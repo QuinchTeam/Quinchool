@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tailwind-tokens:
+    name: No Tailwind arbitrary values
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Test Tailwind arbitrary-value guard
+        run: bun run test:tailwind
+      - name: Check for Tailwind arbitrary values
+        run: bun run lint:tailwind
