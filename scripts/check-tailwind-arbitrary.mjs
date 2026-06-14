@@ -26,7 +26,6 @@ const SOURCE_EXT = /\.(?:[cm]?[jt]sx?|mdx?|css)$/;
 // Posix-style path fragments that are exempt from the rule.
 const IGNORED = [
   "src/components/ui/", // vendored shadcn output
-  "src/generated/", // generated prisma client
   "scripts/check-tailwind-arbitrary.mjs", // documents forbidden syntax
   "scripts/check-tailwind-arbitrary.test.mjs", // regression fixtures
   "node_modules/",
