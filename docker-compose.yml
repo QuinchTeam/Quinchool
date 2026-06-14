@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: quinchool-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: quinchool
+      POSTGRES_PASSWORD: quinchool
+      POSTGRES_DB: quinchool
+    # Host 5432 is taken by other local Postgres containers, so map to 5433.
+    ports:
+      - "5433:5432"
+    volumes:
+      - quinchool-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quinchool -d quinchool"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  quinchool-postgres-data:
