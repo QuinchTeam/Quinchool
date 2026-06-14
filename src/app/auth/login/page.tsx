@@ -1,8 +1,9 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -13,21 +14,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { signIn } from "@/lib/auth-client";
+import { type LoginValues, loginSchema } from "@/lib/validations/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    const { error } = await signIn.email({ email, password });
-    setLoading(false);
+  async function onSubmit(values: LoginValues) {
+    const { error } = await signIn.email({
+      email: values.email,
+      password: values.password,
+    });
 
     if (error) {
       toast.error(error.message ?? "Could not sign in");
@@ -46,56 +56,73 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" autoComplete="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Password</FormLabel>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      nativeButton={false}
+                      className="px-0"
+                      render={<Link href="/auth/forget-password" />}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      autoComplete="current-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              Sign in
+            </Button>
+            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <span>Don&apos;t have an account?</span>
               <Button
                 variant="link"
                 size="sm"
                 nativeButton={false}
                 className="px-0"
-                render={<Link href="/auth/forget-password" />}
+                render={<Link href="/auth/register" />}
               >
-                Forgot password?
+                Sign up
               </Button>
             </div>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            Sign in
-          </Button>
-          <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-            <span>Don&apos;t have an account?</span>
-            <Button
-              variant="link"
-              size="sm"
-              nativeButton={false}
-              className="px-0"
-              render={<Link href="/auth/register" />}
-            >
-              Sign up
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

@@ -1,8 +1,9 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -13,25 +14,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { signUp } from "@/lib/auth-client";
+import { type RegisterValues, registerSchema } from "@/lib/validations/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
+  async function onSubmit(values: RegisterValues) {
     const { error } = await signUp.email({
-      email,
-      password,
-      name: email.split("@")[0],
+      email: values.email,
+      password: values.password,
+      name: values.email.split("@")[0],
     });
-    setLoading(false);
 
     if (error) {
       toast.error(error.message ?? "Could not create account");
@@ -48,45 +55,62 @@ export default function RegisterPage() {
         <CardDescription>Sign up with your email and password.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" autoComplete="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      autoComplete="new-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            Create account
-          </Button>
-          <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-            <span>Already have an account?</span>
             <Button
-              variant="link"
-              size="sm"
-              nativeButton={false}
-              className="px-0"
-              render={<Link href="/auth/login" />}
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
             >
-              Sign in
+              Create account
             </Button>
-          </div>
-        </form>
+            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <span>Already have an account?</span>
+              <Button
+                variant="link"
+                size="sm"
+                nativeButton={false}
+                className="px-0"
+                render={<Link href="/auth/login" />}
+              >
+                Sign in
+              </Button>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

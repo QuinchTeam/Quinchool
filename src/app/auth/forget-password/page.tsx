@@ -1,7 +1,8 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,22 +13,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { requestPasswordReset } from "@/lib/auth-client";
+import {
+  type ForgetPasswordValues,
+  forgetPasswordSchema,
+} from "@/lib/validations/auth";
 
 export default function ForgetPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const form = useForm<ForgetPasswordValues>({
+    resolver: zodResolver(forgetPasswordSchema),
+    defaultValues: { email: "" },
+  });
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
+  async function onSubmit(values: ForgetPasswordValues) {
     const { error } = await requestPasswordReset({
-      email,
+      email: values.email,
       redirectTo: "/auth/update-password",
     });
-    setLoading(false);
 
     if (error) {
       toast.error(error.message ?? "Could not send reset link");
@@ -45,34 +56,45 @@ export default function ForgetPasswordPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" autoComplete="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            Send reset link
-          </Button>
-          <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-            <span>Remembered it?</span>
             <Button
-              variant="link"
-              size="sm"
-              nativeButton={false}
-              className="px-0"
-              render={<Link href="/auth/login" />}
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
             >
-              Sign in
+              Send reset link
             </Button>
-          </div>
-        </form>
+            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <span>Remembered it?</span>
+              <Button
+                variant="link"
+                size="sm"
+                nativeButton={false}
+                className="px-0"
+                render={<Link href="/auth/login" />}
+              >
+                Sign in
+              </Button>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
