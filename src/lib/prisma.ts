@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "../../prisma/generated/client";
 
 // Prisma 7 connects through a driver adapter (the connection string is no
 // longer read from schema.prisma). Reuse a single client across HMR reloads in
