@@ -26,3 +26,7 @@ For a rare, justified exception, add `tailwind-allow-arbitrary` in a comment on 
 ## Git push safety
 
 Never run `git push`, `git push --force`, `git push -f`, or `git push --force-with-lease` (or push to any remote in any other way) unless the user explicitly asks for it in the current chat message — even in bypass-permissions mode. Do not push automatically as part of "finishing" a task.
+
+## Formatting
+
+Never run `bun run format` (or `biome format --write`) with no path — it rewrites the whole repo. Pass only the files you changed.
