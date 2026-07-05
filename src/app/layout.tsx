@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SentryFeedbackButton } from "@/components/sentry-feedback-button";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -40,6 +41,9 @@ export default function RootLayout({
         >
           <TooltipProvider>
             {children}
+            <div className="fixed right-4 bottom-4 z-50">
+              <SentryFeedbackButton />
+            </div>
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>
