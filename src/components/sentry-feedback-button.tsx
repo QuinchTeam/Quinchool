@@ -6,6 +6,16 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
+const SENTRY_FEEDBACK_OPTIONS = {
+  autoInject: false,
+  colorScheme: "dark",
+  themeDark: {
+    background: "var(--card)",
+    accentBackground: "var(--primary)",
+    accentForeground: "var(--neutral-900)",
+  },
+} as const;
+
 export function SentryFeedbackButton() {
   const [isOpening, setIsOpening] = useState(false);
 
@@ -23,7 +33,7 @@ export function SentryFeedbackButton() {
       let feedback = getFeedback();
 
       if (!feedback) {
-        addIntegration(feedbackSyncIntegration({ autoInject: false }));
+        addIntegration(feedbackSyncIntegration(SENTRY_FEEDBACK_OPTIONS));
         feedback = getFeedback();
       }
 
