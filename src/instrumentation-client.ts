@@ -5,10 +5,7 @@ Sentry.init({
 
   tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
 
-  integrations: [
-    Sentry.replayIntegration(),
-    Sentry.feedbackIntegration({ colorScheme: "system" }),
-  ],
+  integrations: [Sentry.replayIntegration()],
 
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
