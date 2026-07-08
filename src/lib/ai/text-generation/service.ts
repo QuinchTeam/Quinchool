@@ -1,9 +1,9 @@
-import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/config/text-generation-models";
-import { getTextGenerationProviderChain } from "@/lib/text-generation/provider-chain";
+import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
+import { getTextGenerationProviderChain } from "@/lib/ai/text-generation/provider-chain";
 import type {
   GenerateTextParams,
   GenerateTextResult,
-} from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/types";
 
 export async function generateText({
   modelId = DEFAULT_TEXT_GENERATION_MODEL_ID,

@@ -26,8 +26,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   DEFAULT_TEXT_GENERATION_MODEL_ID,
   TEXT_GENERATION_MODELS,
-} from "@/lib/config/text-generation-models";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/models";
+import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
 import {
   type TextGenerationValues,
   textGenerationSchema,
@@ -61,7 +61,7 @@ export default function TextGenerationPage() {
     setGeneratedText("");
     setGenerationError("");
 
-    const response = await fetch("/api/generate-text", {
+    const response = await fetch("/api/text-generation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),

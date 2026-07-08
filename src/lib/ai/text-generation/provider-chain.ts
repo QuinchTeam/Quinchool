@@ -1,12 +1,12 @@
-import { getTextGenerationModelConfig } from "@/lib/config/text-generation-models";
-import { googleAIStudioTextGenerationAdapter } from "@/lib/text-generation/adapters/google-ai-studio";
-import { openAITextGenerationAdapter } from "@/lib/text-generation/adapters/openai";
+import { googleAIStudioTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/google-ai-studio";
+import { openAITextGenerationAdapter } from "@/lib/ai/text-generation/adapters/openai";
+import { getTextGenerationModelConfig } from "@/lib/ai/text-generation/models";
 import type {
   TextGenerationModelId,
   TextGenerationProviderAdapter,
   TextGenerationProviderId,
-} from "@/lib/text-generation/types";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/types";
+import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
 
 const TEXT_GENERATION_ADAPTERS: Record<
   TextGenerationProviderId,

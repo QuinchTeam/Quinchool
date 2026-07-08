@@ -30,17 +30,21 @@ export async function generateGoogleText({
   prompt,
   providerModelId,
 }: GenerateGoogleTextParams): Promise<GenerateGoogleTextResult> {
+  throw new Error("Force Stop");
+  // biome-ignore lint/correctness/noUnreachable: Forced stop kept for local testing.
   const response = await getGoogleClient().models.generateContent({
     model: providerModelId,
     contents: prompt,
   });
 
-  if (!response.text) {
+  const text = response.text ?? "";
+
+  if (!text) {
     throw new Error("Google AI Studio returned no text output");
   }
 
   return {
     providerModelId,
-    text: response.text,
+    text,
   };
 }

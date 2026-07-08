@@ -1,11 +1,11 @@
 import type {
   TextGenerationModelId,
   TextGenerationProviderId,
-} from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/types";
 import {
   TEXT_GENERATION_MODEL_IDS,
   TEXT_GENERATION_PROVIDER_IDS,
-} from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/types";
 
 export const DEFAULT_TEXT_GENERATION_MODEL_ID =
   TEXT_GENERATION_MODEL_IDS.GPT_5_4_NANO;

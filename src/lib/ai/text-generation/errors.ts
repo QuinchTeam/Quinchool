@@ -1,6 +1,6 @@
 import { ApiError as GoogleApiError } from "@google/genai";
 import OpenAI from "openai";
-import type { TextGenerationProviderId } from "@/lib/text-generation/types";
+import type { TextGenerationProviderId } from "@/lib/ai/text-generation/types";
 
 export const TEXT_GENERATION_ERROR_CODES = {
   RATE_LIMIT: "rate_limit",

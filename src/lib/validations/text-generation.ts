@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TEXT_GENERATION_MODEL_IDS } from "@/lib/text-generation/types";
+import { TEXT_GENERATION_MODEL_IDS } from "@/lib/ai/text-generation/types";
 
 export const textGenerationSchema = z.object({
   modelId: z.enum(TEXT_GENERATION_MODEL_IDS),

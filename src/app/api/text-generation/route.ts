@@ -1,5 +1,5 @@
-import { getTextGenerationErrorResponse } from "@/lib/text-generation/errors";
-import { generateText } from "@/lib/text-generation/service";
+import { getTextGenerationErrorResponse } from "@/lib/ai/text-generation/errors";
+import { generateText } from "@/lib/ai/text-generation/service";
 import { textGenerationSchema } from "@/lib/validations/text-generation";
 
 export async function POST(request: Request) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     return Response.json(result);
   } catch (error) {
-    console.error("generate-text error", error);
+    console.error("text-generation error", error);
 
     const errorResponse = getTextGenerationErrorResponse(error);
 

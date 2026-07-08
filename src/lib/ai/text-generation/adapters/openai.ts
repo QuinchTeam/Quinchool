@@ -1,12 +1,12 @@
-import { getProviderModelId } from "@/lib/config/text-generation-models";
-import { generateOpenAIText } from "@/lib/services/openai-text";
-import { mapTextGenerationProviderError } from "@/lib/text-generation/errors";
+import { mapTextGenerationProviderError } from "@/lib/ai/text-generation/errors";
+import { getProviderModelId } from "@/lib/ai/text-generation/models";
+import { generateOpenAIText } from "@/lib/ai/text-generation/providers/openai";
 import type {
   GenerateTextResult,
   ProviderGenerateTextParams,
   TextGenerationProviderAdapter,
-} from "@/lib/text-generation/types";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/text-generation/types";
+} from "@/lib/ai/text-generation/types";
+import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
 
 export const openAITextGenerationAdapter: TextGenerationProviderAdapter = {
   async generateText({
