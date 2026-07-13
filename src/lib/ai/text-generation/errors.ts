@@ -1,5 +1,4 @@
 import { ApiError as GoogleApiError } from "@google/genai";
-import OpenAI from "openai";
 import type { TextGenerationProviderId } from "@/lib/ai/text-generation/types";
 
 export const TEXT_GENERATION_ERROR_CODES = {
@@ -42,6 +41,16 @@ export class TextGenerationError extends Error {
     this.code = code;
     this.providerId = providerId;
     this.providerModelId = providerModelId;
+    this.status = status;
+  }
+}
+
+export class TextGenerationProviderHttpError extends Error {
+  status: number;
+
+  constructor({ message, status }: { message: string; status: number }) {
+    super(message);
+    this.name = "TextGenerationProviderHttpError";
     this.status = status;
   }
 }
@@ -90,13 +99,15 @@ export function getTextGenerationErrorResponse(
 
 function isProviderRateLimitError(error: unknown): boolean {
   return (
-    (error instanceof OpenAI.APIError || error instanceof GoogleApiError) &&
+    (error instanceof GoogleApiError ||
+      error instanceof TextGenerationProviderHttpError) &&
     error.status === 429
   );
 }
 
 function readProviderErrorMessage(error: unknown): string | undefined {
-  return error instanceof OpenAI.APIError || error instanceof GoogleApiError
+  return error instanceof GoogleApiError ||
+    error instanceof TextGenerationProviderHttpError
     ? error.message
     : undefined;
 }

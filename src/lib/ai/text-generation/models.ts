@@ -8,7 +8,7 @@ import {
 } from "@/lib/ai/text-generation/types";
 
 export const DEFAULT_TEXT_GENERATION_MODEL_ID =
-  TEXT_GENERATION_MODEL_IDS.GPT_5_4_NANO;
+  TEXT_GENERATION_MODEL_IDS.GEMINI_3_1_FLASH_LITE;
 
 export interface TextGenerationModelConfig {
   description: string;
@@ -18,30 +18,6 @@ export interface TextGenerationModelConfig {
 }
 
 export const TEXT_GENERATION_MODELS = [
-  {
-    id: TEXT_GENERATION_MODEL_IDS.GPT_5_4_NANO,
-    name: "GPT-5.4 Nano",
-    description: "Cheapest OpenAI text model.",
-    providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.OPENAI]: "gpt-5.4-nano",
-    },
-  },
-  {
-    id: TEXT_GENERATION_MODEL_IDS.GPT_5_4_MINI,
-    name: "GPT-5.4 Mini",
-    description: "Low-cost model with stronger output quality.",
-    providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.OPENAI]: "gpt-5.4-mini",
-    },
-  },
-  {
-    id: TEXT_GENERATION_MODEL_IDS.GPT_5_4,
-    name: "GPT-5.4",
-    description: "More capable, still cheaper than GPT-5.5.",
-    providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.OPENAI]: "gpt-5.4",
-    },
-  },
   {
     id: TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH,
     name: "Gemini 3.5 Flash",
@@ -66,6 +42,7 @@ export const TEXT_GENERATION_MODELS = [
       "Largest open-weight Gemma model available via the Gemini API.",
     providerModels: {
       [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemma-4-31b-it",
+      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: "google/gemma-4-31b-it:free",
     },
   },
   {
@@ -74,6 +51,10 @@ export const TEXT_GENERATION_MODELS = [
     description: "Lighter, faster open-weight Gemma model.",
     providerModels: {
       [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemma-4-26b-a4b-it",
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/google/gemma-4-26b-a4b-it",
+      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]:
+        "google/gemma-4-26b-a4b-it:free",
     },
   },
 ] as const satisfies readonly TextGenerationModelConfig[];

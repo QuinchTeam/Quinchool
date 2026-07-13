@@ -30,8 +30,6 @@ export async function generateGoogleText({
   prompt,
   providerModelId,
 }: GenerateGoogleTextParams): Promise<GenerateGoogleTextResult> {
-  throw new Error("Force Stop");
-  // biome-ignore lint/correctness/noUnreachable: Forced stop kept for local testing.
   const response = await getGoogleClient().models.generateContent({
     model: providerModelId,
     contents: prompt,

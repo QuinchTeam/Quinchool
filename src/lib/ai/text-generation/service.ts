@@ -13,6 +13,8 @@ export async function generateText({
   let lastError: unknown;
 
   for (const adapter of providerChain) {
+    console.info("Text generation provider:", adapter.providerId);
+
     try {
       return await adapter.generateText({ modelId, prompt });
     } catch (error) {

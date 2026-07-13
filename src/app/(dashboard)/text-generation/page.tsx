@@ -16,9 +16,7 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -27,19 +25,10 @@ import {
   DEFAULT_TEXT_GENERATION_MODEL_ID,
   TEXT_GENERATION_MODELS,
 } from "@/lib/ai/text-generation/models";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
 import {
   type TextGenerationValues,
   textGenerationSchema,
 } from "@/lib/validations/text-generation";
-
-const OPENAI_MODELS = TEXT_GENERATION_MODELS.filter(
-  (model) => TEXT_GENERATION_PROVIDER_IDS.OPENAI in model.providerModels,
-);
-const GOOGLE_AI_STUDIO_MODELS = TEXT_GENERATION_MODELS.filter(
-  (model) =>
-    TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO in model.providerModels,
-);
 
 interface GenerateTextResponse {
   error?: string;
@@ -94,22 +83,11 @@ export default function TextGenerationPage() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>OpenAI</SelectLabel>
-                      {OPENAI_MODELS.map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          {model.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel>Google AI Studio</SelectLabel>
-                      {GOOGLE_AI_STUDIO_MODELS.map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          {model.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                    {TEXT_GENERATION_MODELS.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

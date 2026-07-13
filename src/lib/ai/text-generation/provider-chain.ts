@@ -1,5 +1,6 @@
+import { cloudflareWorkersAITextGenerationAdapter } from "@/lib/ai/text-generation/adapters/cloudflare-workers-ai";
 import { googleAIStudioTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/google-ai-studio";
-import { openAITextGenerationAdapter } from "@/lib/ai/text-generation/adapters/openai";
+import { openRouterTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/openrouter";
 import { getTextGenerationModelConfig } from "@/lib/ai/text-generation/models";
 import type {
   TextGenerationModelId,
@@ -12,9 +13,11 @@ const TEXT_GENERATION_ADAPTERS: Record<
   TextGenerationProviderId,
   TextGenerationProviderAdapter
 > = {
-  [TEXT_GENERATION_PROVIDER_IDS.OPENAI]: openAITextGenerationAdapter,
   [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]:
     googleAIStudioTextGenerationAdapter,
+  [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+    cloudflareWorkersAITextGenerationAdapter,
+  [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: openRouterTextGenerationAdapter,
 };
 
 export function getTextGenerationProviderChain(

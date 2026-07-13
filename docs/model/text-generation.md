@@ -4,12 +4,12 @@
 
 ### Direct Providers
 
-1. OpenAI - OpenAI Platform - GPT
-2. Google - Google AI Studio - Gemini, Gemma
+1. Google (Google AI Studio) - Gemini, Gemma
 
 ### Third-party Providers
 
-None yet.
+1. Cloudflare (Workers AI) - Gemma 4 26B A4B
+2. OpenRouter - Gemma 4 31B, Gemma 4 26B A4B
 
 ## Open-weight Models
 
