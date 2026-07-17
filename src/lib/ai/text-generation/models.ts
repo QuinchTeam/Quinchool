@@ -36,25 +36,53 @@ export const TEXT_GENERATION_MODELS = [
     },
   },
   {
-    id: TEXT_GENERATION_MODEL_IDS.GEMMA_4_31B,
-    name: "Gemma 4 31B",
-    description:
-      "Largest open-weight Gemma model available via the Gemini API.",
-    providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemma-4-31b-it",
-      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: "google/gemma-4-31b-it:free",
-    },
-  },
-  {
     id: TEXT_GENERATION_MODEL_IDS.GEMMA_4_26B_A4B,
     name: "Gemma 4 26B (A4B)",
     description: "Lighter, faster open-weight Gemma model.",
     providerModels: {
       [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemma-4-26b-a4b-it",
-      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
-        "@cf/google/gemma-4-26b-a4b-it",
       [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]:
         "google/gemma-4-26b-a4b-it:free",
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/google/gemma-4-26b-a4b-it",
+    },
+  },
+  {
+    id: TEXT_GENERATION_MODEL_IDS.GLM_5_2,
+    name: "GLM 5.2",
+    description: "Open-weight agentic coding model.",
+    providerModels: {
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/zai-org/glm-5.2",
+    },
+  },
+  {
+    id: TEXT_GENERATION_MODEL_IDS.KIMI_K2_7_CODE,
+    name: "Kimi K2.7 Code",
+    description: "Open-weight model for agentic coding tasks.",
+    providerModels: {
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/moonshotai/kimi-k2.7-code",
+    },
+  },
+  {
+    id: TEXT_GENERATION_MODEL_IDS.KIMI_K2_6,
+    name: "Kimi K2.6",
+    description: "Open-weight model for multimodal agentic work.",
+    providerModels: {
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/moonshotai/kimi-k2.6",
+    },
+  },
+  {
+    id: TEXT_GENERATION_MODEL_IDS.GPT_OSS_20B,
+    name: "GPT-OSS 20B",
+    description: "Fast open-weight reasoning model.",
+    providerModels: {
+      [TEXT_GENERATION_PROVIDER_IDS.GROQ]: "openai/gpt-oss-20b",
+      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: "openai/gpt-oss-20b:free",
+      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
+        "@cf/openai/gpt-oss-20b",
     },
   },
 ] as const satisfies readonly TextGenerationModelConfig[];
