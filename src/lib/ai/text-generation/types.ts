@@ -30,11 +30,18 @@ export interface ProviderGenerateTextParams {
   prompt: string;
 }
 
+export interface TextGenerationUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+}
+
 export interface GenerateTextResult {
   modelId: TextGenerationModelId;
   providerId: TextGenerationProviderId;
   providerModelId: string;
   text: string;
+  usage?: TextGenerationUsage;
 }
 
 export interface TextGenerationProviderAdapter {

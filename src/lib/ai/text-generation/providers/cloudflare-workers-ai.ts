@@ -1,4 +1,5 @@
 import { TextGenerationProviderHttpError } from "@/lib/ai/text-generation/errors";
+import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
 
 export interface GenerateCloudflareWorkersAITextParams {
   prompt: string;
@@ -8,6 +9,7 @@ export interface GenerateCloudflareWorkersAITextParams {
 export interface GenerateCloudflareWorkersAITextResult {
   providerModelId: string;
   text: string;
+  usage?: TextGenerationUsage;
 }
 
 interface CloudflareWorkersAIResponse {
@@ -15,6 +17,11 @@ interface CloudflareWorkersAIResponse {
   result?: {
     choices?: Array<{ message?: { content?: string } }>;
     response?: string;
+    usage?: {
+      completion_tokens?: number;
+      prompt_tokens?: number;
+      total_tokens?: number;
+    };
   };
 }
 
@@ -68,5 +75,13 @@ export async function generateCloudflareWorkersAIText({
     throw new Error("Cloudflare Workers AI returned no text output");
   }
 
-  return { providerModelId, text };
+  return {
+    providerModelId,
+    text,
+    usage: {
+      inputTokens: body.result?.usage?.prompt_tokens,
+      outputTokens: body.result?.usage?.completion_tokens,
+      totalTokens: body.result?.usage?.total_tokens,
+    },
+  };
 }

@@ -31,6 +31,7 @@ export const cloudflareWorkersAITextGenerationAdapter: TextGenerationProviderAda
           providerId: TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI,
           providerModelId: result.providerModelId,
           text: result.text,
+          usage: result.usage,
         };
       } catch (error) {
         throw mapTextGenerationProviderError({

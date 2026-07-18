@@ -27,6 +27,7 @@ export const groqTextGenerationAdapter: TextGenerationProviderAdapter = {
         providerId: TEXT_GENERATION_PROVIDER_IDS.GROQ,
         providerModelId: result.providerModelId,
         text: result.text,
+        usage: result.usage,
       };
     } catch (error) {
       throw mapTextGenerationProviderError({

@@ -1,4 +1,5 @@
 import { TextGenerationProviderHttpError } from "@/lib/ai/text-generation/errors";
+import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
 
 export interface GenerateGroqTextParams {
   prompt: string;
@@ -8,11 +9,17 @@ export interface GenerateGroqTextParams {
 export interface GenerateGroqTextResult {
   providerModelId: string;
   text: string;
+  usage?: TextGenerationUsage;
 }
 
 interface GroqResponse {
   error?: { message?: string };
   choices?: Array<{ message?: { content?: string } }>;
+  usage?: {
+    completion_tokens?: number;
+    prompt_tokens?: number;
+    total_tokens?: number;
+  };
 }
 
 function getGroqApiKey() {
@@ -59,5 +66,13 @@ export async function generateGroqText({
     throw new Error("Groq returned no text output");
   }
 
-  return { providerModelId, text };
+  return {
+    providerModelId,
+    text,
+    usage: {
+      inputTokens: body.usage?.prompt_tokens,
+      outputTokens: body.usage?.completion_tokens,
+      totalTokens: body.usage?.total_tokens,
+    },
+  };
 }

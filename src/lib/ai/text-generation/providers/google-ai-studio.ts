@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
 
 let googleClient: GoogleGenAI | null = null;
 
@@ -10,6 +11,7 @@ export interface GenerateGoogleTextParams {
 export interface GenerateGoogleTextResult {
   providerModelId: string;
   text: string;
+  usage?: TextGenerationUsage;
 }
 
 function getGoogleClient() {
@@ -44,5 +46,10 @@ export async function generateGoogleText({
   return {
     providerModelId,
     text,
+    usage: {
+      inputTokens: response.usageMetadata?.promptTokenCount,
+      outputTokens: response.usageMetadata?.candidatesTokenCount,
+      totalTokens: response.usageMetadata?.totalTokenCount,
+    },
   };
 }

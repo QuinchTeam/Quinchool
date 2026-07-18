@@ -28,6 +28,7 @@ export const googleAIStudioTextGenerationAdapter: TextGenerationProviderAdapter 
           providerId: TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO,
           providerModelId: result.providerModelId,
           text: result.text,
+          usage: result.usage,
         };
       } catch (error) {
         throw mapTextGenerationProviderError({
