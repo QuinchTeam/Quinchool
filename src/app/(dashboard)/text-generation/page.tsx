@@ -88,6 +88,7 @@ export default function TextGenerationPage() {
                 <FormItem>
                   <FormLabel>Model</FormLabel>
                   <Combobox
+                    filter={null}
                     items={models}
                     itemToStringValue={(model) => model.name}
                     value={selectedModel}
