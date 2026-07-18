@@ -1,23 +1,23 @@
 # Text Generation Backend Flow
 
+All simple text generation run through `/api/text-generation`. It accepts modelId, and prompt. It returns generated text result.
+
+
 ## Runtime Path
 
 ```txt
-page.tsx
-  -> POST /api/text-generation
-  -> validate { modelId, prompt }
+POST /api/text-generation (route handler)
   -> generateText() service
-  -> provider chain
-  -> adapter
-  -> provider SDK/API call
+  -> provider chain selects an adapter
+  -> adapter.generateText()
+  -> provider SDK/API call function
 ```
 
 ## Pieces
 
 | Piece | File | Job |
 | --- | --- | --- |
-| Client | `src/app/(dashboard)/text-generation/page.tsx` | Sends `{ modelId, prompt }`, renders result/error. |
-| API route | `src/app/api/text-generation/route.ts` | HTTP boundary: parse JSON, validate, return `Response.json`. |
+| API route | `src/app/api/text-generation/route.ts` | HTTP boundary: parse JSON, validate, run generateText() service, return `Response.json`. |
 | Validation | `src/lib/validations/text-generation.ts` | Zod schema for allowed model IDs and non-empty prompt. |
 | Service | `src/lib/ai/text-generation/service.ts` | Main text-generation entry point; picks default model and tries providers. |
 | Provider chain | `src/lib/ai/text-generation/provider-chain.ts` | Reads the model config and returns adapters in provider order. |
@@ -38,9 +38,12 @@ page.tsx
 
 ## Current Provider Order
 
-- Gemma 4 31B: Google AI Studio, OpenRouter.
-- Gemma 4 26B A4B: Google AI Studio, Cloudflare Workers AI, OpenRouter.
+- Gemini 3.5 Flash, Gemini 3.1 Flash-Lite: Google AI Studio.
+- Kimi K2.7 Code, Kimi K2.6: Cloudflare Workers AI.
+- Gemma 4 26B A4B: Google AI Studio, OpenRouter, Cloudflare Workers AI.
+- GPT-OSS 20B: Groq, OpenRouter, Cloudflare Workers AI.
 - OpenRouter uses its free variants and needs `OPENROUTER_API_KEY`.
+- Groq needs `GROQ_API_KEY`.
 
 ## Add a Provider
 

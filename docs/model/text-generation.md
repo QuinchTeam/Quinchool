@@ -1,27 +1,24 @@
-# For Text-generation
+# Text-generation
 
 ## Providers
 
 ### Direct Providers
 
-1. Google (Google AI Studio) - Gemini, Gemma
+1. Google (Google AI Studio) - for Gemini and Gemma
 
 ### Third-party Providers
 
-1. Cloudflare (Workers AI) - Gemma 4 26B A4B
-2. OpenRouter - Gemma 4 31B, Gemma 4 26B A4B
+1. Cloudflare Workers AI
+2. OpenRouter
+3. Groq
 
-## Open-weight Models
+## Our Models
 
-1. DeepSeek
-2. GLM
-3. Qwen
-4. GPT-OSS
-5. Gemma
-6. Mistral
-7. Llama
+Note: [ Model : Provider -> Fallback Provider -> ... ]
 
-## Frontier Models
-
-1. GPT
-2. Gemini
+1. Gemini 3.5 Flash : Google AI Studio
+2. Gemini 3.1 Flash-Lite : Google AI Studio
+3. Kimi K2.7 Code : Cloudflare Workers AI
+4. Kimi K2.6 : Cloudflare Workers AI
+5. Gemma 4 26B (A4B) : Google AI Studio → OpenRouter → Cloudflare Workers AI
+6. GPT-OSS 20B : Groq → OpenRouter → Cloudflare Workers AI

@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { registerLangfuse } from "./lib/langfuse";
 
 export async function register() {
   // Next runs this once at startup. NEXT_RUNTIME tells us which runtime
@@ -6,6 +7,7 @@ export async function register() {
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("../sentry.server.config");
+    registerLangfuse();
   }
   if (process.env.NEXT_RUNTIME === "edge") {
     await import("../sentry.edge.config");

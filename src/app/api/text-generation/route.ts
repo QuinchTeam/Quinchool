@@ -5,6 +5,7 @@ import { textGenerationSchema } from "@/lib/validations/text-generation";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.info("API[Text Generation] - Request Body: ", body);
 
     const parsedBody = textGenerationSchema.safeParse(body);
 
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
       modelId: parsedBody.data.modelId,
       prompt: parsedBody.data.prompt,
     });
-
+    console.info("API[Text Generation] - Response: ", result);
     return Response.json(result);
   } catch (error) {
     console.error("text-generation error", error);
