@@ -1,4 +1,4 @@
-import { Gemini, Gemma, Kimi, OpenAI, ZAI } from "@lobehub/icons";
+import { Gemini, Gemma, Kimi, OpenAI } from "@lobehub/icons";
 import {
   TEXT_GENERATION_MODEL_IDS,
   type TextGenerationModelId,
@@ -20,8 +20,6 @@ export function ModelIcon({
       return <Gemini aria-hidden="true" className={iconClassName} />;
     case TEXT_GENERATION_MODEL_IDS.GEMMA_4_26B_A4B:
       return <Gemma aria-hidden="true" className={iconClassName} />;
-    case TEXT_GENERATION_MODEL_IDS.GLM_5_2:
-      return <ZAI aria-hidden="true" className={iconClassName} />;
     case TEXT_GENERATION_MODEL_IDS.KIMI_K2_7_CODE:
     case TEXT_GENERATION_MODEL_IDS.KIMI_K2_6:
       return <Kimi aria-hidden="true" className={iconClassName} />;

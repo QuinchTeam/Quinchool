@@ -48,15 +48,6 @@ export const TEXT_GENERATION_MODELS = [
     },
   },
   {
-    id: TEXT_GENERATION_MODEL_IDS.GLM_5_2,
-    name: "GLM 5.2",
-    description: "Open-weight agentic coding model.",
-    providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
-        "@cf/zai-org/glm-5.2",
-    },
-  },
-  {
     id: TEXT_GENERATION_MODEL_IDS.KIMI_K2_7_CODE,
     name: "Kimi K2.7 Code",
     description: "Open-weight model for agentic coding tasks.",

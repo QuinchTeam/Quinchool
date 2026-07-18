@@ -39,7 +39,7 @@ POST /api/text-generation (route handler)
 ## Current Provider Order
 
 - Gemini 3.5 Flash, Gemini 3.1 Flash-Lite: Google AI Studio.
-- GLM 5.2, Kimi K2.7 Code, Kimi K2.6: Cloudflare Workers AI.
+- Kimi K2.7 Code, Kimi K2.6: Cloudflare Workers AI.
 - Gemma 4 26B A4B: Google AI Studio, OpenRouter, Cloudflare Workers AI.
 - GPT-OSS 20B: Groq, OpenRouter, Cloudflare Workers AI.
 - OpenRouter uses its free variants and needs `OPENROUTER_API_KEY`.
