@@ -3,6 +3,7 @@
 import {
   AiGenerativeIcon,
   ChatBotIcon,
+  FilePenIcon,
   Home01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -84,6 +85,12 @@ export function AppSidebar() {
               <SidebarMenuButton render={<Link href="/chatbot" />}>
                 <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
                 <span>Chatbot</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link href="/resume-builder" />}>
+                <HugeiconsIcon icon={FilePenIcon} strokeWidth={2} />
+                <span>Resume Builder</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
