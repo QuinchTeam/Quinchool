@@ -5,6 +5,7 @@ import { SentryFeedbackButton } from "@/components/sentry-feedback-button";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,13 +40,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
-            {children}
-            <div className="fixed right-4 bottom-4 z-50">
-              <SentryFeedbackButton />
-            </div>
-            <Toaster />
-          </TooltipProvider>
+          <TanstackQueryProvider>
+            <TooltipProvider>
+              {children}
+              <div className="fixed right-4 bottom-4 z-50">
+                <SentryFeedbackButton />
+              </div>
+              <Toaster />
+            </TooltipProvider>
+          </TanstackQueryProvider>
         </ThemeProvider>
       </body>
     </html>
