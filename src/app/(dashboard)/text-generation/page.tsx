@@ -1,19 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { ModelIcon } from "@/components/model-icon";
+import { TextModelSelector } from "@/components/text-model-selector";
 import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
-} from "@/components/ui/combobox";
 import {
   Form,
   FormControl,
@@ -25,8 +17,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   DEFAULT_TEXT_GENERATION_MODEL_ID,
-  TEXT_GENERATION_MODELS,
-  type TextGenerationModelConfig,
 } from "@/lib/ai/text-generation/models";
 import {
   type TextGenerationValues,
@@ -38,12 +28,9 @@ interface GenerateTextResponse {
   text?: string;
 }
 
-const models: readonly TextGenerationModelConfig[] = TEXT_GENERATION_MODELS;
-
 export default function TextGenerationPage() {
   const [generatedText, setGeneratedText] = useState("");
   const [generationError, setGenerationError] = useState("");
-  const modelComboboxAnchor = useRef<HTMLDivElement>(null);
   const form = useForm<TextGenerationValues>({
     resolver: zodResolver(textGenerationSchema),
     defaultValues: {
@@ -80,84 +67,13 @@ export default function TextGenerationPage() {
             control={form.control}
             name="modelId"
             render={({ field }) => {
-              const selectedModel = models.find(
-                (model) => model.id === field.value,
-              );
-
               return (
                 <FormItem>
-                  <FormLabel>Model</FormLabel>
-                  <Combobox
-                    filter={null}
-                    items={models}
-                    itemToStringValue={(model) => model.name}
-                    value={selectedModel}
-                    onValueChange={(model) => {
-                      if (model) {
-                        field.onChange(model.id);
-                      }
-                    }}
-                  >
-                    <div ref={modelComboboxAnchor} className="w-full">
-                      <FormControl>
-                        <ComboboxTrigger
-                          render={
-                            <Button
-                              className="h-auto w-full justify-between py-2"
-                              type="button"
-                              variant="outline"
-                            />
-                          }
-                        >
-                          {selectedModel ? (
-                            <span className="flex min-w-0 items-center gap-3">
-                              <ModelIcon
-                                className="size-5"
-                                modelId={selectedModel.id}
-                              />
-                              <span className="truncate font-bold">
-                                {selectedModel.name}
-                              </span>
-                            </span>
-                          ) : (
-                            "Select a model"
-                          )}
-                        </ComboboxTrigger>
-                      </FormControl>
-                    </div>
-                    <ComboboxContent anchor={modelComboboxAnchor}>
-                      <ComboboxEmpty>No model found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {(model) => {
-                          const providerCount = Object.keys(
-                            model.providerModels,
-                          ).length;
-
-                          return (
-                            <ComboboxItem key={model.id} value={model}>
-                              <div className="bg-muted p-2 rounded-lg">
-                                <ModelIcon modelId={model.id} />
-                              </div>
-                              <span className="grid min-w-0 gap-1">
-                                <span className="flex items-center gap-2">
-                                  <span className="font-bold">
-                                    {model.name}
-                                  </span>
-                                  <span className="font-mono text-xs text-muted-foreground">
-                                    ({providerCount} Provider
-                                    {providerCount === 1 ? "" : "s"})
-                                  </span>
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {model.description}
-                                </span>
-                              </span>
-                            </ComboboxItem>
-                          );
-                        }}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                  <TextModelSelector
+                    label="Model"
+                    value={field.value}
+                    onValueChange={(modelId) => field.onChange(modelId)}
+                  />
                   <FormMessage />
                 </FormItem>
               );
