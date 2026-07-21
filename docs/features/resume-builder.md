@@ -41,10 +41,30 @@ Section 3
 - List all Experiences with label of Company Name
 
 ## Database Plan
-- Create a Prisma model ResumeBullet. id uuid, companyName string, Experience string, createdAt, updatedAt
+- Create a Prisma model ResumeBullet. id uuid, companyName string, experience string, createdAt, updatedAt.
+- companyName and experience are required
+- run a migration (date then name for intent format) after and push to db.
 
+## Route Handler
+- Use resource-based REST endpoints. The URL identifies the resource, while the HTTP method identifies the operation.
+- e.g.
+```
+GET    /api/resume-bullets          Get all resume bullet
+POST   /api/resume-bullets          Create a resume bullet
+
+GET    /api/resume-bullets/:id      Get one resume bullet
+PATCH  /api/resume-bullets/:id      Update part of a resume bullet
+PUT    /api/resume-bullets/:id      Replace an entire resume bullet
+DELETE /api/resume-bullets/:id      Delete a resume bullet
+```
+- for filter, pagination, sorting, etc use query params.
+
+## Client Side Call
+- Use tanstack query, create a use-resume-builder, useResumeBuilder, this one hook use to getResumeBullet, saveResumeBullet, updateResumeBullet, deleteResumeBullet
+- Use useQuery, and useMutation from tanstack query.
+- add cache on query from tanstack
+- invalidate the query for every create, save, delete.
 
 ## Deps
 - Shadcn UI
-- Tanstack Query [New]
-- 
+- Tanstack Query
