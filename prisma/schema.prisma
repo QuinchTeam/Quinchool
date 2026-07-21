@@ -14,15 +14,16 @@ datasource db {
 // (user, session, account, verification).
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String         @unique
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  resumeBullets ResumeBullet[]
 
   @@map("user")
 }
@@ -69,4 +70,19 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@map("verification")
+}
+
+// Resume Builder: one experience bullet assigned to a single company.
+
+model ResumeBullet {
+  id          String   @id @default(uuid())
+  companyName String
+  experience  String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("resume_bullet")
 }
