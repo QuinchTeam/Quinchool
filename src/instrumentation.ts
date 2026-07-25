@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { isAbortedConnectionError } from "./lib/errors/is-aborted-connection-error";
 import { registerLangfuse } from "./lib/langfuse";
 
 export async function register() {
@@ -7,6 +8,16 @@ export async function register() {
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("../sentry.server.config");
+    if (process.env.NODE_ENV === "development") {
+      process.setUncaughtExceptionCaptureCallback((error) => {
+        if (isAbortedConnectionError(error)) {
+          return;
+        }
+
+        process.setUncaughtExceptionCaptureCallback(null);
+        throw error;
+      });
+    }
     registerLangfuse();
   }
   if (process.env.NEXT_RUNTIME === "edge") {
@@ -17,4 +28,10 @@ export async function register() {
 // Next calls this for any server-side request error: Server Components,
 // Route Handlers, Server Actions, and proxy.ts. One line replaces the
 // Fastify error handler from the source guide.
-export const onRequestError = Sentry.captureRequestError;
+export function onRequestError(
+  ...args: Parameters<typeof Sentry.captureRequestError>
+) {
+  if (!isAbortedConnectionError(args[0])) {
+    Sentry.captureRequestError(...args);
+  }
+}
