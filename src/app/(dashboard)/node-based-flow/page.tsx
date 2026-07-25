@@ -4,6 +4,7 @@ import {
   addEdge,
   Background,
   BackgroundVariant,
+  type ColorMode,
   type Connection,
   type Edge,
   type Node,
@@ -14,7 +15,8 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react";
-import { useCallback, useRef } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import "@xyflow/react/dist/style.css";
 
@@ -36,11 +38,27 @@ function nextNodeId() {
   return `node-${nodeCounter}`;
 }
 
+// React Flow reads window.matchMedia synchronously during render when given
+// colorMode="system", which mismatches SSR (no window -> "light") against the
+// client's real preference and breaks hydration. Deriving colorMode from
+// next-themes instead and holding it at "light" until mounted keeps the
+// client's first render identical to the server's; the switch to the real
+// theme happens after hydration, which is a normal update, not a mismatch.
+function useSsrSafeColorMode(): ColorMode {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  return mounted && resolvedTheme === "dark" ? "dark" : "light";
+}
+
 function FlowCanvas() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { screenToFlowPosition } = useReactFlow();
+  const colorMode = useSsrSafeColorMode();
 
   const spawnNode = useCallback(
     (type: NodeCardType, position: { x: number; y: number }) => {
@@ -104,7 +122,7 @@ function FlowCanvas() {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        colorMode="system"
+        colorMode={colorMode}
         proOptions={{ hideAttribution: true }}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
