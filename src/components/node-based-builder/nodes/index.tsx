@@ -2,14 +2,14 @@
 
 import {
   Cancel01Icon,
+  AiBrain01Icon,
   InformationCircleIcon,
+  MagicWand01Icon,
   ParagraphIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
 import {
   Handle,
-  type Node,
-  type NodeProps,
   type NodeTypes,
   Position,
   useNodeConnections,
@@ -19,11 +19,18 @@ import {
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { EnhancerNode, type EnhancerNodeData } from "./enhancer-node";
+import { PromptNode, type PromptNodeData } from "./prompt-node";
+import {
+  TextGeneratorNode,
+  type TextGeneratorNodeData,
+} from "./text-generator-node";
 
 // Drag-and-drop payload key shared with the toolbar. A button sets the node
 // type here on drag start; the canvas reads it on drop.
@@ -33,15 +40,34 @@ export const NODE_DRAG_MIME = "application/reactflow-type";
 // canvas and the nodeTypes map all stay in sync. Add a new card = add a row.
 export const NODE_CARDS = [
   { type: "prompt", label: "Prompt", icon: ParagraphIcon },
+  { type: "enhancer", label: "Enhancer", icon: MagicWand01Icon },
+  { type: "textGenerator", label: "Text Generator", icon: AiBrain01Icon },
 ] as const;
 
 export type NodeCardType = (typeof NODE_CARDS)[number]["type"];
 
 // Fresh data for a newly spawned node of a given type.
-export function createNodeData(type: NodeCardType): PromptNode["data"] {
+export type NodeData =
+  | PromptNodeData
+  | EnhancerNodeData
+  | TextGeneratorNodeData;
+
+export function createNodeData(type: NodeCardType): NodeData {
   switch (type) {
     case "prompt":
       return { text: "" };
+    case "enhancer":
+      return {
+        enhancedPrompt: "",
+        modelId: DEFAULT_TEXT_GENERATION_MODEL_ID,
+        prompt: "",
+      };
+    case "textGenerator":
+      return {
+        generatedText: "",
+        modelId: DEFAULT_TEXT_GENERATION_MODEL_ID,
+        prompt: "",
+      };
   }
 }
 
@@ -134,12 +160,14 @@ function NodeInfoPopover({ id }: { id: string }) {
 // Shared chrome for every card: a target handle on the left, a source handle on
 // the right, a titled header and a body slot. Cards only supply their body.
 
-function NodeShell({
+export function NodeShell({
+  active = false,
   id,
   icon,
   label,
   children,
 }: {
+  active?: boolean;
   id: string;
   icon: HugeiconsIconProps["icon"];
   label: string;
@@ -148,7 +176,11 @@ function NodeShell({
   const { deleteElements } = useReactFlow();
 
   return (
-    <div className="w-64 rounded-xl border bg-card text-card-foreground shadow-sm">
+    <div
+      className={`w-64 rounded-xl border bg-card text-card-foreground shadow-sm ${
+        active ? "animate-pulse ring-2 ring-primary" : ""
+      }`}
+    >
       <Handle type="target" position={Position.Left} />
       <div className="flex items-center gap-2 border-b px-3 py-2">
         <HugeiconsIcon icon={icon} size={16} strokeWidth={2} />
@@ -174,27 +206,8 @@ function NodeShell({
   );
 }
 
-// ─── Prompt ──────────────────────────────────────────────────────────────────
-
-export type PromptNode = Node<{ text: string }, "prompt">;
-
-function PromptCard({ id, data }: NodeProps<PromptNode>) {
-  const { updateNodeData } = useReactFlow();
-
-  return (
-    <NodeShell id={id} icon={ParagraphIcon} label="Prompt">
-      <textarea
-        // nodrag/nowheel let the textarea scroll and select without the canvas
-        // hijacking the gesture to pan/zoom the node.
-        className="nodrag nowheel h-24 max-h-60 w-full resize-none rounded-md border bg-background px-2 py-1.5 text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
-        onChange={(event) => updateNodeData(id, { text: event.target.value })}
-        placeholder="Text..."
-        value={data.text}
-      />
-    </NodeShell>
-  );
-}
-
 export const nodeTypes: NodeTypes = {
-  prompt: PromptCard,
+  prompt: PromptNode,
+  enhancer: EnhancerNode,
+  textGenerator: TextGeneratorNode,
 };

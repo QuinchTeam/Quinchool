@@ -4,12 +4,12 @@ import {
   NODE_CARDS,
   NODE_DRAG_MIME,
   type NodeCardType,
-} from "@/components/node-based-builder/node-cards";
+} from "@/components/node-based-builder/nodes";
 import { Button } from "@/components/ui/button";
 
 // Each entry both clicks (spawn at canvas center) and drags (spawn at drop
 // point). The canvas owns the actual spawn; the toolbar only reports intent.
-export function NodeToolbar({
+export function CanvasNodeToolbar({
   onSpawn,
 }: {
   onSpawn: (type: NodeCardType) => void;

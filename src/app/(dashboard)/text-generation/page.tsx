@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 
 import { TextModelSelector } from "@/components/text-model-selector";
 import { Button } from "@/components/ui/button";
+import { useTextGeneration } from "@/hooks/use-text-generation";
 import {
   Form,
   FormControl,
@@ -15,22 +16,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  DEFAULT_TEXT_GENERATION_MODEL_ID,
-} from "@/lib/ai/text-generation/models";
+import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
 import {
   type TextGenerationValues,
   textGenerationSchema,
 } from "@/lib/validations/text-generation";
 
-interface GenerateTextResponse {
-  error?: string;
-  text?: string;
-}
-
 export default function TextGenerationPage() {
   const [generatedText, setGeneratedText] = useState("");
   const [generationError, setGenerationError] = useState("");
+  const generateText = useTextGeneration();
   const form = useForm<TextGenerationValues>({
     resolver: zodResolver(textGenerationSchema),
     defaultValues: {
@@ -43,19 +38,14 @@ export default function TextGenerationPage() {
     setGeneratedText("");
     setGenerationError("");
 
-    const response = await fetch("/api/text-generation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const data = (await response.json()) as GenerateTextResponse;
-
-    if (!response.ok) {
-      setGenerationError(data.error ?? "Failed to generate text");
-      return;
+    try {
+      const { text } = await generateText.mutateAsync(values);
+      setGeneratedText(text);
+    } catch (error) {
+      setGenerationError(
+        error instanceof Error ? error.message : "Failed to generate text",
+      );
     }
-
-    setGeneratedText(data.text ?? "");
   }
 
   return (
@@ -95,7 +85,7 @@ export default function TextGenerationPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={form.formState.isSubmitting}>
+          <Button type="submit" disabled={generateText.isPending}>
             Submit
           </Button>
         </form>
