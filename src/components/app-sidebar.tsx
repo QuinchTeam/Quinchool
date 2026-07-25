@@ -5,6 +5,7 @@ import {
   ChatBotIcon,
   FilePenIcon,
   Home01Icon,
+  WorkflowSquareIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
@@ -91,6 +92,12 @@ export function AppSidebar() {
               <SidebarMenuButton render={<Link href="/resume-builder" />}>
                 <HugeiconsIcon icon={FilePenIcon} strokeWidth={2} />
                 <span>Resume Builder</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link href="/node-based-flow" />}>
+                <HugeiconsIcon icon={WorkflowSquareIcon} strokeWidth={2} />
+                <span>Node Base Flow</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

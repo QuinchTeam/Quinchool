@@ -1,4 +1,6 @@
-import { useRef } from "react";
+import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useEffect, useRef, useState } from "react";
 
 import { ModelIcon } from "@/components/model-icon";
 import { Button } from "@/components/ui/button";
@@ -21,15 +23,27 @@ const models: readonly TextGenerationModelConfig[] = TEXT_GENERATION_MODELS;
 
 export function TextModelSelector({
   label,
+  inCanvas = false,
   onValueChange,
   value,
 }: {
   label: string;
+  inCanvas?: boolean;
   onValueChange: (modelId: TextGenerationModelId) => void;
   value: TextGenerationModelId;
 }) {
   const anchor = useRef<HTMLDivElement>(null);
   const selectedModel = models.find((model) => model.id === value);
+
+  if (inCanvas) {
+    return (
+      <CanvasTextModelSelector
+        label={label}
+        onValueChange={onValueChange}
+        value={value}
+      />
+    );
+  }
 
   return (
     <div className="grid gap-2">
@@ -65,7 +79,7 @@ export function TextModelSelector({
             )}
           </ComboboxTrigger>
         </div>
-        <ComboboxContent anchor={anchor}>
+        <ComboboxContent anchor={anchor} className="min-w-0">
           <ComboboxEmpty>No model found.</ComboboxEmpty>
           <ComboboxList>
             {(model) => {
@@ -94,6 +108,101 @@ export function TextModelSelector({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
+    </div>
+  );
+}
+
+function CanvasTextModelSelector({
+  label,
+  onValueChange,
+  value,
+}: {
+  label: string;
+  onValueChange: (modelId: TextGenerationModelId) => void;
+  value: TextGenerationModelId;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const selectedModel = models.find((model) => model.id === value);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!wrapperRef.current?.contains(event.target as globalThis.Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsidePress);
+  }, [open]);
+
+  return (
+    <div className="grid gap-2">
+      <Label>{label}</Label>
+      <div ref={wrapperRef} className="relative">
+        <button
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          className="nodrag flex h-9 w-full items-center justify-between rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={() => setOpen((current) => !current)}
+          onPointerDown={(event) => event.stopPropagation()}
+          type="button"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            {selectedModel ? (
+              <ModelIcon className="size-4" modelId={selectedModel.id} />
+            ) : null}
+            <span className="truncate">
+              {selectedModel?.name ?? "Select a model"}
+            </span>
+          </span>
+          <HugeiconsIcon
+            className="size-4 shrink-0 opacity-50"
+            icon={ArrowDown01Icon}
+            strokeWidth={2}
+          />
+        </button>
+        {open ? (
+          <div
+            className="nodrag nowheel absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            role="listbox"
+          >
+            {models.map((model) => {
+              const selected = model.id === value;
+
+              return (
+                <button
+                  aria-selected={selected}
+                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground"
+                  key={model.id}
+                  onClick={() => {
+                    onValueChange(model.id);
+                    setOpen(false);
+                  }}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  role="option"
+                  type="button"
+                >
+                  <ModelIcon className="size-4 shrink-0" modelId={model.id} />
+                  <span className="min-w-0 flex-1 truncate">{model.name}</span>
+                  {selected ? (
+                    <HugeiconsIcon
+                      className="size-4 shrink-0"
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
