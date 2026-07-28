@@ -64,10 +64,14 @@ function CanvasContent() {
 
   const spawnNode = useCallback(
     (type: NodeCardType, position: { x: number; y: number }) => {
-      setNodes((current) => [
-        ...current,
-        { id: nextNodeId(), type, position, data: createNodeData(type) },
-      ]);
+      const node = {
+        id: nextNodeId(),
+        type,
+        position,
+        data: createNodeData(type),
+      };
+
+      setNodes((current) => [...current, node]);
     },
     [setNodes],
   );
