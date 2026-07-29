@@ -1,4 +1,0 @@
-interface:
-  display_name: "Commit Only"
-  short_description: "Create local commits only, no push or PR"
-  default_prompt: "Use $commit-only to group my current changes into local commits without pushing or opening a PR."
