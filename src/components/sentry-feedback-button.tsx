@@ -19,6 +19,10 @@ const SENTRY_FEEDBACK_OPTIONS = {
 export function SentryFeedbackButton() {
   const [isOpening, setIsOpening] = useState(false);
 
+  if (process.env.NODE_ENV !== "production") {
+    return null;
+  }
+
   async function handleClick() {
     if (isOpening) {
       return;

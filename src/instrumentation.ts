@@ -7,7 +7,9 @@ export async function register() {
   // we're booting in, so we load the matching config (different runtimes
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("../sentry.server.config");
+    if (process.env.NODE_ENV === "production") {
+      await import("../sentry.server.config");
+    }
     if (process.env.NODE_ENV === "development") {
       process.setUncaughtExceptionCaptureCallback((error) => {
         if (isAbortedConnectionError(error)) {
@@ -20,7 +22,10 @@ export async function register() {
     }
     registerLangfuse();
   }
-  if (process.env.NEXT_RUNTIME === "edge") {
+  if (
+    process.env.NEXT_RUNTIME === "edge" &&
+    process.env.NODE_ENV === "production"
+  ) {
     await import("../sentry.edge.config");
   }
 }
@@ -31,7 +36,10 @@ export async function register() {
 export function onRequestError(
   ...args: Parameters<typeof Sentry.captureRequestError>
 ) {
-  if (!isAbortedConnectionError(args[0])) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    !isAbortedConnectionError(args[0])
+  ) {
     Sentry.captureRequestError(...args);
   }
 }
