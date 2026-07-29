@@ -1,4 +1,0 @@
-interface:
-  display_name: "Commit and Push Main"
-  short_description: "Commit grouped changes and push main safely"
-  default_prompt: "Use $commit-push-main to group my changes into commits and push them to main."
