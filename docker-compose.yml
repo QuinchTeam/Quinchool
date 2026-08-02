@@ -8,7 +8,11 @@ services:
     shm_size: "1gb"
 
   postgres:
-    image: postgres:17
+    # pgvector's image is postgres:17 plus the vector extension, so the existing
+    # data volume attaches unchanged. Must be the -trixie (Debian 13) variant:
+    # the default tag is Debian 12, whose older glibc reports a different
+    # collation version and invalidates every text index in the volume.
+    image: pgvector/pgvector:pg17-trixie
     container_name: quinchool-postgres
     restart: unless-stopped
     environment:
