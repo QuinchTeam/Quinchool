@@ -1,8 +1,18 @@
 @AGENTS.md
 
+## Component placement
+
+Always place React components in `src/components/`, including components used by only one route. Do not create component files inside `src/app/`. Keep `src/app/` limited to Next.js route files and conventions such as `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, and `route.ts`.
+
+Organize feature-specific components under an appropriate subdirectory, for example `src/components/resume-builder/build-resume.tsx`.
+
+## Package manager
+
+Use npm exclusively for installing dependencies and running package scripts. Do not use Bun, pnpm, or Yarn. Keep `package-lock.json` updated and do not create other package-manager lockfiles.
+
 ## Tailwind CSS
 
-Use the project's Tailwind design tokens — never arbitrary bracket values like `w-[240px]`, `text-[#fff]`, or `[mask-type:luminance]`. Reach for scale tokens (`w-60`, `text-sm`, `gap-2`) or add a token to `@theme` in `src/app/globals.css`. Arbitrary **variants** (`data-[state=open]:`, `[&_svg]:`) are allowed. This is enforced by `bun run lint:tailwind`, a husky pre-commit hook, and CI. See AGENTS.md for the full policy and the `tailwind-allow-arbitrary` escape hatch.
+Use the project's Tailwind design tokens — never arbitrary bracket values like `w-[240px]`, `text-[#fff]`, or `[mask-type:luminance]`. Reach for scale tokens (`w-60`, `text-sm`, `gap-2`) or add a token to `@theme` in `src/app/globals.css`. Arbitrary **variants** (`data-[state=open]:`, `[&_svg]:`) are allowed. This is enforced by `npm run lint:tailwind`, a husky pre-commit hook, and CI. See AGENTS.md for the full policy and the `tailwind-allow-arbitrary` escape hatch.
 
 ## Git push safety
 
@@ -10,4 +20,4 @@ Never run `git push`, `git push --force`, `git push -f`, or `git push --force-wi
 
 ## Formatting
 
-Never run `bun run format` (or `biome format --write`) with no path — it rewrites the whole repo. Pass only the files you changed.
+Never run `npm run format` (or `biome format --write`) with no path — it rewrites the whole repo. Pass only the files you changed.

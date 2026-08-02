@@ -11,7 +11,7 @@ yarn dev
 # or
 pnpm dev
 # or
-bun dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -27,8 +27,8 @@ Arbitrary variants such as `data-[state=open]:block` and `[&_svg]:size-4` remain
 allowed. Add genuinely missing values to `@theme` in `src/app/globals.css`.
 
 ```bash
-bun run lint:tailwind
-bun run test:tailwind
+npm run lint:tailwind
+npm run test:tailwind
 ```
 
 The guard runs against staged stylesheets, JavaScript, TypeScript, and MDX files
