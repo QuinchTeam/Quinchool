@@ -23,7 +23,7 @@ model User {
   updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
-  resumeBullets ResumeBullet[]
+  careerProfile CareerProfile?
 
   @@map("user")
 }
@@ -72,17 +72,138 @@ model Verification {
   @@map("verification")
 }
 
-// Resume Builder: one experience bullet assigned to a single company.
+// Career Profile: the complete source data used to tailor a user's resume.
 
-model ResumeBullet {
-  id          String   @id @default(uuid())
-  companyName String
-  experience  String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model CareerProfile {
+  id              String       @id @default(cuid())
+  name            String
+  email           String
+  contactNumber   String
+  linkedin        String?
+  github          String?
+  personalWebsite String?
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experiences     Experience[]
+  projects        Project[]
+  skillGroups     SkillGroup[]
+  educations      Education[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  @@index([userId])
-  @@map("resume_bullet")
+  @@map("career_profile")
+}
+
+model Experience {
+  id              String             @id @default(cuid())
+  jobTitle        String
+  companyName     String
+  location        String
+  employmentType  String?
+  isCurrent       Boolean            @default(false)
+  startDate       DateTime           @db.Date
+  endDate         DateTime?          @db.Date
+  sortOrder       Int                @default(0)
+  careerProfileId String
+  careerProfile   CareerProfile      @relation(fields: [careerProfileId], references: [id], onDelete: Cascade)
+  bullets         ExperienceBullet[]
+  skills          Skill[]            @relation("ExperienceSkills")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([careerProfileId, sortOrder])
+  @@map("experience")
+}
+
+model ExperienceBullet {
+  id           String     @id @default(cuid())
+  text         String
+  sortOrder    Int        @default(0)
+  experienceId String
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([experienceId, sortOrder])
+  @@map("experience_bullet")
+}
+
+model Project {
+  id              String          @id @default(cuid())
+  projectName     String
+  isCurrent       Boolean         @default(false)
+  startDate       DateTime        @db.Date
+  endDate         DateTime?       @db.Date
+  sortOrder       Int             @default(0)
+  careerProfileId String
+  careerProfile   CareerProfile   @relation(fields: [careerProfileId], references: [id], onDelete: Cascade)
+  bullets         ProjectBullet[]
+  skills          Skill[]         @relation("ProjectSkills")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([careerProfileId, sortOrder])
+  @@map("project")
+}
+
+model ProjectBullet {
+  id        String   @id @default(cuid())
+  text      String
+  sortOrder Int      @default(0)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId, sortOrder])
+  @@map("project_bullet")
+}
+
+model SkillGroup {
+  id              String        @id @default(cuid())
+  label           String
+  sortOrder       Int           @default(0)
+  careerProfileId String
+  careerProfile   CareerProfile @relation(fields: [careerProfileId], references: [id], onDelete: Cascade)
+  skills          Skill[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([careerProfileId, sortOrder])
+  @@map("skill_group")
+}
+
+model Skill {
+  id           String       @id @default(cuid())
+  name         String
+  sortOrder    Int          @default(0)
+  skillGroupId String
+  skillGroup   SkillGroup   @relation(fields: [skillGroupId], references: [id], onDelete: Cascade)
+  experiences  Experience[] @relation("ExperienceSkills")
+  projects     Project[]    @relation("ProjectSkills")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([skillGroupId, name])
+  @@index([skillGroupId, sortOrder])
+  @@map("skill")
+}
+
+model Education {
+  id              String        @id @default(cuid())
+  institutionName String
+  location        String
+  degree          String
+  fieldOfStudy    String
+  specialization  String?
+  startDate       DateTime      @db.Date
+  endDate         DateTime      @db.Date
+  sortOrder       Int           @default(0)
+  careerProfileId String
+  careerProfile   CareerProfile @relation(fields: [careerProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([careerProfileId, sortOrder])
+  @@map("education")
 }
