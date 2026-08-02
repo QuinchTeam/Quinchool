@@ -1,6 +1,6 @@
-import * as Sentry from "@sentry/nextjs";
 import { isAbortedConnectionError } from "./lib/errors/is-aborted-connection-error";
-import { registerLangfuse } from "./lib/langfuse";
+
+type CaptureRequestError = typeof import("@sentry/nextjs").captureRequestError;
 
 export async function register() {
   // Next runs this once at startup. NEXT_RUNTIME tells us which runtime
@@ -8,7 +8,11 @@ export async function register() {
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
     if (process.env.NODE_ENV === "production") {
-      await import("../sentry.server.config");
+      const [{ registerLangfuse }] = await Promise.all([
+        import("./lib/langfuse"),
+        import("../sentry.server.config"),
+      ]);
+      registerLangfuse();
     }
     if (process.env.NODE_ENV === "development") {
       process.setUncaughtExceptionCaptureCallback((error) => {
@@ -20,7 +24,6 @@ export async function register() {
         throw error;
       });
     }
-    registerLangfuse();
   }
   if (
     process.env.NEXT_RUNTIME === "edge" &&
@@ -33,13 +36,12 @@ export async function register() {
 // Next calls this for any server-side request error: Server Components,
 // Route Handlers, Server Actions, and proxy.ts. One line replaces the
 // Fastify error handler from the source guide.
-export function onRequestError(
-  ...args: Parameters<typeof Sentry.captureRequestError>
-) {
+export async function onRequestError(...args: Parameters<CaptureRequestError>) {
   if (
     process.env.NODE_ENV === "production" &&
     !isAbortedConnectionError(args[0])
   ) {
-    Sentry.captureRequestError(...args);
+    const { captureRequestError } = await import("@sentry/nextjs");
+    await captureRequestError(...args);
   }
 }
