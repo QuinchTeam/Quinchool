@@ -1,9 +1,13 @@
 import { getTextGenerationErrorResponse } from "@/lib/ai/text-generation/errors";
 import { generateText } from "@/lib/ai/text-generation/service";
 import { prisma } from "@/lib/prisma";
+import { parseJsonObject, reconcileTailoredResume } from "@/lib/resume";
 import { getSessionUserId } from "@/lib/session";
-import { buildResumeSchema } from "@/lib/validations/build-resume";
-import { buildRankResumeBullet } from "@/prompts/resume-builder";
+import {
+  buildResumeSchema,
+  tailorSelectionSchema,
+} from "@/lib/validations/build-resume";
+import { buildTailorResumePrompt } from "@/prompts/resume-builder";
 
 export async function POST(request: Request) {
   try {
@@ -20,21 +24,47 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const resumeBullets = await prisma.resumeBullet.findMany({
+    // Same ordering as GET /api/career-profile, so the ids in the prompt line
+    // up with the profile the preview already rendered.
+    const careerProfile = await prisma.careerProfile.findUnique({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      include: {
+        experiences: {
+          orderBy: { sortOrder: "asc" },
+          include: { bullets: { orderBy: { sortOrder: "asc" } } },
+        },
+        skillGroups: {
+          orderBy: { sortOrder: "asc" },
+          include: { skills: { orderBy: { sortOrder: "asc" } } },
+        },
+      },
     });
+    const experiences =
+      careerProfile?.experiences.map((experience) => ({
+        companyName: experience.companyName,
+        jobTitle: experience.jobTitle,
+        bullets: experience.bullets.map((bullet) => ({ text: bullet.text })),
+      })) ?? [];
+    const skillGroups =
+      careerProfile?.skillGroups.map((group) => ({
+        label: group.label,
+        skills: group.skills.map((skill) => skill.name),
+      })) ?? [];
 
-    if (!resumeBullets.length) {
+    if (!experiences.some((experience) => experience.bullets.length)) {
       return Response.json(
         { error: "Add at least one experience before building a resume" },
         { status: 400 },
       );
     }
 
-    const prompt = buildRankResumeBullet({
+    const prompt = buildTailorResumePrompt({
+      experiences: experiences.map((experience) => ({
+        ...experience,
+        bullets: experience.bullets.map((bullet) => bullet.text),
+      })),
       jobRequirement: parsedBody.data.jobRequirement,
-      resumeBullets,
+      skillGroups,
     });
 
     const result = await generateText({
@@ -43,7 +73,29 @@ export async function POST(request: Request) {
     });
     console.info("API[Build Resume] - Provider Used: ", result.providerId);
 
-    return Response.json(result);
+    const selection = tailorSelectionSchema.safeParse(
+      parseJsonObject(result.text),
+    );
+
+    if (!selection.success) {
+      console.error("API[Build Resume] - Unparsable reply: ", result.text);
+
+      return Response.json(
+        { error: "The model returned an unreadable result. Try again." },
+        { status: 502 },
+      );
+    }
+
+    const tailoredResume = reconcileTailoredResume(
+      { experiences, skillGroups },
+      selection.data,
+    );
+    console.info(
+      "API[Build Resume] - Tailored: ",
+      JSON.stringify(tailoredResume),
+    );
+
+    return Response.json(tailoredResume);
   } catch (error) {
     console.error("build-resume error", error);
 

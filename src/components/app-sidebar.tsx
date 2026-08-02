@@ -89,9 +89,9 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/resume-builder" />}>
+              <SidebarMenuButton render={<Link href="/resume/resume-tailor" />}>
                 <HugeiconsIcon icon={FilePenIcon} strokeWidth={2} />
-                <span>Resume Builder</span>
+                <span>Resume</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>

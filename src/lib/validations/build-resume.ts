@@ -7,3 +7,27 @@ export const buildResumeSchema = z.object({
 });
 
 export type BuildResumeValues = z.infer<typeof buildResumeSchema>;
+
+// What the model is asked to reply with. Ids reference the experience /
+// skill-group order sent in the prompt; the texts are re-checked against the
+// career profile afterwards, so an invented bullet never reaches the resume.
+export const tailorSelectionSchema = z.object({
+  experiences: z
+    .array(
+      z.object({
+        id: z.string(),
+        bullets: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
+  skillGroups: z
+    .array(
+      z.object({
+        id: z.string(),
+        skills: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
+});
+
+export type TailorSelection = z.infer<typeof tailorSelectionSchema>;
