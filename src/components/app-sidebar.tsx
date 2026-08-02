@@ -2,6 +2,7 @@
 
 import {
   AiGenerativeIcon,
+  Briefcase01Icon,
   ChatBotIcon,
   FilePenIcon,
   Home01Icon,
@@ -92,6 +93,12 @@ export function AppSidebar() {
               <SidebarMenuButton render={<Link href="/resume/resume-tailor" />}>
                 <HugeiconsIcon icon={FilePenIcon} strokeWidth={2} />
                 <span>Resume</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link href="/jobs-scraper" />}>
+                <HugeiconsIcon icon={Briefcase01Icon} strokeWidth={2} />
+                <span>Jobs Scraper</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
