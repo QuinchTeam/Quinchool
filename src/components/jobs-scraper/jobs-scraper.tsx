@@ -2,6 +2,7 @@
 
 import {
   AiSearch02Icon,
+  AiSettingIcon,
   Briefcase01Icon,
   Calendar03Icon,
   Clock01Icon,
@@ -12,7 +13,7 @@ import {
   SquareArrowUpRightIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -25,35 +26,17 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  type DiscoveredJob,
-  EXCLUDED_JOB_LEVELS,
-  EXCLUDED_TECH,
-  JOB_LEVELS,
-  JOB_ROLES,
-  JOB_SOURCES,
-  type JobScanResult,
-  type JobSourceIssue,
-  type PotentialJob,
-  REQUIRED_TECH,
+import { useJobsScraper } from "@/hooks/use-jobs-scraper";
+import type {
+  JobScraperConfig,
+  JobScraperState,
+  JobSourceIssue,
+  SavedJob,
 } from "@/lib/jobs-scraper/schema";
 import { cn } from "@/lib/utils";
 
-async function requestJobScan(): Promise<JobScanResult> {
-  const response = await fetch("/api/jobs-scraper", { method: "POST" });
-  const body = (await response.json()) as JobScanResult | { error?: string };
-
-  if (!response.ok) {
-    throw new Error(
-      "error" in body && body.error ? body.error : "The job scan failed.",
-    );
-  }
-
-  return body as JobScanResult;
-}
-
 export function JobsScraper() {
-  const scan = useMutation({ mutationFn: requestJobScan });
+  const { isError, isLoading, refetch, scan, state } = useJobsScraper();
 
   return (
     <main className="min-h-full bg-muted/20">
@@ -68,27 +51,37 @@ export function JobsScraper() {
               />
               <h1 className="text-2xl font-semibold">Jobs Scraper</h1>
             </div>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-              Today only <span aria-hidden="true">·</span> Remote worldwide
-              <span aria-hidden="true">·</span> Hybrid in the Philippines
+              {state ? formatTimeRange(state.config) : "Loading criteria"}
+              {state ? <span aria-hidden="true">/</span> : null}
+              {state ? formatLocationModes(state.config) : null}
             </p>
           </div>
-          <Button
-            onClick={() => scan.mutate()}
-            disabled={scan.isPending}
-            className="w-full sm:w-auto"
-          >
-            <HugeiconsIcon
-              icon={scan.data ? RefreshIcon : Search01Icon}
-              strokeWidth={2}
-            />
-            {scan.isPending
-              ? "Scanning job boards"
-              : scan.data
-                ? "Scan again"
-                : "Scan today's jobs"}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/jobs-scraper/settings" />}
+            >
+              <HugeiconsIcon icon={AiSettingIcon} strokeWidth={2} />
+              Edit criteria
+            </Button>
+            <Button
+              onClick={() => scan.mutate()}
+              disabled={scan.isPending || !state}
+            >
+              <HugeiconsIcon
+                icon={state?.lastScannedAt ? RefreshIcon : Search01Icon}
+                strokeWidth={2}
+              />
+              {scan.isPending
+                ? "Scanning job boards"
+                : state?.lastScannedAt
+                  ? "Scan again"
+                  : "Scan jobs"}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -102,32 +95,21 @@ export function JobsScraper() {
             />
             <h2 className="text-sm font-semibold">Search criteria</h2>
           </div>
-          <CriteriaGroup label="Roles" items={JOB_ROLES} />
-          <CriteriaGroup label="Levels" items={JOB_LEVELS} />
-          <CriteriaGroup label="Required stack" items={REQUIRED_TECH} />
-          <CriteriaGroup
-            label="Excluded levels"
-            items={EXCLUDED_JOB_LEVELS}
-            destructive
-          />
-          <CriteriaGroup label="Excluded" items={EXCLUDED_TECH} destructive />
-          <div className="border-t pt-5">
-            <p className="mb-3 text-xs font-medium text-muted-foreground">
-              Sources
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {JOB_SOURCES.map((source) => (
-                <Badge key={source} variant="outline">
-                  {source}
-                </Badge>
-              ))}
-            </div>
-          </div>
+          {state ? (
+            <CriteriaSummary config={state.config} />
+          ) : (
+            <CriteriaLoading />
+          )}
         </aside>
 
         <section className="min-w-0 lg:col-span-3">
-          {scan.isPending ? (
+          {isLoading || scan.isPending ? (
             <LoadingResults />
+          ) : isError ? (
+            <ErrorResults
+              message="Saved jobs could not be loaded."
+              onRetry={() => refetch()}
+            />
           ) : scan.isError ? (
             <ErrorResults
               message={
@@ -137,8 +119,8 @@ export function JobsScraper() {
               }
               onRetry={() => scan.mutate()}
             />
-          ) : scan.data ? (
-            <JobResults result={scan.data} />
+          ) : state?.lastScannedAt ? (
+            <JobResults state={state} />
           ) : (
             <Empty className="min-h-96 border">
               <EmptyHeader>
@@ -147,7 +129,7 @@ export function JobsScraper() {
                 </EmptyMedia>
                 <EmptyTitle>No scan yet</EmptyTitle>
                 <EmptyDescription>
-                  Run a scan to see listings that pass every active filter.
+                  Run a scan to save matching jobs to your account.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -155,6 +137,41 @@ export function JobsScraper() {
         </section>
       </div>
     </main>
+  );
+}
+
+function CriteriaSummary({ config }: { config: JobScraperConfig }) {
+  return (
+    <>
+      <CriteriaGroup label="Roles" items={config.roles} />
+      <CriteriaGroup label="Levels" items={config.includedLevels} />
+      <CriteriaGroup
+        label="Required stack"
+        items={config.requiredTechnologies}
+      />
+      <CriteriaGroup
+        label="Excluded levels"
+        items={config.excludedLevels}
+        destructive
+      />
+      <CriteriaGroup
+        label="Excluded"
+        items={config.excludedTechnologies}
+        destructive
+      />
+      <div className="border-t pt-5">
+        <p className="mb-3 text-xs font-medium text-muted-foreground">
+          Sources
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {config.sources.map((source) => (
+            <Badge key={source} variant="outline">
+              {source}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -171,37 +188,46 @@ function CriteriaGroup({
     <div>
       <p className="mb-3 text-xs font-medium text-muted-foreground">{label}</p>
       <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <Badge key={item} variant={destructive ? "destructive" : "secondary"}>
-            {item}
-          </Badge>
-        ))}
+        {items.length > 0 ? (
+          items.map((item) => (
+            <Badge
+              key={item}
+              variant={destructive ? "destructive" : "secondary"}
+            >
+              {item}
+            </Badge>
+          ))
+        ) : (
+          <span className="text-xs text-muted-foreground">None</span>
+        )}
       </div>
     </div>
   );
 }
 
-function JobResults({ result }: { result: JobScanResult }) {
-  const potentialJobs = result.potentialJobs ?? [];
+function JobResults({ state }: { state: JobScraperState }) {
+  const matches = state.jobs.filter((job) => job.classification === "MATCH");
+  const potentialJobs = state.jobs.filter(
+    (job) => job.classification === "POTENTIAL",
+  );
   const scanTime = new Intl.DateTimeFormat("en-PH", {
-    hour: "numeric",
-    minute: "2-digit",
+    dateStyle: "medium",
+    timeStyle: "short",
     timeZone: "Asia/Manila",
-  }).format(new Date(result.scannedAt));
+  }).format(new Date(state.lastScannedAt ?? ""));
 
-  if (result.jobs.length === 0 && potentialJobs.length === 0) {
+  if (state.jobs.length === 0) {
     return (
       <div className="grid gap-4">
-        <SourceIssues issues={result.sourceIssues ?? []} />
+        <SourceIssues issues={state.sourceIssues} />
         <Empty className="min-h-96 border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <HugeiconsIcon icon={Briefcase01Icon} strokeWidth={2} />
             </EmptyMedia>
-            <EmptyTitle>No matches today</EmptyTitle>
+            <EmptyTitle>No saved jobs</EmptyTitle>
             <EmptyDescription>
-              No source listing passed every title, stack, location, and
-              exclusion filter.
+              The latest scan did not find a listing that passed your criteria.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -210,80 +236,81 @@ function JobResults({ result }: { result: JobScanResult }) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">
-            {result.jobs.length}{" "}
-            {result.jobs.length === 1 ? "match" : "matches"}
+            {state.savedJobCount} saved{" "}
+            {state.savedJobCount === 1 ? "job" : "jobs"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Posted {formatScanDate(result.scanDate)}
+            {state.newJobCount} new in the latest scan
+            {state.savedJobCount > state.jobs.length
+              ? ` / Showing ${state.jobs.length} most recently seen`
+              : ""}
           </p>
         </div>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <HugeiconsIcon icon={Clock01Icon} className="size-3.5" />
-          Scanned at {scanTime}
+          Last scanned {scanTime}
         </p>
       </div>
 
-      <SourceIssues issues={result.sourceIssues ?? []} />
+      <SourceIssues issues={state.sourceIssues} />
 
-      {result.jobs.length > 0 ? (
-        <JobList jobs={result.jobs} scanDate={result.scanDate} />
+      {matches.length > 0 ? (
+        <JobSection title="Matches" jobs={matches} />
       ) : null}
-
       {potentialJobs.length > 0 ? (
-        <section className="grid gap-3 pt-4">
-          <div>
-            <h2 className="text-base font-semibold">
-              {potentialJobs.length} potential{" "}
-              {potentialJobs.length === 1 ? "match" : "matches"}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              These are relevant listings with details that need manual review.
-            </p>
-          </div>
-          <JobList jobs={potentialJobs} scanDate={result.scanDate} />
-        </section>
+        <JobSection
+          title="Potential matches"
+          description="Relevant listings with one or more details to review."
+          jobs={potentialJobs}
+        />
       ) : null}
     </div>
   );
 }
 
-function JobList({
+function JobSection({
+  description,
   jobs,
-  scanDate,
+  title,
 }: {
-  jobs: (DiscoveredJob | PotentialJob)[];
-  scanDate: string;
+  description?: string;
+  jobs: SavedJob[];
+  title: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-background">
-      {jobs.map((job) => (
-        <JobCard key={job.url} job={job} scanDate={scanDate} />
-      ))}
-    </div>
+    <section className="grid gap-3">
+      <div>
+        <h2 className="text-base font-semibold">
+          {title} <span className="text-muted-foreground">{jobs.length}</span>
+        </h2>
+        {description ? (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
+      <div className="overflow-hidden rounded-lg border bg-background">
+        {jobs.map((job) => (
+          <JobCard key={job.id} job={job} />
+        ))}
+      </div>
+    </section>
   );
 }
 
-function JobCard({
-  job,
-  scanDate,
-}: {
-  job: DiscoveredJob | PotentialJob;
-  scanDate: string;
-}) {
-  const isPotential = "reviewReasons" in job;
-
+function JobCard({ job }: { job: SavedJob }) {
   return (
     <article className="grid gap-4 border-b p-5 last:border-b-0 sm:p-6 md:grid-cols-4">
       <div className="grid min-w-0 gap-3 md:col-span-3">
         <div className="flex flex-wrap items-center gap-2">
+          {job.isNew ? <Badge>New</Badge> : null}
           <Badge variant="outline">{job.source}</Badge>
           <Badge variant="secondary">{job.workMode}</Badge>
+          <Badge variant="outline">{job.level}</Badge>
           <Badge variant="outline">
-            {job.postedDate === scanDate ? "Today" : "Date unconfirmed"}
+            {job.postedText ?? formatPostedDate(job.postedDate)}
           </Badge>
         </div>
         <div>
@@ -307,13 +334,16 @@ function JobCard({
             ))}
           </div>
         ) : null}
-        {isPotential ? (
+        {job.reviewReasons.length > 0 ? (
           <ul className="grid gap-1 text-sm text-muted-foreground">
             {job.reviewReasons.map((reason) => (
               <li key={reason}>{reason}</li>
             ))}
           </ul>
         ) : null}
+        <p className="text-xs text-muted-foreground">
+          Last seen {formatDateTime(job.lastSeenAt)}
+        </p>
       </div>
       <div className="flex items-start md:justify-end">
         <a
@@ -353,15 +383,28 @@ function SourceIssues({ issues }: { issues: JobSourceIssue[] }) {
   );
 }
 
+function CriteriaLoading() {
+  return (
+    <div className="grid gap-5">
+      {[0, 1, 2, 3].map((item) => (
+        <div key={item} className="grid gap-2">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-6 w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LoadingResults() {
   return (
-    <output className="grid gap-4" aria-busy="true" aria-label="Scanning jobs">
+    <output className="grid gap-4" aria-busy="true" aria-label="Loading jobs">
       <div className="flex items-end justify-between">
         <div className="grid gap-2">
           <Skeleton className="h-5 w-24" />
           <Skeleton className="h-4 w-36" />
         </div>
-        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-40" />
       </div>
       <div className="overflow-hidden rounded-lg border bg-background">
         {[0, 1, 2].map((item) => (
@@ -370,11 +413,7 @@ function LoadingResults() {
               <Skeleton className="h-5 w-16" />
               <Skeleton className="h-5 w-20" />
             </div>
-            <div className="grid gap-2">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-1/3" />
-            </div>
-            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-5 w-3/4" />
             <Skeleton className="h-16 w-full" />
           </div>
         ))}
@@ -396,7 +435,7 @@ function ErrorResults({
         <EmptyMedia variant="icon" className="text-destructive">
           <HugeiconsIcon icon={AiSearch02Icon} strokeWidth={2} />
         </EmptyMedia>
-        <EmptyTitle>Scan failed</EmptyTitle>
+        <EmptyTitle>Jobs unavailable</EmptyTitle>
         <EmptyDescription>{message}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -409,11 +448,36 @@ function ErrorResults({
   );
 }
 
-function formatScanDate(date: string): string {
+function formatTimeRange(config: JobScraperConfig): string {
+  if (config.timeRange === "LAST_HOUR") return "Last hour";
+  if (config.timeRange === "TODAY") return "Today only";
+  if (config.timeRange === "THIS_WEEK") return "This week";
+  return `${config.customStartDate ?? "Custom"} to ${config.customEndDate ?? "range"}`;
+}
+
+function formatLocationModes(config: JobScraperConfig): string {
+  const worldwide = config.worldwideWorkModes.join(", ");
+  const philippines = config.philippinesWorkModes.join(", ");
+  return [
+    worldwide ? `Worldwide: ${worldwide}` : "",
+    philippines ? `Philippines: ${philippines}` : "",
+  ]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+function formatPostedDate(date: string | null): string {
+  if (!date) return "Date unconfirmed";
   return new Intl.DateTimeFormat("en-PH", {
-    day: "numeric",
-    month: "long",
+    dateStyle: "medium",
     timeZone: "Asia/Manila",
-    year: "numeric",
   }).format(new Date(`${date}T00:00:00+08:00`));
+}
+
+function formatDateTime(date: string): string {
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Manila",
+  }).format(new Date(date));
 }

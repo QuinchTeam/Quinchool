@@ -14,16 +14,18 @@ datasource db {
 // (user, session, account, verification).
 
 model User {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  emailVerified Boolean        @default(false)
-  image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  careerProfile CareerProfile?
+  id               String            @id @default(cuid())
+  name             String
+  email            String            @unique
+  emailVerified    Boolean           @default(false)
+  image            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  careerProfile    CareerProfile?
+  jobScraperConfig JobScraperConfig?
+  scrapedJobs      ScrapedJob[]
 
   @@map("user")
 }
@@ -206,4 +208,58 @@ model Education {
 
   @@index([careerProfileId, sortOrder])
   @@map("education")
+}
+
+model JobScraperConfig {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roles                String[]
+  includedLevels       String[]
+  requiredTechnologies String[]
+  excludedLevels       String[]
+  excludedTechnologies String[]
+  sources              String[]
+  timeRange            String
+  customStartDate      DateTime? @db.Date
+  customEndDate        DateTime? @db.Date
+  worldwideWorkModes   String[]
+  philippinesWorkModes String[]
+  lastScannedAt        DateTime?
+  lastScanId           String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@map("job_scraper_config")
+}
+
+model ScrapedJob {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source          String
+  sourceJobId     String
+  url             String
+  title           String
+  company         String
+  location        String
+  country         String
+  workMode        String
+  level           String
+  classification  String
+  postedDate      DateTime? @db.Date
+  postedAt        DateTime? @db.Timestamptz(3)
+  postedText      String?
+  summary         String
+  description     String
+  matchedSkills   String[]
+  reviewReasons   String[]
+  firstSeenAt     DateTime  @default(now())
+  lastSeenAt      DateTime  @default(now())
+  firstSeenScanId String
+  lastSeenScanId  String
+
+  @@unique([userId, source, sourceJobId])
+  @@index([userId, lastSeenAt])
+  @@map("scraped_job")
 }

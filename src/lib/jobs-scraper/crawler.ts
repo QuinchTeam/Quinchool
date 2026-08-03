@@ -1,12 +1,13 @@
 import "server-only";
 
 import { z } from "zod";
-
+import { logJobsScraper } from "@/lib/jobs-scraper/logging";
 import {
+  getCrawlLookbackSeconds,
   getJobSourceFromUrl,
-  JOB_ROLES,
   JOB_SOURCES,
   JOB_URL_PREFIXES,
+  type JobScraperConfig,
   type JobSourceIssue,
 } from "@/lib/jobs-scraper/schema";
 
@@ -59,15 +60,26 @@ export class Crawl4AiUnavailableError extends Error {
   }
 }
 
-export async function collectJobDocuments(): Promise<{
+export async function collectJobDocuments(
+  scanId: string,
+  config: JobScraperConfig,
+): Promise<{
   documents: JobDocument[];
   sourceIssues: JobSourceIssue[];
 }> {
-  const searchResults = await crawlUrls(buildSearchUrls());
+  const searchUrls = buildSearchUrls(config);
+  const searchStartedAt = Date.now();
+  const searchResults = await crawlUrls(searchUrls);
+
+  logJobsScraper("info", "crawl.search.completed", scanId, {
+    durationMs: Date.now() - searchStartedAt,
+    sources: summarizeCrawlBatch(searchUrls, searchResults),
+  });
+
   const sourceIssues: JobSourceIssue[] = [];
   const detailUrls = new Map<JobSource, string[]>();
 
-  for (const source of JOB_SOURCES) {
+  for (const source of config.sources) {
     const sourceSearchResults = searchResults.filter(
       (result) => getJobSourceFromUrl(result.url) === source,
     );
@@ -88,7 +100,18 @@ export async function collectJobDocuments(): Promise<{
     }
   }
 
-  const detailResults = await crawlUrls([...detailUrls.values()].flat());
+  logJobsScraper("info", "crawl.links.selected", scanId, {
+    sources: Object.fromEntries(
+      [...detailUrls].map(([source, urls]) => [
+        source,
+        { count: urls.length, urls },
+      ]),
+    ),
+  });
+
+  const selectedDetailUrls = [...detailUrls.values()].flat();
+  const detailsStartedAt = Date.now();
+  const detailResults = await crawlUrls(selectedDetailUrls);
   const documents = detailResults.flatMap((result) => {
     const source = getJobSourceFromUrl(result.url);
     const content = readMarkdown(result);
@@ -106,7 +129,7 @@ export async function collectJobDocuments(): Promise<{
     ];
   });
 
-  for (const source of JOB_SOURCES) {
+  for (const source of config.sources) {
     if (
       (detailUrls.get(source)?.length ?? 0) > 0 &&
       !documents.some((document) => document.source === source)
@@ -118,20 +141,85 @@ export async function collectJobDocuments(): Promise<{
     }
   }
 
+  logJobsScraper(
+    sourceIssues.length ? "warn" : "info",
+    "crawl.details.completed",
+    scanId,
+    {
+      durationMs: Date.now() - detailsStartedAt,
+      issues: sourceIssues,
+      sources: Object.fromEntries(
+        JOB_SOURCES.map((source) => [
+          source,
+          {
+            ...summarizeSourceCrawl(source, selectedDetailUrls, detailResults),
+            documents: documents
+              .filter((document) => document.source === source)
+              .map((document) => document.url),
+          },
+        ]),
+      ),
+    },
+  );
+
   return { documents, sourceIssues };
 }
 
-function buildSearchUrls(): string[] {
-  return JOB_ROLES.flatMap((role) => {
+function buildSearchUrls(config: JobScraperConfig): string[] {
+  const lookbackSeconds = getCrawlLookbackSeconds(config);
+  const jobStreetDays = lookbackSeconds <= 86_400 ? 1 : 7;
+
+  return config.roles.flatMap((role) => {
     const encodedRole = encodeURIComponent(role);
     const slug = role.toLowerCase().replaceAll(" ", "-");
+    const urls: string[] = [];
 
-    return [
-      `https://www.linkedin.com/jobs/search/?keywords=${encodedRole}&location=Philippines&f_TPR=r86400&f_WT=2%2C3&f_E=2%2C3`,
-      `https://www.linkedin.com/jobs/search/?keywords=${encodedRole}&location=Worldwide&f_TPR=r86400&f_WT=2&f_E=2%2C3`,
-      `https://ph.jobstreet.com/${slug}-jobs?daterange=1`,
-    ];
+    if (config.sources.includes("LinkedIn")) {
+      if (config.philippinesWorkModes.length > 0) {
+        urls.push(
+          buildLinkedInSearchUrl(
+            encodedRole,
+            "Philippines",
+            config.philippinesWorkModes,
+            lookbackSeconds,
+          ),
+        );
+      }
+
+      if (config.worldwideWorkModes.length > 0) {
+        urls.push(
+          buildLinkedInSearchUrl(
+            encodedRole,
+            "Worldwide",
+            config.worldwideWorkModes,
+            lookbackSeconds,
+          ),
+        );
+      }
+    }
+
+    if (config.sources.includes("JobStreet")) {
+      urls.push(
+        `https://ph.jobstreet.com/${slug}-jobs?daterange=${jobStreetDays}`,
+      );
+    }
+
+    return urls;
   });
+}
+
+function buildLinkedInSearchUrl(
+  encodedRole: string,
+  location: string,
+  workModes: JobScraperConfig["worldwideWorkModes"],
+  lookbackSeconds: number,
+): string {
+  const workModeIds = { Hybrid: "3", Onsite: "1", Remote: "2" } as const;
+  const encodedModes = encodeURIComponent(
+    workModes.map((mode) => workModeIds[mode]).join(","),
+  );
+
+  return `https://www.linkedin.com/jobs/search/?keywords=${encodedRole}&location=${encodeURIComponent(location)}&f_TPR=r${lookbackSeconds}&f_WT=${encodedModes}`;
 }
 
 async function crawlUrls(urls: string[]): Promise<CrawlResult[]> {
@@ -248,4 +336,31 @@ function isBlocked(result: CrawlResult): boolean {
   return /additional verification required|just a moment|access denied|captcha/i.test(
     `${result.error_message ?? ""} ${readMarkdown(result)}`,
   );
+}
+
+function summarizeCrawlBatch(urls: string[], results: CrawlResult[]) {
+  return Object.fromEntries(
+    JOB_SOURCES.map((source) => [
+      source,
+      summarizeSourceCrawl(source, urls, results),
+    ]),
+  );
+}
+
+function summarizeSourceCrawl(
+  source: JobSource,
+  urls: string[],
+  results: CrawlResult[],
+) {
+  const sourceResults = results.filter(
+    (result) => getJobSourceFromUrl(result.url) === source,
+  );
+
+  return {
+    requestedCount: urls.filter((url) => getJobSourceFromUrl(url) === source)
+      .length,
+    returnedCount: sourceResults.length,
+    successfulCount: sourceResults.filter((result) => result.success).length,
+    blockedCount: sourceResults.filter(isBlocked).length,
+  };
 }
