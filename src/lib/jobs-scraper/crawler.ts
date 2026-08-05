@@ -15,7 +15,11 @@ const CRAWL4AI_URL = (
   process.env.CRAWL4AI_URL ?? "http://127.0.0.1:11235"
 ).replace(/\/$/, "");
 const MAX_JOBS_PER_SOURCE = 10;
-const MAX_DOCUMENT_LENGTH = 12_000;
+// Job pages put the tech stack well below the summary, and 12k characters was
+// cutting it off — listings were rejected for "no required technology" when the
+// stack sat just past the limit. Raising this costs Gemini tokens per scan;
+// lower it if quota becomes the binding constraint.
+const MAX_DOCUMENT_LENGTH = 30_000;
 
 const crawlLinkSchema = z.object({ href: z.string() }).passthrough();
 const crawlResultSchema = z
@@ -243,6 +247,10 @@ async function crawlUrls(urls: string[]): Promise<CrawlResult[]> {
             enable_stealth: true,
             headless: true,
             user_agent_mode: "random",
+            headers: {
+              type: "dict",
+              value: { "Accept-Language": "en-US,en;q=0.9" },
+            },
           },
         },
         crawler_config: {
@@ -252,6 +260,15 @@ async function crawlUrls(urls: string[]): Promise<CrawlResult[]> {
             magic: true,
             page_timeout: 60_000,
             stream: false,
+            // LinkedIn renders locations and relative posting times in the
+            // browser from navigator.language, which the random user agent
+            // leaves random — scans came back in French and German. The browser
+            // locale is what settles it; the Accept-Language header above only
+            // covers server-rendered markup. Manila time also keeps a relative
+            // label such as "18 minutes ago" resolving to the same calendar day
+            // the date filters use.
+            locale: "en-US",
+            timezone_id: "Asia/Manila",
           },
         },
       }),
