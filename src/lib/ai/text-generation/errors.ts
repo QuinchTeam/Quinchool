@@ -105,9 +105,25 @@ function isProviderRateLimitError(error: unknown): boolean {
   );
 }
 
-function readProviderErrorMessage(error: unknown): string | undefined {
-  return error instanceof GoogleApiError ||
-    error instanceof TextGenerationProviderHttpError
-    ? error.message
-    : undefined;
+/**
+ * The readable sentence behind a provider failure. Google puts the whole HTTP
+ * error body in `message`, so the useful text arrives wrapped in a JSON
+ * envelope: {"error":{"code":503,"message":"...","status":"UNAVAILABLE"}}.
+ */
+export function readProviderErrorMessage(error: unknown): string | undefined {
+  if (
+    !(error instanceof GoogleApiError) &&
+    !(error instanceof TextGenerationProviderHttpError)
+  ) {
+    return undefined;
+  }
+
+  try {
+    const body: unknown = JSON.parse(error.message);
+    const nested = (body as { error?: { message?: unknown } })?.error?.message;
+
+    return typeof nested === "string" && nested ? nested : error.message;
+  } catch {
+    return error.message;
+  }
 }
