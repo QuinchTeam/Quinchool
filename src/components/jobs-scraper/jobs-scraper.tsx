@@ -7,16 +7,16 @@ import {
   Calendar03Icon,
   Clock01Icon,
   FilterHorizontalIcon,
-  Location01Icon,
   RefreshIcon,
   Search01Icon,
-  SquareArrowUpRightIcon,
+  Task01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 
+import { JobCard } from "@/components/jobs-scraper/job-card";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -33,7 +33,6 @@ import type {
   JobSourceIssue,
   SavedJob,
 } from "@/lib/jobs-scraper/schema";
-import { cn } from "@/lib/utils";
 
 export function JobsScraper() {
   const { isError, isLoading, refetch, scan, state } = useJobsScraper();
@@ -59,6 +58,15 @@ export function JobsScraper() {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/jobs-scraper/rejected" />}
+            >
+              <HugeiconsIcon icon={Task01Icon} strokeWidth={2} />
+              Review scan
+              {state ? ` (${state.classificationCounts.REJECTED})` : ""}
+            </Button>
             <Button
               variant="outline"
               nativeButton={false}
@@ -216,7 +224,7 @@ function JobResults({ state }: { state: JobScraperState }) {
     timeZone: "Asia/Manila",
   }).format(new Date(state.lastScannedAt ?? ""));
 
-  if (state.jobs.length === 0) {
+  if (matches.length === 0 && potentialJobs.length === 0) {
     return (
       <div className="grid gap-4">
         <SourceIssues issues={state.sourceIssues} />
@@ -228,8 +236,20 @@ function JobResults({ state }: { state: JobScraperState }) {
             <EmptyTitle>No saved jobs</EmptyTitle>
             <EmptyDescription>
               The latest scan did not find a listing that passed your criteria.
+              {state.classificationCounts.REJECTED > 0
+                ? ` ${state.classificationCounts.REJECTED} listings were rejected — review them to check the verdicts.`
+                : ""}
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/jobs-scraper/rejected" />}
+            >
+              Review rejected listings
+            </Button>
+          </EmptyContent>
         </Empty>
       </div>
     );
@@ -240,14 +260,13 @@ function JobResults({ state }: { state: JobScraperState }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">
-            {state.savedJobCount} saved{" "}
-            {state.savedJobCount === 1 ? "job" : "jobs"}
+            {matches.length + potentialJobs.length} saved{" "}
+            {matches.length + potentialJobs.length === 1 ? "job" : "jobs"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {state.newJobCount} new in the latest scan
-            {state.savedJobCount > state.jobs.length
-              ? ` / Showing ${state.jobs.length} most recently seen`
-              : ""}
+            {[...matches, ...potentialJobs].filter((job) => job.isNew).length}{" "}
+            new in the latest scan / {state.classificationCounts.REJECTED}{" "}
+            rejected
           </p>
         </div>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -291,75 +310,12 @@ function JobSection({
           <p className="text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="divide-y overflow-hidden rounded-lg border bg-background">
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} />
         ))}
       </div>
     </section>
-  );
-}
-
-function JobCard({ job }: { job: SavedJob }) {
-  return (
-    <article className="grid gap-4 border-b p-5 last:border-b-0 sm:p-6 md:grid-cols-4">
-      <div className="grid min-w-0 gap-3 md:col-span-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {job.isNew ? <Badge>New</Badge> : null}
-          <Badge variant="outline">{job.source}</Badge>
-          <Badge variant="secondary">{job.workMode}</Badge>
-          <Badge variant="outline">{job.level}</Badge>
-          <Badge variant="outline">
-            {job.postedText ?? formatPostedDate(job.postedDate)}
-          </Badge>
-        </div>
-        <div>
-          <h3 className="text-base font-semibold">{job.title}</h3>
-          <p className="text-sm text-muted-foreground">{job.company}</p>
-        </div>
-        <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
-          <HugeiconsIcon
-            icon={Location01Icon}
-            className="mt-0.5 size-4 shrink-0"
-          />
-          {job.location}
-        </p>
-        <p className="text-sm leading-relaxed">{job.summary}</p>
-        {job.matchedSkills.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {job.matchedSkills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
-          </div>
-        ) : null}
-        {job.reviewReasons.length > 0 ? (
-          <ul className="grid gap-1 text-sm text-muted-foreground">
-            {job.reviewReasons.map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        ) : null}
-        <p className="text-xs text-muted-foreground">
-          Last seen {formatDateTime(job.lastSeenAt)}
-        </p>
-      </div>
-      <div className="flex items-start md:justify-end">
-        <a
-          href={job.url}
-          target="_blank"
-          rel="noreferrer"
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "w-full md:w-auto",
-          )}
-        >
-          View job
-          <HugeiconsIcon icon={SquareArrowUpRightIcon} strokeWidth={2} />
-        </a>
-      </div>
-    </article>
   );
 }
 
@@ -464,20 +420,4 @@ function formatLocationModes(config: JobScraperConfig): string {
   ]
     .filter(Boolean)
     .join(" / ");
-}
-
-function formatPostedDate(date: string | null): string {
-  if (!date) return "Date unconfirmed";
-  return new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "medium",
-    timeZone: "Asia/Manila",
-  }).format(new Date(`${date}T00:00:00+08:00`));
-}
-
-function formatDateTime(date: string): string {
-  return new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Manila",
-  }).format(new Date(date));
 }

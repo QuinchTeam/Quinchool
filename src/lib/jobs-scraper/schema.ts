@@ -192,6 +192,7 @@ export const potentialJobSchema = discoveredJobSchema
 
 export const jobExtractionSchema = discoveredJobsSchema.extend({
   potentialJobs: z.array(potentialJobSchema),
+  rejectedJobs: z.array(potentialJobSchema),
 });
 
 export type PotentialJob = z.infer<typeof potentialJobSchema>;
@@ -199,26 +200,28 @@ export type PotentialJob = z.infer<typeof potentialJobSchema>;
 export function parseJobExtraction(value: unknown): {
   jobs: DiscoveredJob[];
   potentialJobs: PotentialJob[];
+  rejectedJobs: PotentialJob[];
 } {
   const parsed = jobExtractionSchema.parse(value);
 
   return {
     jobs: parsed.jobs.slice(0, 30).map(normalizeGeneratedJob),
-    potentialJobs: parsed.potentialJobs.slice(0, 30).map((job) => ({
-      ...normalizeGeneratedJob(job),
-      reviewReasons: job.reviewReasons
-        .slice(0, 4)
-        .map((reason) => truncate(reason, 500)),
-    })),
+    potentialJobs: parsed.potentialJobs.slice(0, 30).map(normalizeReviewedJob),
+    rejectedJobs: parsed.rejectedJobs.slice(0, 30).map(normalizeReviewedJob),
   };
 }
 
+export const JOB_CLASSIFICATIONS = ["MATCH", "POTENTIAL", "REJECTED"] as const;
+
+export const jobClassificationSchema = z.enum(JOB_CLASSIFICATIONS);
+
 export interface SavedJob {
-  classification: "MATCH" | "POTENTIAL";
+  classification: (typeof JOB_CLASSIFICATIONS)[number];
   company: string;
   country: string;
   firstSeenAt: string;
   id: string;
+  isManualClassification: boolean;
   isNew: boolean;
   lastSeenAt: string;
   level: string;
@@ -236,6 +239,7 @@ export interface SavedJob {
 }
 
 export interface JobScraperState {
+  classificationCounts: Record<SavedJob["classification"], number>;
   config: JobScraperConfig;
   jobs: SavedJob[];
   lastScannedAt: string | null;
@@ -249,91 +253,110 @@ export interface JobSourceIssue {
   source: DiscoveredJob["source"];
 }
 
-export function filterDiscoveredJobs(
-  jobs: DiscoveredJob[],
+/**
+ * Every reason the configured criteria disqualify a job. An empty array means
+ * the job passed. Jobs carrying `reviewReasons` are graded leniently: a missing
+ * posting date, an unclear work mode, and a missing required technology are
+ * treated as open questions instead of failures, because they are exactly what
+ * puts a listing in the potential bucket.
+ */
+export function getJobRejectionReasons(
+  job: DiscoveredJob | PotentialJob,
   config: JobScraperConfig,
   now = new Date(),
-): DiscoveredJob[] {
-  const seen = new Set<string>();
+): string[] {
+  const isLenient = "reviewReasons" in job;
+  const searchableText = [job.title, job.summary, ...job.matchedSkills].join(
+    " ",
+  );
+  const levelText = `${job.title} ${job.level}`;
+  const excludedLevel = findMatchingCriterion(levelText, config.excludedLevels);
+  const excludedTech = findMatchingCriterion(
+    searchableText,
+    config.excludedTechnologies,
+  );
+  const reasons: string[] = [];
 
-  return jobs.filter((job) => {
-    const source = getJobSourceFromUrl(job.url);
-    const searchableText = [job.title, job.summary, ...job.matchedSkills].join(
-      " ",
-    );
-    const isMatch =
-      source === job.source &&
-      config.sources.includes(job.source) &&
-      job.url.startsWith(JOB_URL_PREFIXES[job.source]) &&
-      isDateInRange(job.postedDate, job.postedAt, config, now) &&
-      isLocationAllowed(job.country, job.workMode, config) &&
-      matchesAnyCriterion(job.title, config.roles) &&
-      matchesAnyCriterion(job.level, config.includedLevels) &&
-      !matchesAnyCriterion(
-        `${job.title} ${job.level}`,
-        config.excludedLevels,
-      ) &&
-      (config.requiredTechnologies.length === 0 ||
-        matchesAnyCriterion(searchableText, config.requiredTechnologies)) &&
-      !containsExcludedTech(searchableText, config.excludedTechnologies);
-    const dedupeKey = job.url.toLowerCase();
+  if (
+    getJobSourceFromUrl(job.url) !== job.source ||
+    !job.url.startsWith(JOB_URL_PREFIXES[job.source])
+  ) {
+    reasons.push(`The URL is not a ${job.source} job listing.`);
+  }
 
-    if (!isMatch || seen.has(dedupeKey)) {
-      return false;
+  if (!config.sources.includes(job.source)) {
+    reasons.push(`${job.source} is not one of your enabled sources.`);
+  }
+
+  if (job.postedDate === null) {
+    if (!isLenient) {
+      reasons.push("The posting date could not be established.");
     }
+  } else if (!isDateInRange(job.postedDate, job.postedAt, config, now)) {
+    const { fromDate, toDate } = getJobDateWindow(config, now);
+    reasons.push(
+      config.timeRange === "LAST_HOUR"
+        ? "It was not posted within the last hour."
+        : `Posted ${job.postedDate}, outside your ${fromDate} to ${toDate} window.`,
+    );
+  }
 
-    seen.add(dedupeKey);
-    return true;
-  });
+  if (job.workMode === "Unclear") {
+    if (!isLenient) {
+      reasons.push("The work mode could not be established.");
+    }
+  } else if (!isLocationAllowed(job.country, job.workMode, config)) {
+    reasons.push(
+      `${job.workMode} work in ${job.country} is not an allowed location and work mode.`,
+    );
+  }
+
+  if (!matchesAnyCriterion(job.title, config.roles)) {
+    reasons.push(`"${job.title}" does not match a configured role.`);
+  }
+
+  if (!matchesAnyCriterion(job.level, config.includedLevels)) {
+    reasons.push(`Level "${job.level}" is not an included level.`);
+  }
+
+  // A posting open to several levels ("Software Engineer (Junior / Mid /
+  // Senior)") names an excluded level without being one. An included level in
+  // the same text settles it, so only reject when no included level appears.
+  if (excludedLevel && !matchesAnyCriterion(levelText, config.includedLevels)) {
+    reasons.push(
+      `The title or level matches the excluded level "${excludedLevel}".`,
+    );
+  }
+
+  if (
+    !isLenient &&
+    config.requiredTechnologies.length > 0 &&
+    !matchesAnyCriterion(searchableText, config.requiredTechnologies)
+  ) {
+    reasons.push("None of your required technologies were mentioned.");
+  }
+
+  if (excludedTech) {
+    reasons.push(`It mentions the excluded technology "${excludedTech}".`);
+  }
+
+  return reasons;
 }
 
-export function filterPotentialJobs(
-  jobs: PotentialJob[],
-  config: JobScraperConfig,
-  now = new Date(),
-): PotentialJob[] {
-  const seen = new Set<string>();
-
-  return jobs.filter((job) => {
-    const source = getJobSourceFromUrl(job.url);
-    const searchableText = [job.title, job.summary, ...job.matchedSkills].join(
-      " ",
-    );
-    const isDateAllowed =
-      job.postedDate === null ||
-      isDateInRange(job.postedDate, job.postedAt, config, now);
-    const isLocationValid =
-      job.workMode === "Unclear" ||
-      isLocationAllowed(job.country, job.workMode, config);
-    const isMatch =
-      source === job.source &&
-      config.sources.includes(job.source) &&
-      job.url.startsWith(JOB_URL_PREFIXES[job.source]) &&
-      isDateAllowed &&
-      isLocationValid &&
-      matchesAnyCriterion(job.title, config.roles) &&
-      matchesAnyCriterion(job.level, config.includedLevels) &&
-      !matchesAnyCriterion(
-        `${job.title} ${job.level}`,
-        config.excludedLevels,
-      ) &&
-      !containsExcludedTech(searchableText, config.excludedTechnologies);
-    const dedupeKey = job.url.toLowerCase();
-
-    if (!isMatch || seen.has(dedupeKey)) {
-      return false;
-    }
-
-    seen.add(dedupeKey);
-    return true;
-  });
+export function findMatchingCriterion(
+  text: string,
+  criteria: readonly string[],
+): string | null {
+  return (
+    criteria.find((criterion) => textMatchesCriterion(text, criterion)) ?? null
+  );
 }
 
 export function containsExcludedTech(
   text: string,
   excludedTechnologies: readonly string[],
 ): boolean {
-  return matchesAnyCriterion(text, excludedTechnologies);
+  return findMatchingCriterion(text, excludedTechnologies) !== null;
 }
 
 export function matchesAnyCriterion(
@@ -504,6 +527,15 @@ function normalizeGeneratedJob<T extends DiscoveredJob | PotentialJob>(
     matchedSkills: job.matchedSkills
       .slice(0, 12)
       .map((skill) => truncate(skill, 120)),
+  };
+}
+
+function normalizeReviewedJob(job: PotentialJob): PotentialJob {
+  return {
+    ...normalizeGeneratedJob(job),
+    reviewReasons: job.reviewReasons
+      .slice(0, 4)
+      .map((reason) => truncate(reason, 500)),
   };
 }
 

@@ -13,16 +13,15 @@ import {
 } from "@/lib/jobs-scraper/crawler";
 import { logJobsScraper } from "@/lib/jobs-scraper/logging";
 import {
-  containsExcludedTech,
   type DiscoveredJob,
-  filterDiscoveredJobs,
-  filterPotentialJobs,
   getJobDateWindow,
+  getJobRejectionReasons,
   type JobScraperConfig,
   type JobScraperState,
   jobExtractionSchema,
   type PotentialJob,
   parseJobExtraction,
+  type SavedJob,
 } from "@/lib/jobs-scraper/schema";
 import {
   getJobScraperConfig,
@@ -51,29 +50,15 @@ export async function scanJobs(
   });
 
   const { documents, sourceIssues } = await collectJobDocuments(scanId, config);
-  const eligibleDocuments = documents.filter(
-    (document) =>
-      !containsExcludedTech(document.content, config.excludedTechnologies),
-  );
-  const excludedDocuments = documents.filter((document) =>
-    containsExcludedTech(document.content, config.excludedTechnologies),
-  );
 
-  logJobsScraper("info", "documents.filtered", scanId, {
-    eligible: eligibleDocuments.map(({ source, url }) => ({ source, url })),
-    eligibleCount: eligibleDocuments.length,
-    excluded: excludedDocuments.map(({ source, url }) => ({
-      reason: "excluded_technology",
-      source,
-      url,
-    })),
-    excludedCount: excludedDocuments.length,
-    inputCount: documents.length,
+  logJobsScraper("info", "documents.collected", scanId, {
+    documents: documents.map(({ source, url }) => ({ source, url })),
+    documentCount: documents.length,
   });
 
-  if (eligibleDocuments.length === 0) {
+  if (documents.length === 0) {
     logJobsScraper("info", "gemini.skipped", scanId, {
-      reason: "no_eligible_documents",
+      reason: "no_documents",
     });
     await persistJobScan(userId, scanId, scannedAt, []);
     const state = await getJobScraperState(userId, sourceIssues);
@@ -90,7 +75,7 @@ export async function scanJobs(
   const text = await generateGoogleJson({
     providerModelId,
     responseJsonSchema: z.toJSONSchema(jobExtractionSchema),
-    prompt: buildExtractionPrompt(scannedAt, config, eligibleDocuments),
+    prompt: buildExtractionPrompt(scannedAt, config, documents),
   });
   const result = parseJobExtraction(JSON.parse(text) as unknown);
 
@@ -99,48 +84,28 @@ export async function scanJobs(
     matchCandidates: result.jobs.map(toLoggedJob),
     model: providerModelId,
     potentialCandidates: result.potentialJobs.map(toLoggedJob),
-  });
-
-  const jobs = filterDiscoveredJobs(result.jobs, config, scannedAt);
-  const matchedUrls = new Set(jobs.map((job) => job.url.toLowerCase()));
-  const potentialJobs = filterPotentialJobs(
-    result.potentialJobs,
-    config,
-    scannedAt,
-  ).filter((job) => !matchedUrls.has(job.url.toLowerCase()));
-  const potentialUrls = new Set(
-    potentialJobs.map((job) => job.url.toLowerCase()),
-  );
-
-  logJobsScraper("info", "selection.completed", scanId, {
-    matches: jobs.map(toLoggedJob),
-    potentialMatches: potentialJobs.map(toLoggedJob),
-    rejectedMatchUrls: result.jobs
-      .filter((job) => !matchedUrls.has(job.url.toLowerCase()))
-      .map((job) => job.url),
-    rejectedPotentialUrls: result.potentialJobs
-      .filter((job) => !potentialUrls.has(job.url.toLowerCase()))
-      .map((job) => job.url),
+    rejectedCandidates: result.rejectedJobs.map(toLoggedJob),
   });
 
   const descriptions = new Map(
-    eligibleDocuments.map((document) => [
-      document.url.toLowerCase(),
-      document.content,
-    ]),
+    documents.map((document) => [document.url.toLowerCase(), document.content]),
   );
-  await persistJobScan(userId, scanId, scannedAt, [
-    ...jobs.map((job) => ({
-      classification: "MATCH" as const,
-      description: descriptions.get(job.url.toLowerCase()) ?? "",
-      job,
+  const classified = classifyScannedJobs(result, config, scannedAt).map(
+    (entry) => ({
+      ...entry,
+      description: descriptions.get(entry.job.url.toLowerCase()) ?? "",
+    }),
+  );
+
+  logJobsScraper("info", "selection.completed", scanId, {
+    jobs: classified.map(({ classification, job, reviewReasons }) => ({
+      ...toLoggedJob(job),
+      classification,
+      reviewReasons,
     })),
-    ...potentialJobs.map((job) => ({
-      classification: "POTENTIAL" as const,
-      description: descriptions.get(job.url.toLowerCase()) ?? "",
-      job,
-    })),
-  ]);
+  });
+
+  await persistJobScan(userId, scanId, scannedAt, classified);
 
   const state = await getJobScraperState(userId, sourceIssues);
   logJobsScraper("info", "jobs.persisted", scanId, {
@@ -149,6 +114,61 @@ export async function scanJobs(
   });
   logCompletedScan(scanId, scanStartedAt, state);
   return state;
+}
+
+/**
+ * Grades every extracted listing against the configured criteria and settles it
+ * into one bucket. A listing Gemini proposed as a match or a potential match is
+ * demoted to REJECTED when the deterministic criteria disagree, and it carries
+ * the reasons for that verdict so the scan stays reviewable.
+ */
+export function classifyScannedJobs(
+  result: {
+    jobs: DiscoveredJob[];
+    potentialJobs: PotentialJob[];
+    rejectedJobs: PotentialJob[];
+  },
+  config: JobScraperConfig,
+  scannedAt: Date,
+): {
+  classification: SavedJob["classification"];
+  job: DiscoveredJob | PotentialJob;
+  reviewReasons: string[];
+}[] {
+  const candidates = [
+    ...result.jobs.map((job) => ({ job, proposed: "MATCH" as const })),
+    ...result.potentialJobs.map((job) => ({
+      job,
+      proposed: "POTENTIAL" as const,
+    })),
+    ...result.rejectedJobs.map((job) => ({
+      job,
+      proposed: "REJECTED" as const,
+    })),
+  ];
+  const seen = new Set<string>();
+
+  return candidates.flatMap(({ job, proposed }) => {
+    const dedupeKey = job.url.toLowerCase();
+
+    if (seen.has(dedupeKey)) {
+      return [];
+    }
+
+    seen.add(dedupeKey);
+    const failures = getJobRejectionReasons(job, config, scannedAt);
+    const classification =
+      proposed === "REJECTED" || failures.length > 0 ? "REJECTED" : proposed;
+    const modelReasons = "reviewReasons" in job ? job.reviewReasons : [];
+
+    return [
+      {
+        classification,
+        job,
+        reviewReasons: [...new Set([...modelReasons, ...failures])].slice(0, 6),
+      },
+    ];
+  });
 }
 
 function logCompletedScan(
@@ -161,13 +181,9 @@ function logCompletedScan(
     "scan.completed",
     scanId,
     {
+      classificationCounts: state.classificationCounts,
       durationMs: Date.now() - scanStartedAt,
-      matchCount: state.jobs.filter((job) => job.classification === "MATCH")
-        .length,
       newJobCount: state.newJobCount,
-      potentialCount: state.jobs.filter(
-        (job) => job.classification === "POTENTIAL",
-      ).length,
       savedJobCount: state.savedJobCount,
       sourceIssues: state.sourceIssues,
     },
@@ -227,12 +243,18 @@ User criteria:
 Rules:
 - A title must match one configured role. The level must match an included level and must not match an excluded level.
 - Worldwide modes apply to every country. Philippines modes apply only when the job country is the Philippines.
-- Exclude any listing that mentions a configured excluded technology. JavaScript is not Java.
+- A listing that mentions a configured excluded technology does not qualify. JavaScript is not Java.
 - Use the document's SOURCE and exact URL. LinkedIn URLs must start with https://www.linkedin.com/jobs/view/ and JobStreet URLs must start with https://ph.jobstreet.com/job/.
+- Write every field in English. If the document is in another language, translate it, including the country name and the posting label.
 - Set postedDate to the Philippine calendar date. Preserve the site's visible posting label in postedText. Set postedAt only when an exact timestamp or an explicit relative posting time can support it.
-- Return at most one job per document and at most 25 jobs total. The summary must state the relevant stack and work arrangement.
+- Return exactly one entry per document, in exactly one of the three lists, and never repeat a URL. Every document must be accounted for. The summary must state the relevant stack and work arrangement.
 
-Return listings satisfying every criterion in jobs. Return promising listings in potentialJobs only when the role and level qualify but the date, work mode, or required technology is missing or unclear. Explain each uncertainty in reviewReasons. Never return an excluded level, excluded technology, invalid source URL, explicit disallowed work mode, or listing outside the configured date range in either list. Do not duplicate a URL.
+Classify each document into one list:
+- jobs: it satisfies every criterion above.
+- potentialJobs: the role and level qualify, but the date, work mode, or required technology is missing or unclear from the document. Explain each uncertainty in reviewReasons.
+- rejectedJobs: it fails at least one criterion, or the document is not a readable job listing. State every disqualifying detail in reviewReasons, most important first, each one specific (name the excluded technology, the seniority wording, the country, or the posting date you read).
+
+Write reviewReasons as short sentences addressed to the person reviewing the scan, so they can judge whether the verdict was correct. Fill in as much of the listing as the document supports even when rejecting it; use "Unclear" for an unknown work mode and null for an unknown posting date.
 
 SCAN TIME: ${scannedAt.toISOString()}
 

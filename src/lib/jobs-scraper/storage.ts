@@ -17,6 +17,7 @@ interface JobToSave {
   classification: SavedJob["classification"];
   description: string;
   job: DiscoveredJob | PotentialJob;
+  reviewReasons: string[];
 }
 
 export async function getJobScraperConfig(
@@ -53,28 +54,68 @@ export async function getJobScraperState(
     create: { userId, ...toConfigData(DEFAULT_JOB_SCRAPER_CONFIG) },
     update: {},
   });
-  const [jobs, savedJobCount, newJobCount] = await Promise.all([
+  const [jobs, counts, newJobCount] = await Promise.all([
+    // ponytail: MATCH sorts before POTENTIAL before REJECTED, so the cap can
+    // only ever truncate the rejected tail. Paginate if a user outgrows it.
     prisma.scrapedJob.findMany({
       where: { userId },
-      orderBy: [{ lastSeenAt: "desc" }, { firstSeenAt: "desc" }],
-      take: 200,
+      orderBy: [
+        { classification: "asc" },
+        { lastSeenAt: "desc" },
+        { firstSeenAt: "desc" },
+      ],
+      take: 300,
     }),
-    prisma.scrapedJob.count({ where: { userId } }),
+    prisma.scrapedJob.groupBy({
+      by: ["classification"],
+      where: { userId },
+      _count: { _all: true },
+    }),
     config.lastScanId
       ? prisma.scrapedJob.count({
           where: { userId, firstSeenScanId: config.lastScanId },
         })
       : Promise.resolve(0),
   ]);
+  const classificationCounts = { MATCH: 0, POTENTIAL: 0, REJECTED: 0 };
+
+  for (const { classification, _count } of counts) {
+    if (classification in classificationCounts) {
+      classificationCounts[classification as SavedJob["classification"]] =
+        _count._all;
+    }
+  }
 
   return {
+    classificationCounts,
     config: toJobScraperConfig(config),
     jobs: jobs.map((job) => toSavedJob(job, config.lastScanId)),
     lastScannedAt: config.lastScannedAt?.toISOString() ?? null,
     newJobCount,
-    savedJobCount,
+    savedJobCount: Object.values(classificationCounts).reduce(
+      (total, count) => total + count,
+      0,
+    ),
     sourceIssues,
   };
+}
+
+/**
+ * Records the user's own verdict. The flag keeps later scans from overwriting
+ * it, since the whole point of the review page is that the pipeline gets calls
+ * wrong. Returns false when the job does not belong to the user.
+ */
+export async function updateJobClassification(
+  userId: string,
+  jobId: string,
+  classification: SavedJob["classification"],
+): Promise<boolean> {
+  const { count } = await prisma.scrapedJob.updateMany({
+    where: { id: jobId, userId },
+    data: { classification, isManualClassification: true },
+  });
+
+  return count > 0;
 }
 
 export async function persistJobScan(
@@ -84,8 +125,18 @@ export async function persistJobScan(
   jobs: JobToSave[],
 ): Promise<void> {
   await prisma.$transaction(async (transaction) => {
-    for (const { classification, description, job } of jobs) {
+    for (const { classification, description, job, reviewReasons } of jobs) {
       const sourceJobId = getSourceJobId(job.url, job.source);
+      const existing = await transaction.scrapedJob.findUnique({
+        where: {
+          userId_source_sourceJobId: {
+            userId,
+            source: job.source,
+            sourceJobId,
+          },
+        },
+        select: { isManualClassification: true },
+      });
       const commonData = {
         url: job.url,
         title: job.title,
@@ -94,7 +145,6 @@ export async function persistJobScan(
         country: job.country,
         workMode: job.workMode,
         level: job.level,
-        classification,
         postedDate: job.postedDate
           ? new Date(`${job.postedDate}T00:00:00Z`)
           : null,
@@ -103,7 +153,7 @@ export async function persistJobScan(
         summary: job.summary,
         description,
         matchedSkills: job.matchedSkills,
-        reviewReasons: "reviewReasons" in job ? job.reviewReasons : [],
+        reviewReasons,
         lastSeenAt: scannedAt,
         lastSeenScanId: scanId,
       };
@@ -120,11 +170,14 @@ export async function persistJobScan(
           userId,
           source: job.source,
           sourceJobId,
+          classification,
           ...commonData,
           firstSeenAt: scannedAt,
           firstSeenScanId: scanId,
         },
-        update: commonData,
+        update: existing?.isManualClassification
+          ? commonData
+          : { ...commonData, classification },
       });
     }
 
@@ -196,6 +249,7 @@ function toSavedJob(
     country: string;
     firstSeenAt: Date;
     id: string;
+    isManualClassification: boolean;
     lastSeenAt: Date;
     level: string;
     location: string;
@@ -219,6 +273,7 @@ function toSavedJob(
     country: job.country,
     firstSeenAt: job.firstSeenAt.toISOString(),
     id: job.id,
+    isManualClassification: job.isManualClassification,
     isNew: job.firstSeenScanId === lastScanId,
     lastSeenAt: job.lastSeenAt.toISOString(),
     level: job.level,

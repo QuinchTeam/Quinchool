@@ -234,32 +234,34 @@ model JobScraperConfig {
 }
 
 model ScrapedJob {
-  id              String    @id @default(cuid())
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source          String
-  sourceJobId     String
-  url             String
-  title           String
-  company         String
-  location        String
-  country         String
-  workMode        String
-  level           String
-  classification  String
-  postedDate      DateTime? @db.Date
-  postedAt        DateTime? @db.Timestamptz(3)
-  postedText      String?
-  summary         String
-  description     String
-  matchedSkills   String[]
-  reviewReasons   String[]
-  firstSeenAt     DateTime  @default(now())
-  lastSeenAt      DateTime  @default(now())
-  firstSeenScanId String
-  lastSeenScanId  String
+  id                     String    @id @default(cuid())
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source                 String
+  sourceJobId            String
+  url                    String
+  title                  String
+  company                String
+  location               String
+  country                String
+  workMode               String
+  level                  String
+  classification         String
+  isManualClassification Boolean   @default(false)
+  postedDate             DateTime? @db.Date
+  postedAt               DateTime? @db.Timestamptz(3)
+  postedText             String?
+  summary                String
+  description            String
+  matchedSkills          String[]
+  reviewReasons          String[]
+  firstSeenAt            DateTime  @default(now())
+  lastSeenAt             DateTime  @default(now())
+  firstSeenScanId        String
+  lastSeenScanId         String
 
   @@unique([userId, source, sourceJobId])
   @@index([userId, lastSeenAt])
+  @@index([userId, classification, lastSeenAt])
   @@map("scraped_job")
 }

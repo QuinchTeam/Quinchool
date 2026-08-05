@@ -5,8 +5,7 @@ import {
   containsExcludedTech,
   DEFAULT_JOB_SCRAPER_CONFIG,
   type DiscoveredJob,
-  filterDiscoveredJobs,
-  filterPotentialJobs,
+  getJobRejectionReasons,
   getSourceJobId,
   getTodayInManila,
   type JobScraperConfig,
@@ -33,43 +32,58 @@ const baseJob: DiscoveredJob = {
   matchedSkills: ["React", "FastAPI", "PostgreSQL"],
 };
 
-test("applies user criteria to strict and potential jobs", () => {
-  const jobs = filterDiscoveredJobs(
+test("explains why a job fails the configured criteria", () => {
+  assert.deepEqual(getJobRejectionReasons(baseJob, config, now), []);
+
+  const rejections: [DiscoveredJob, RegExp][] = [
     [
-      baseJob,
-      {
-        ...baseJob,
-        country: "Singapore",
-        location: "Singapore",
-        url: "https://ph.jobstreet.com/job/456",
-        source: "JobStreet",
-      },
-      {
-        ...baseJob,
-        summary: `${baseJob.summary} Requires Java.`,
-        url: "https://ph.jobstreet.com/job/789",
-        source: "JobStreet",
-      },
-      {
-        ...baseJob,
-        postedDate: "2026-08-01",
-        url: "https://www.linkedin.com/jobs/view/124",
-      },
-      {
-        ...baseJob,
-        level: "Senior",
-        title: "Senior Full Stack Engineer",
-        url: "https://www.linkedin.com/jobs/view/125",
-      },
+      { ...baseJob, country: "Singapore", location: "Singapore" },
+      /not an allowed location and work mode/,
     ],
-    config,
-    now,
+    [
+      { ...baseJob, summary: `${baseJob.summary} Requires Java.` },
+      /excluded technology "Java"/,
+    ],
+    [{ ...baseJob, postedDate: "2026-08-01" }, /outside your .* window/],
+    [
+      { ...baseJob, level: "Senior", title: "Senior Full Stack Engineer" },
+      /excluded level "Senior"/,
+    ],
+    [{ ...baseJob, title: "Data Analyst" }, /does not match a configured role/],
+    [
+      { ...baseJob, summary: "Ship features.", matchedSkills: [] },
+      /required technologies were mentioned/,
+    ],
+    [
+      { ...baseJob, url: "https://ph.jobstreet.com/job/456" },
+      /not a LinkedIn job listing/,
+    ],
+  ];
+
+  for (const [job, expected] of rejections) {
+    const reasons = getJobRejectionReasons(job, config, now);
+
+    assert.equal(
+      reasons.some((reason) => expected.test(reason)),
+      true,
+      `expected ${expected} in ${JSON.stringify(reasons)}`,
+    );
+  }
+
+  // A posting spanning several levels names "Senior" without being senior-only.
+  assert.deepEqual(
+    getJobRejectionReasons(
+      {
+        ...baseJob,
+        level: "Junior",
+        title: "Software Engineer (Junior / Mid / Senior)",
+      },
+      config,
+      now,
+    ),
+    [],
   );
 
-  assert.deepEqual(
-    jobs.map((job) => job.url),
-    [baseJob.url],
-  );
   assert.equal(
     containsExcludedTech(
       "JavaScript and TypeScript",
@@ -81,31 +95,40 @@ test("applies user criteria to strict and potential jobs", () => {
     containsExcludedTech("Java and Spring", config.excludedTechnologies),
     true,
   );
+});
 
+test("treats missing details as open questions on potential jobs only", () => {
   const potentialJob: PotentialJob = {
     ...baseJob,
     matchedSkills: [],
     postedDate: null,
     postedAt: null,
+    summary: "Ship product features with a modern stack.",
     reviewReasons: ["Posting date and required stack need review."],
     url: "https://www.linkedin.com/jobs/view/126",
     workMode: "Unclear",
   };
+
+  assert.deepEqual(getJobRejectionReasons(potentialJob, config, now), []);
   assert.deepEqual(
-    filterPotentialJobs(
-      [
-        potentialJob,
-        {
-          ...potentialJob,
-          level: "Senior",
-          title: "Senior Software Engineer",
-          url: "https://www.linkedin.com/jobs/view/127",
-        },
-      ],
+    getJobRejectionReasons(
+      { ...baseJob, postedDate: null } as unknown as DiscoveredJob,
       config,
       now,
-    ).map((job) => job.url),
-    [potentialJob.url],
+    ),
+    ["The posting date could not be established."],
+  );
+  assert.equal(
+    getJobRejectionReasons(
+      {
+        ...potentialJob,
+        level: "Senior",
+        title: "Senior Software Engineer",
+      },
+      config,
+      now,
+    ).length > 0,
+    true,
   );
 });
 
@@ -119,17 +142,14 @@ test("supports last-hour and seven-day custom windows", () => {
     postedAt: "2026-08-02T13:30:00+08:00",
   };
 
-  assert.equal(
-    filterDiscoveredJobs([recentJob], lastHourConfig, now).length,
-    1,
-  );
-  assert.equal(
-    filterDiscoveredJobs(
-      [{ ...recentJob, postedAt: "2026-08-02T12:30:00+08:00" }],
+  assert.deepEqual(getJobRejectionReasons(recentJob, lastHourConfig, now), []);
+  assert.deepEqual(
+    getJobRejectionReasons(
+      { ...recentJob, postedAt: "2026-08-02T12:30:00+08:00" },
       lastHourConfig,
       now,
-    ).length,
-    0,
+    ),
+    ["It was not posted within the last hour."],
   );
 
   const today = getTodayInManila();
@@ -186,8 +206,17 @@ test("normalizes verbose Gemini output without rejecting the scan", () => {
         workMode: "Unclear",
       },
     ],
+    rejectedJobs: [
+      {
+        ...baseJob,
+        postedDate: null,
+        reviewReasons: [verboseReason],
+        workMode: "Unclear",
+      },
+    ],
   });
 
   assert.equal(result.potentialJobs.length, 1);
   assert.equal(result.potentialJobs[0]?.reviewReasons[0]?.length, 500);
+  assert.equal(result.rejectedJobs[0]?.reviewReasons[0]?.length, 500);
 });

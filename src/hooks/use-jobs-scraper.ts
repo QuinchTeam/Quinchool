@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   JobScraperConfig,
   JobScraperState,
+  SavedJob,
 } from "@/lib/jobs-scraper/schema";
 
 const JOBS_SCRAPER_KEY = ["jobs-scraper"] as const;
@@ -48,6 +49,15 @@ export function useJobsScraper() {
     onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
   });
 
+  const updateClassification = useMutation({
+    mutationFn: (variables: {
+      classification: SavedJob["classification"];
+      id: string;
+    }) =>
+      requestJobsScraper({ method: "PATCH", body: JSON.stringify(variables) }),
+    onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
+  });
+
   return {
     isError: query.isError,
     isLoading: query.isLoading,
@@ -55,5 +65,6 @@ export function useJobsScraper() {
     saveConfig,
     scan,
     state: query.data,
+    updateClassification,
   };
 }
