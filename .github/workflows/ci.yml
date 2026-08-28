@@ -7,14 +7,23 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: apps/web
+
 jobs:
   tailwind-tokens:
     name: No Tailwind arbitrary values
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
       - name: Test Tailwind arbitrary-value guard
-        run: bun run test:tailwind
+        run: npm run test:tailwind
       - name: Check for Tailwind arbitrary values
-        run: bun run lint:tailwind
+        run: npm run lint:tailwind
