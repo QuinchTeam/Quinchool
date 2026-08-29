@@ -34,8 +34,9 @@ On macOS or Linux change it to `.venv/bin/python`.
 
 ## How a request flows
 
-Web owns auth and the database. It calls the API, which calls the AI service.
-Each hop is one environment variable, all with working localhost defaults:
+NestJS owns auth and the database. The web app calls it, and NestJS delegates
+stateless AI work to FastAPI. Each hop is one environment variable, all with
+working localhost defaults:
 
 | File            | Variable              | Points at        |
 | --------------- | --------------------- | ---------------- |
@@ -50,9 +51,12 @@ the request against the better-auth session row, reads and writes every job
 row itself, and delegates crawling and classification to `apps/ai`. The career
 profile works the same way on `/career-profile`, minus the AI hop.
 
-`apps/web` serves no API routes at all. The API owns every endpoint, the
-database, the provider keys, and better-auth itself: it mounts the auth handler
-on `/api/auth`, and the web app keeps only the React client pointed at it.
+`apps/web` serves no API routes at all. The API owns every public endpoint, the
+database, and better-auth itself: it mounts the auth handler on `/api/auth`, and
+the web app keeps only the React client pointed at it.
+
+FastAPI owns provider keys, model/provider fallback, prompts, and model-output
+handling. It receives JSON from NestJS and performs no database calls.
 
 That is also why `apps/web` has no `DATABASE_URL` and no Prisma client — the
 schema generates one client now, for the API.
