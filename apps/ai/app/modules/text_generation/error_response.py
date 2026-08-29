@@ -2,7 +2,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.logging import log_event
 from app.lib.llm.errors import TextGenerationError
-from app.validations.text_generation import TextGenerationErrorResponse
+from app.modules.text_generation.schemas import TextGenerationErrorResponse
 
 
 def llm_error_response(

@@ -8,12 +8,12 @@ from app.lib.llm.errors import ProviderHttpError, TextGenerationError
 from app.lib.llm.models import TEXT_GENERATION_MODELS, get_provider_chain
 from app.lib.llm.providers import ProviderText
 from app.main import app
-from app.services.text_generation import generate_text
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     GenerateTextResult,
     TextGenerationModelId,
     TextGenerationUsage,
 )
+from app.modules.text_generation.service import generate_text
 
 
 @final
@@ -27,7 +27,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         )
 
         with patch.dict(
-            "app.services.text_generation.TEXT_GENERATION_PROVIDERS",
+            "app.modules.text_generation.service.TEXT_GENERATION_PROVIDERS",
             {
                 "groq": AsyncMock(side_effect=ProviderHttpError("groq is down", 503)),
                 "openrouter": AsyncMock(
@@ -45,7 +45,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
 
     async def test_reports_the_last_failure_when_every_provider_fails(self) -> None:
         with patch.dict(
-            "app.services.text_generation.TEXT_GENERATION_PROVIDERS",
+            "app.modules.text_generation.service.TEXT_GENERATION_PROVIDERS",
             {
                 "google-ai-studio": AsyncMock(
                     side_effect=ProviderHttpError(
@@ -75,7 +75,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.routes.text_generation.generate_text",
+            "app.modules.text_generation.router.generate_text",
             new=AsyncMock(return_value=result),
         ):
             async with httpx.AsyncClient(
@@ -100,7 +100,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.routes.text_generation.enhance_prompt",
+            "app.modules.text_generation.router.enhance_prompt",
             new=AsyncMock(side_effect=error),
         ):
             async with httpx.AsyncClient(

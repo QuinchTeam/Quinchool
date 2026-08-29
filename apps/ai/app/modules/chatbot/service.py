@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 
-from app.services.text_generation import generate_text
-from app.validations.chatbot import ChatbotAIResult, ChatMessage
-from app.validations.text_generation import TextGenerationModelId
+from app.modules.chatbot.schemas import ChatbotAIResult, ChatMessage
+from app.modules.text_generation.schemas import TextGenerationModelId
+from app.modules.text_generation.service import generate_text
 
 CAREER_PROFILE_TOOL_CALL = "<tool_call>get_career_profile</tool_call>"
 

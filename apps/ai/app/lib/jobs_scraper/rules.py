@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlparse
 
-from app.validations.jobs_scraper import (
+from app.modules.jobs_scraper.schemas import (
     JOB_URL_PREFIXES,
     DiscoveredJob,
     JobScraperConfig,

@@ -9,13 +9,13 @@ from app.core.exceptions import Crawl4AiUnavailableError
 from app.lib.jobs_scraper.rules import get_job_rejection_reasons
 from app.lib.scraping.crawl4ai import normalize_job_url
 from app.main import app
-from app.services.jobs_scraper import classify_scanned_jobs
-from app.validations.jobs_scraper import (
+from app.modules.jobs_scraper.schemas import (
     DEFAULT_JOB_SCRAPER_CONFIG,
     DiscoveredJob,
     JobExtraction,
     ScanResult,
 )
+from app.modules.jobs_scraper.service import classify_scanned_jobs
 
 
 @final
@@ -79,7 +79,7 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.routes.jobs_scraper.scan_jobs",
+            "app.modules.jobs_scraper.router.scan_jobs",
             new=AsyncMock(return_value=result),
         ):
             async with httpx.AsyncClient(
@@ -102,7 +102,7 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
 
     async def test_scan_endpoint_maps_crawl4ai_failure(self) -> None:
         with patch(
-            "app.routes.jobs_scraper.scan_jobs",
+            "app.modules.jobs_scraper.router.scan_jobs",
             new=AsyncMock(side_effect=Crawl4AiUnavailableError()),
         ):
             async with httpx.AsyncClient(
@@ -126,7 +126,7 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
 
     async def test_scan_endpoint_does_not_hide_unexpected_failure(self) -> None:
         with patch(
-            "app.routes.jobs_scraper.scan_jobs",
+            "app.modules.jobs_scraper.router.scan_jobs",
             new=AsyncMock(side_effect=RuntimeError("unexpected failure")),
         ):
             async with httpx.AsyncClient(

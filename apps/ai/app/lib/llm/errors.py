@@ -10,7 +10,7 @@ from typing import cast
 
 from google.genai import errors as genai_errors
 
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     TextGenerationErrorCode,
     TextGenerationProviderId,
 )

@@ -20,7 +20,7 @@ from app.lib.jobs_scraper.rules import (
 )
 from app.lib.llm.gemini import extract_jobs
 from app.lib.scraping.crawl4ai import collect_job_documents
-from app.validations.jobs_scraper import (
+from app.modules.jobs_scraper.schemas import (
     DiscoveredJob,
     JobClassification,
     JobDocument,
@@ -253,5 +253,4 @@ def _to_logged_job(job: DiscoveredJob | PotentialJob) -> dict[str, object]:
         logged["reviewReasons"] = job.review_reasons
 
     return logged
-
 

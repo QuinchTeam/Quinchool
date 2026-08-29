@@ -21,7 +21,7 @@ from app.lib.jobs_scraper.rules import (
     get_crawl_lookback_seconds,
     get_job_source_from_url,
 )
-from app.validations.jobs_scraper import (
+from app.modules.jobs_scraper.schemas import (
     JOB_SOURCES,
     JOB_URL_PREFIXES,
     JobDocument,

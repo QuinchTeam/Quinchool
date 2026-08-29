@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     CamelModel,
     GenerateTextResult,
     TextGenerationModelId,

@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
-from app.routes.llm_errors import llm_error_response
-from app.services.chatbot import respond, respond_with_profile
-from app.validations.chatbot import (
+from app.modules.chatbot.schemas import (
     ChatbotAIResult,
     ChatbotRequest,
     ProfileChatbotRequest,
 )
+from app.modules.chatbot.service import respond, respond_with_profile
+from app.modules.text_generation.error_response import llm_error_response
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 

@@ -8,7 +8,7 @@ from app.core.config import get_settings
 from app.core.logging import to_iso_z
 from app.lib.jobs_scraper.rules import get_job_date_window
 from app.lib.llm.providers import get_google_client
-from app.validations.jobs_scraper import (
+from app.modules.jobs_scraper.schemas import (
     JobDocument,
     JobExtraction,
     JobScraperConfig,

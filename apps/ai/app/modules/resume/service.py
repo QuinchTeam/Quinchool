@@ -4,8 +4,7 @@ import json
 
 from pydantic import ValidationError
 
-from app.services.text_generation import generate_text
-from app.validations.resume import (
+from app.modules.resume.schemas import (
     TailoredResume,
     TailoredResumeExperience,
     TailoredResumeSkillGroup,
@@ -14,6 +13,7 @@ from app.validations.resume import (
     TailorResumeSkillGroup,
     TailorSelection,
 )
+from app.modules.text_generation.service import generate_text
 
 TAILOR_RESUME_SYSTEM_PROMPT = """# Role
 You are a resume tailoring specialist. You screen a candidate's existing experience bullets and skills against one specific job requirement and decide which of them earn a place on the resume.

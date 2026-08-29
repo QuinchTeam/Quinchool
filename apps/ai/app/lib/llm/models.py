@@ -6,7 +6,7 @@ order is the fallback order: the first provider listed is tried first.
 
 from __future__ import annotations
 
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     TextGenerationModelId,
     TextGenerationProviderId,
 )

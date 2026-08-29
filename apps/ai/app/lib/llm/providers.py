@@ -16,7 +16,7 @@ from google import genai
 
 from app.core.config import get_settings
 from app.lib.llm.errors import ProviderHttpError
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     TextGenerationProviderId,
     TextGenerationUsage,
 )

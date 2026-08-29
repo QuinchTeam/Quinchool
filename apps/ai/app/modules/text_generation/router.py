@@ -9,13 +9,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.routes.llm_errors import llm_error_response
-from app.services.text_generation import enhance_prompt, generate_text
-from app.validations.text_generation import (
+from app.modules.text_generation.error_response import llm_error_response
+from app.modules.text_generation.schemas import (
     GenerateTextResult,
     PromptEnhancerResult,
     TextGenerationRequest,
 )
+from app.modules.text_generation.service import enhance_prompt, generate_text
 
 router = APIRouter(tags=["text-generation"])
 

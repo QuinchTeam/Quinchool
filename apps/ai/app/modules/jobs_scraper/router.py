@@ -15,8 +15,8 @@ from google.genai import errors as genai_errors
 from app.core.exceptions import Crawl4AiUnavailableError
 from app.core.logging import log_jobs_scraper
 from app.lib.llm.errors import read_provider_error_message
-from app.services.jobs_scraper import scan_jobs
-from app.validations.jobs_scraper import ScanRequest, ScanResult
+from app.modules.jobs_scraper.schemas import ScanRequest, ScanResult
+from app.modules.jobs_scraper.service import scan_jobs
 
 router = APIRouter(prefix="/jobs-scraper", tags=["jobs-scraper"])
 

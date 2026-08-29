@@ -2,17 +2,17 @@ from typing import final
 from unittest import IsolatedAsyncioTestCase, TestCase
 from unittest.mock import AsyncMock, patch
 
-from app.services.chatbot import CAREER_PROFILE_TOOL_CALL, respond
-from app.services.resume import reconcile_tailored_resume
-from app.validations.chatbot import ChatMessage
-from app.validations.resume import (
+from app.modules.chatbot.schemas import ChatMessage
+from app.modules.chatbot.service import CAREER_PROFILE_TOOL_CALL, respond
+from app.modules.resume.schemas import (
     TailorResumeExperience,
     TailorResumeSkillGroup,
     TailorSelection,
     TailorSelectionExperience,
     TailorSelectionSkillGroup,
 )
-from app.validations.text_generation import GenerateTextResult
+from app.modules.resume.service import reconcile_tailored_resume
+from app.modules.text_generation.schemas import GenerateTextResult
 
 
 @final
@@ -26,7 +26,7 @@ class ChatbotTest(IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "app.services.chatbot.generate_text",
+            "app.modules.chatbot.service.generate_text",
             new=AsyncMock(return_value=generation),
         ):
             result = await respond(

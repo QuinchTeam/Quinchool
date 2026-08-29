@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from app.routes.llm_errors import llm_error_response
-from app.services.resume import UnreadableTailorReplyError, tailor_resume
-from app.validations.resume import TailoredResume, TailorResumeRequest
+from app.modules.resume.schemas import TailoredResume, TailorResumeRequest
+from app.modules.resume.service import UnreadableTailorReplyError, tailor_resume
+from app.modules.text_generation.error_response import llm_error_response
 
 router = APIRouter(prefix="/resume", tags=["resume"])
 

@@ -10,7 +10,7 @@ from app.core.tracing import observe, usage_details
 from app.lib.llm.errors import map_provider_error
 from app.lib.llm.models import get_provider_chain
 from app.lib.llm.providers import TEXT_GENERATION_PROVIDERS
-from app.validations.text_generation import (
+from app.modules.text_generation.schemas import (
     GenerateTextResult,
     PromptEnhancerResult,
     TextGenerationModelId,

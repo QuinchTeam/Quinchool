@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from app.validations.text_generation import CamelModel, TextGenerationModelId
+from app.modules.text_generation.schemas import CamelModel, TextGenerationModelId
 
 
 class TailorResumeExperience(CamelModel):
