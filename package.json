@@ -3,22 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n web,api,ai -c cyan,magenta,yellow \"npm run dev:web\" \"npm run dev:api\" \"npm run dev:ai\"",
-    "dev:web": "cd apps/web && npm run dev",
-    "dev:api": "cd apps/api && npm run dev",
+    "build": "pnpm -r build",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "dev": "concurrently -n web,api,ai -c cyan,magenta,yellow \"pnpm dev:web\" \"pnpm dev:api\" \"pnpm dev:ai\"",
+    "dev:web": "pnpm --filter @quinchool/web dev",
+    "dev:api": "pnpm --filter @quinchool/api dev",
     "dev:ai": "cd apps/ai && .venv\\Scripts\\python -m uvicorn app.main:app --reload --port 8000",
-    "build": "cd apps/web && npm run build && cd ../api && npm run build",
-    "lint": "cd apps/web && npm run lint",
-    "lint:tailwind": "cd apps/web && npm run lint:tailwind",
-    "test:tailwind": "cd apps/web && npm run test:tailwind",
-    "install:all": "cd apps/web && npm install && cd ../api && npm install",
     "infra": "docker compose up -d",
-    "infra:down": "docker compose down"
+    "infra:down": "docker compose down",
+    "lint": "pnpm --filter @quinchool/web lint",
+    "lint:tailwind": "pnpm --filter @quinchool/web lint:tailwind",
+    "test:tailwind": "pnpm --filter @quinchool/web test:tailwind",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "prisma": "^7.10.0"
   },
   "engines": {
     "node": ">=20.9.0"
-  }
+  },
+  "packageManager": "pnpm@10.29.3"
 }

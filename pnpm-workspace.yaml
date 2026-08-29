@@ -1,0 +1,14 @@
+packages:
+  - "apps/web"
+  - "apps/api"
+  - "packages/*"
+
+# pnpm 10 blocks dependency postinstall scripts by default. These five fetch
+# native binaries or engines and are broken without them; the rest of the
+# blocked list (@google/genai, protobufjs) only generates optional extras.
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - "@sentry/cli"
+  - "@sentry/node-cpu-profiler"
+  - prisma
+  - sharp

@@ -12,7 +12,9 @@ Organize feature-specific components under an appropriate subdirectory, for exam
 
 ## Package manager
 
-Use npm exclusively for installing dependencies and running package scripts. Do not use Bun, pnpm, or Yarn. Keep `package-lock.json` updated and do not create other package-manager lockfiles.
+Use pnpm exclusively for installing dependencies and running package scripts. Do not use npm, Bun, or Yarn. Keep `pnpm-lock.yaml` updated and do not create other package-manager lockfiles.
+
+`pnpm install` at the repo root installs everything — the workspace covers `apps/web`, `apps/api`, and `packages/*`, under one lockfile. Add a dependency to a single app with `pnpm --filter @quinchool/web add <pkg>`, never by running install inside `apps/`.
 
 ## Tailwind CSS: use design tokens, not arbitrary values
 
@@ -26,8 +28,8 @@ Style with the project's Tailwind theme tokens — never hard-coded arbitrary va
 
 This is enforced automatically, so a violation will block the commit/CI:
 
-- `npm run lint:tailwind` — the rule (`apps/web/scripts/check-tailwind-arbitrary.mjs`); run it anytime.
-- `npm run test:tailwind` — regression tests for the rule.
+- `pnpm lint:tailwind` — the rule (`apps/web/scripts/check-tailwind-arbitrary.mjs`); run it anytime.
+- `pnpm test:tailwind` — regression tests for the rule.
 - a pre-commit hook (husky + lint-staged) runs it on staged files.
 - CI runs it on every push/PR (`.github/workflows/ci.yml`).
 
@@ -39,4 +41,4 @@ Never run `git push`, `git push --force`, `git push -f`, or `git push --force-wi
 
 ## Formatting
 
-Never run `npm run format` (or `biome format --write`) with no path — it rewrites the whole repo. Pass only the files you changed.
+Never run `pnpm format` (or `biome format --write`) with no path — it rewrites the whole repo. Pass only the files you changed.
