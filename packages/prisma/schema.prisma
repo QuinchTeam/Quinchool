@@ -1,9 +1,14 @@
 // Prisma schema. Models are defined per feature.
 // Docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client"
-  output   = "./generated"
+// One schema, one client. Only apps/api reads or writes the database; the web
+// app is a frontend that calls it. What is shared here is the schema, not a
+// package.
+
+generator api {
+  provider     = "prisma-client"
+  output       = "../../apps/api/src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
