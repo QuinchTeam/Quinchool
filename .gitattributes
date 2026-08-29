@@ -1,0 +1,8 @@
+# LF in the repository and in every working tree. Biome formats to LF and
+# reports every CRLF file as unformatted, so letting core.autocrlf hand out
+# CRLF checkouts put the whole tree permanently at odds with the formatter.
+* text=auto eol=lf
+
+# Lockfiles and generated SQL are never hand-edited; keep them byte-stable.
+pnpm-lock.yaml -diff
+*.sql text eol=lf
