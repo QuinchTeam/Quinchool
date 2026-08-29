@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { apiUrl, withCredentials } from "@/lib/api";
 import type { TailoredResume } from "@/lib/resume";
 
 interface BuildResumeInput {
@@ -12,6 +12,7 @@ interface BuildResumeInput {
 
 async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
   const response = await fetch(input, {
+    ...withCredentials,
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -34,7 +35,7 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
 export function useResumeBuilder() {
   const buildResume = useMutation({
     mutationFn: (input: BuildResumeInput) =>
-      fetchJson<TailoredResume>("/api/build-resume", {
+      fetchJson<TailoredResume>(apiUrl("/build-resume"), {
         method: "POST",
         body: JSON.stringify(input),
       }),

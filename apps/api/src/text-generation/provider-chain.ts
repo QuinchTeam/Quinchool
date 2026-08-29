@@ -1,14 +1,14 @@
-import { cloudflareWorkersAITextGenerationAdapter } from "@/lib/ai/text-generation/adapters/cloudflare-workers-ai";
-import { googleAIStudioTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/google-ai-studio";
-import { groqTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/groq";
-import { openRouterTextGenerationAdapter } from "@/lib/ai/text-generation/adapters/openrouter";
-import { getTextGenerationModelConfig } from "@/lib/ai/text-generation/models";
+import { cloudflareWorkersAITextGenerationAdapter } from "./adapters/cloudflare-workers-ai";
+import { googleAIStudioTextGenerationAdapter } from "./adapters/google-ai-studio";
+import { groqTextGenerationAdapter } from "./adapters/groq";
+import { openRouterTextGenerationAdapter } from "./adapters/openrouter";
+import { getTextGenerationModelConfig } from "./models";
 import type {
   TextGenerationModelId,
   TextGenerationProviderAdapter,
   TextGenerationProviderId,
-} from "@/lib/ai/text-generation/types";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
+} from "./types";
+import { TEXT_GENERATION_PROVIDER_IDS } from "./types";
 
 const TEXT_GENERATION_ADAPTERS: Record<
   TextGenerationProviderId,

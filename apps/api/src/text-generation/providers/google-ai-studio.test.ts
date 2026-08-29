@@ -1,7 +1,7 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import * as assert from "node:assert/strict";
+import { test } from "node:test";
 
-import { prepareGoogleJsonSchema } from "./google-ai-studio.ts";
+import { prepareGoogleJsonSchema } from "./google-ai-studio";
 
 test("removes nested maxItems constraints rejected by Gemini", () => {
   assert.deepEqual(

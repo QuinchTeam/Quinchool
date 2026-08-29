@@ -1,12 +1,12 @@
-import { mapTextGenerationProviderError } from "@/lib/ai/text-generation/errors";
-import { getProviderModelId } from "@/lib/ai/text-generation/models";
-import { generateOpenRouterText } from "@/lib/ai/text-generation/providers/openrouter";
+import { mapTextGenerationProviderError } from "../errors";
+import { getProviderModelId } from "../models";
+import { generateOpenRouterText } from "../providers/openrouter";
 import type {
   GenerateTextResult,
   ProviderGenerateTextParams,
   TextGenerationProviderAdapter,
-} from "@/lib/ai/text-generation/types";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
+} from "../types";
+import { TEXT_GENERATION_PROVIDER_IDS } from "../types";
 
 export const openRouterTextGenerationAdapter: TextGenerationProviderAdapter = {
   providerId: TEXT_GENERATION_PROVIDER_IDS.OPENROUTER,

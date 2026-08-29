@@ -1,18 +1,18 @@
-import { TextGenerationProviderHttpError } from "@/lib/ai/text-generation/errors";
-import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
+import { TextGenerationProviderHttpError } from "../errors";
+import type { TextGenerationUsage } from "../types";
 
-export interface GenerateGroqTextParams {
+export interface GenerateOpenRouterTextParams {
   prompt: string;
   providerModelId: string;
 }
 
-export interface GenerateGroqTextResult {
+export interface GenerateOpenRouterTextResult {
   providerModelId: string;
   text: string;
   usage?: TextGenerationUsage;
 }
 
-interface GroqResponse {
+interface OpenRouterResponse {
   error?: { message?: string };
   choices?: Array<{ message?: { content?: string } }>;
   usage?: {
@@ -22,26 +22,26 @@ interface GroqResponse {
   };
 }
 
-function getGroqApiKey() {
-  const apiKey = process.env.GROQ_API_KEY?.trim();
+function getOpenRouterApiKey() {
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
 
   if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured");
+    throw new Error("OPENROUTER_API_KEY is not configured");
   }
 
   return apiKey;
 }
 
-export async function generateGroqText({
+export async function generateOpenRouterText({
   prompt,
   providerModelId,
-}: GenerateGroqTextParams): Promise<GenerateGroqTextResult> {
+}: GenerateOpenRouterTextParams): Promise<GenerateOpenRouterTextResult> {
   const response = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
+    "https://openrouter.ai/api/v1/chat/completions",
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${getGroqApiKey()}`,
+        Authorization: `Bearer ${getOpenRouterApiKey()}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -50,12 +50,12 @@ export async function generateGroqText({
       }),
     },
   );
-  const body = (await response.json()) as GroqResponse;
+  const body = (await response.json()) as OpenRouterResponse;
 
   if (!response.ok) {
     throw new TextGenerationProviderHttpError({
       message:
-        body.error?.message ?? `Groq request failed (${response.status})`,
+        body.error?.message ?? `OpenRouter request failed (${response.status})`,
       status: response.status,
     });
   }
@@ -63,7 +63,7 @@ export async function generateGroqText({
   const text = body.choices?.[0]?.message?.content?.trim();
 
   if (!text) {
-    throw new Error("Groq returned no text output");
+    throw new Error("OpenRouter returned no text output");
   }
 
   return {

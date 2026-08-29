@@ -1,15 +1,15 @@
 import { startActiveObservation } from "@langfuse/tracing";
 import { context, ROOT_CONTEXT } from "@opentelemetry/api";
-import { registerLangfuse } from "@/lib/langfuse";
+import { registerLangfuse } from "./../common/langfuse";
 import {
   DEFAULT_TEXT_GENERATION_MODEL_ID,
   getProviderModelId,
-} from "@/lib/ai/text-generation/models";
-import { getTextGenerationProviderChain } from "@/lib/ai/text-generation/provider-chain";
+} from "./models";
+import { getTextGenerationProviderChain } from "./provider-chain";
 import type {
   GenerateTextParams,
   GenerateTextResult,
-} from "@/lib/ai/text-generation/types";
+} from "./types";
 
 export async function generateText({
   modelId = DEFAULT_TEXT_GENERATION_MODEL_ID,

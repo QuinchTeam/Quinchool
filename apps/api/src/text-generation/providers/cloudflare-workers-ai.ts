@@ -1,5 +1,5 @@
-import { TextGenerationProviderHttpError } from "@/lib/ai/text-generation/errors";
-import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
+import { TextGenerationProviderHttpError } from "../errors";
+import type { TextGenerationUsage } from "../types";
 
 export interface GenerateCloudflareWorkersAITextParams {
   prompt: string;

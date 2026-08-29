@@ -1,4 +1,5 @@
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { apiUrl, withCredentials } from "@/lib/api";
 import type { TextGenerationValues } from "@/lib/validations/text-generation";
 
 export type PromptEnhancerInput = {
@@ -17,7 +18,8 @@ export type TextGenerationResult = {
 export async function enhancePrompt(
   input: PromptEnhancerInput,
 ): Promise<PromptEnhancerResult> {
-  const response = await fetch("/api/prompt-enhancer", {
+  const response = await fetch(apiUrl("/prompt-enhancer"), {
+    ...withCredentials,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -36,7 +38,8 @@ export async function enhancePrompt(
 export async function generateText(
   input: TextGenerationValues,
 ): Promise<TextGenerationResult> {
-  const response = await fetch("/api/text-generation", {
+  const response = await fetch(apiUrl("/text-generation"), {
+    ...withCredentials,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),

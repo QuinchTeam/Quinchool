@@ -1,12 +1,12 @@
-import { mapTextGenerationProviderError } from "@/lib/ai/text-generation/errors";
-import { getProviderModelId } from "@/lib/ai/text-generation/models";
-import { generateGoogleText } from "@/lib/ai/text-generation/providers/google-ai-studio";
+import { mapTextGenerationProviderError } from "../errors";
+import { getProviderModelId } from "../models";
+import { generateGoogleText } from "../providers/google-ai-studio";
 import type {
   GenerateTextResult,
   ProviderGenerateTextParams,
   TextGenerationProviderAdapter,
-} from "@/lib/ai/text-generation/types";
-import { TEXT_GENERATION_PROVIDER_IDS } from "@/lib/ai/text-generation/types";
+} from "../types";
+import { TEXT_GENERATION_PROVIDER_IDS } from "../types";
 
 export const googleAIStudioTextGenerationAdapter: TextGenerationProviderAdapter =
   {

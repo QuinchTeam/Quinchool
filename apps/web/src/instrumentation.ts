@@ -8,11 +8,8 @@ export async function register() {
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
     if (process.env.NODE_ENV === "production") {
-      const [{ registerLangfuse }] = await Promise.all([
-        import("./lib/langfuse"),
-        import("../sentry.server.config"),
-      ]);
-      registerLangfuse();
+      // Langfuse moved to apps/api with the text generation it traces.
+      await import("../sentry.server.config");
     }
     if (process.env.NODE_ENV === "development") {
       process.setUncaughtExceptionCaptureCallback((error) => {

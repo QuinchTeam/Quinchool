@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { TextGenerationUsage } from "@/lib/ai/text-generation/types";
+import type { TextGenerationUsage } from "../types";
 
 let googleClient: GoogleGenAI | null = null;
 

@@ -1,12 +1,12 @@
-import "server-only";
+import { Injectable } from "@nestjs/common";
 
-import { generateText } from "@/lib/ai/text-generation/service";
+import { PrismaService } from "../prisma/prisma.service";
+import { generateText } from "../text-generation/service";
 import type {
   GenerateTextResult,
   TextGenerationModelId,
-} from "@/lib/ai/text-generation/types";
-import { prisma } from "@/lib/prisma";
-import type { ChatMessage } from "@/lib/validations/chatbot";
+} from "../text-generation/types";
+import type { ChatMessage } from "./chatbot.contract";
 
 const CAREER_PROFILE_TOOL_CALL = "<tool_call>get_career_profile</tool_call>";
 
@@ -14,16 +14,25 @@ export interface ChatbotResult extends GenerateTextResult {
   toolUsed: boolean;
 }
 
-export async function generateChatbotResponse({
-  messages,
-  modelId,
-  userId,
-}: {
-  messages: ChatMessage[];
-  modelId: TextGenerationModelId;
-  userId: string;
-}): Promise<ChatbotResult> {
-  const firstResponse = await generateText({
+@Injectable()
+export class ChatbotService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Answers in one pass unless the model asks for the career profile, in which
+   * case the profile is read and the question is put a second time with it in
+   * hand.
+   */
+  async respond({
+    messages,
+    modelId,
+    userId,
+  }: {
+    messages: ChatMessage[];
+    modelId: TextGenerationModelId;
+    userId: string;
+  }): Promise<ChatbotResult> {
+    const firstResponse = await generateText({
     modelId,
     prompt: buildToolSelectionPrompt(messages),
   });
@@ -32,13 +41,14 @@ export async function generateChatbotResponse({
     return { ...firstResponse, toolUsed: false };
   }
 
-  const careerProfile = await getCareerProfile(userId);
+  const careerProfile = await getCareerProfile(this.prisma, userId);
   const finalResponse = await generateText({
     modelId,
     prompt: buildProfileResponsePrompt(messages, careerProfile),
   });
 
   return { ...finalResponse, toolUsed: true };
+  }
 }
 
 function buildToolSelectionPrompt(messages: ChatMessage[]): string {
@@ -73,7 +83,8 @@ function buildProfileResponsePrompt(
   ].join("\n");
 }
 
-async function getCareerProfile(userId: string) {
+/** Only the fields the assistant is allowed to talk about. */
+function getCareerProfile(prisma: PrismaService, userId: string) {
   return prisma.careerProfile.findUnique({
     where: { userId },
     select: {

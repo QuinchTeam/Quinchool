@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/input-group";
 import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { apiUrl, withCredentials } from "@/lib/api";
 import type { ChatMessage } from "@/lib/validations/chatbot";
 
 interface DisplayMessage extends ChatMessage {
@@ -89,7 +90,8 @@ export function Chatbot() {
     setIsPending(true);
 
     try {
-      const response = await fetch("/api/chatbot", {
+      const response = await fetch(apiUrl("/chatbot"), {
+        ...withCredentials,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
