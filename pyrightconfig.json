@@ -1,0 +1,4 @@
+{
+  "include": ["apps/ai/app", "apps/ai/tests"],
+  "executionEnvironments": [{ "root": "apps/ai" }]
+}
