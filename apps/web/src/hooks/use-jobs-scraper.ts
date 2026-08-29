@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { apiUrl, withCredentials } from "@/lib/api";
 import type {
   JobScraperConfig,
   JobScraperState,
@@ -13,7 +14,8 @@ const JOBS_SCRAPER_KEY = ["jobs-scraper"] as const;
 async function requestJobsScraper(
   init?: RequestInit,
 ): Promise<JobScraperState> {
-  const response = await fetch("/api/jobs-scraper", {
+  const response = await fetch(apiUrl("/jobs-scraper"), {
+    ...withCredentials,
     headers: { "Content-Type": "application/json" },
     ...init,
   });
