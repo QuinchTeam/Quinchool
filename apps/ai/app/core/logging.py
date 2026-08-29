@@ -1,0 +1,57 @@
+"""Structured scan logs. Port of apps/web/src/lib/jobs-scraper/logging.ts, so a
+scan reads the same in this service's output as it did in the Next.js one.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import time
+from collections.abc import Mapping
+from datetime import datetime, timezone
+from typing import Literal
+
+JobsScraperLogLevel = Literal["error", "info", "warn"]
+
+
+def create_jobs_scraper_log(
+    level: JobsScraperLogLevel,
+    event: str,
+    scan_id: str,
+    fields: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    return {
+        "timestamp": to_iso_z(datetime.now(timezone.utc)),
+        "level": level,
+        "service": "jobs-scraper",
+        "event": event,
+        "scanId": scan_id,
+        **(fields or {}),
+    }
+
+
+def log_jobs_scraper(
+    level: JobsScraperLogLevel,
+    event: str,
+    scan_id: str,
+    fields: Mapping[str, object] | None = None,
+) -> None:
+    line = json.dumps(
+        create_jobs_scraper_log(level, event, scan_id, fields), default=str
+    )
+    stream = sys.stderr if level in ("error", "warn") else sys.stdout
+    print(line, file=stream, flush=True)
+
+
+def elapsed_ms(started_at: float) -> int:
+    """Milliseconds since a time.monotonic() reading."""
+    return round((time.monotonic() - started_at) * 1000)
+
+
+def to_iso_z(value: datetime) -> str:
+    """The `2026-08-29T04:05:06.000Z` shape JavaScript's toISOString() emits."""
+    return (
+        value.astimezone(timezone.utc)
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z")
+    )
