@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { apiUrl, withCredentials } from "@/lib/api";
 import type { CareerProfileValues } from "@/lib/validations/career-profile";
 
 const CAREER_PROFILE_KEY = ["career-profile"] as const;
@@ -11,6 +12,7 @@ async function fetchCareerProfile(
   init?: RequestInit,
 ): Promise<CareerProfileValues | null> {
   const response = await fetch(input, {
+    ...withCredentials,
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -30,11 +32,11 @@ export function useCareerProfile() {
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: CAREER_PROFILE_KEY,
-    queryFn: () => fetchCareerProfile("/api/career-profile"),
+    queryFn: () => fetchCareerProfile(apiUrl("/career-profile")),
   });
   const saveCareerProfile = useMutation({
     mutationFn: (values: CareerProfileValues) =>
-      fetchCareerProfile("/api/career-profile", {
+      fetchCareerProfile(apiUrl("/career-profile"), {
         method: "PUT",
         body: JSON.stringify(values),
       }),
