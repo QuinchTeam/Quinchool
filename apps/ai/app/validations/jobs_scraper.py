@@ -218,15 +218,23 @@ class JobBase(CamelModel):
     @field_validator("posted_at", mode="after")
     @classmethod
     def _offset_datetime(cls, value: str | None) -> str | None:
+        """Drops a postedAt the model did not express as an offset timestamp.
+
+        Gemini answers this field with the label it read often enough
+        ("21 hours ago") that raising here would fail an entire scan over one
+        listing's metadata. The visible label is already kept in postedText and
+        the day in postedDate, so an unusable timestamp is worth less than the
+        other nineteen jobs in the batch.
+        """
         if value is None:
             return None
 
-        parsed = datetime.fromisoformat(value)
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            return None
 
-        if parsed.tzinfo is None:
-            raise ValueError("postedAt must carry a UTC offset")
-
-        return value
+        return value if parsed.tzinfo else None
 
 
 class DiscoveredJob(JobBase):
@@ -283,6 +291,7 @@ class ScannedJob(CamelModel):
     """One graded listing, flattened into the row Nest stores."""
 
     classification: JobClassification
+    source: JobSource
     source_job_id: str
     url: str
     title: str

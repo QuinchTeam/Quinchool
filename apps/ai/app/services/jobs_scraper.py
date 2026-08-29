@@ -112,7 +112,8 @@ async def scan_jobs(
                 {
                     "classification": job.classification,
                     "reviewReasons": job.review_reasons,
-                    "source": job.source_job_id,
+                    "source": job.source,
+                    "sourceJobId": job.source_job_id,
                     "title": job.title,
                     "url": job.url,
                 }
@@ -178,6 +179,7 @@ def _to_scanned_job(
 
     return ScannedJob(
         classification=classification,
+        source=source,
         source_job_id=get_source_job_id(job.url, source),
         url=job.url,
         title=job.title,

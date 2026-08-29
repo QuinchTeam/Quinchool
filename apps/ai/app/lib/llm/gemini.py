@@ -42,6 +42,9 @@ async def extract_jobs(
         model=get_settings().gemini_model,
         contents=_build_extraction_prompt(scanned_at, config, documents),
         config={
+            # Nothing here calls a tool, and leaving AFC on makes the SDK warn
+            # that generate_content is the wrong place for it.
+            "automatic_function_calling": {"disable": True},
             "response_mime_type": "application/json",
             "response_schema": JobExtraction,
             "temperature": 0,
