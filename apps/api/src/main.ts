@@ -4,9 +4,9 @@ import { toNodeHandler } from "better-auth/node";
 import * as express from "express";
 
 import { AppModule } from "./app.module";
-import { createAuth } from "./auth/better-auth";
-import { env } from "./config/env";
-import { PrismaService } from "./prisma/prisma.service";
+import { createAuth } from "./core/auth/better-auth";
+import { env } from "./core/config/env";
+import { PrismaService } from "./core/database/prisma/prisma.service";
 
 async function bootstrap() {
   // better-auth reads the raw request body itself, so Nest's parser is left
