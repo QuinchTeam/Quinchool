@@ -1,29 +1,14 @@
-/**
- * Tailors the stored career profile to one job requirement. Ported from
- * apps/web/src/app/api/build-resume/route.ts.
- */
+/** Reads resume source data and delegates the stateless tailoring workflow. */
 
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 
+import { callAIService } from "../common/ai-service";
 import { PrismaService } from "../prisma/prisma.service";
-import { generateText } from "../text-generation/service";
-import {
-  type BuildResumeValues,
-  tailorSelectionSchema,
-} from "./build-resume.contract";
-import { buildTailorResumePrompt } from "./prompts";
-import {
-  parseJsonObject,
-  reconcileTailoredResume,
-  type TailoredResume,
-} from "./tailoring";
+import type { BuildResumeValues } from "./build-resume.contract";
 
-/** Raised when the model's reply is not the JSON selection that was asked for. */
-export class UnreadableTailorReplyError extends Error {
-  constructor() {
-    super("The model returned an unreadable result. Try again.");
-    this.name = "UnreadableTailorReplyError";
-  }
+export interface TailoredResume {
+  experiences: { companyName: string; jobTitle: string; bullets: string[] }[];
+  skillGroups: { label: string; skills: string[] }[];
 }
 
 @Injectable()
@@ -36,8 +21,7 @@ export class BuildResumeService {
     userId: string,
     values: BuildResumeValues,
   ): Promise<TailoredResume> {
-    // Same ordering as GET /career-profile, so the ids in the prompt line up
-    // with the profile the preview already rendered.
+    // Keep the same ordering as GET /career-profile and the resume preview.
     const careerProfile = await this.prisma.careerProfile.findUnique({
       where: { userId },
       include: {
@@ -69,30 +53,20 @@ export class BuildResumeService {
       });
     }
 
-    const result = await generateText({
-      modelId: values.modelId,
-      prompt: buildTailorResumePrompt({
+    const result = await callAIService<TailoredResume>(
+      "/resume/tailor",
+      {
+        ...values,
         experiences: experiences.map((experience) => ({
           ...experience,
           bullets: experience.bullets.map((bullet) => bullet.text),
         })),
-        jobRequirement: values.jobRequirement,
         skillGroups,
-      }),
-    });
-
-    this.logger.log(`tailor.generated ${JSON.stringify({
-      providerId: result.providerId,
-    })}`);
-
-    const selection = tailorSelectionSchema.safeParse(
-      parseJsonObject(result.text),
+      },
+      "Failed to build resume",
     );
 
-    if (!selection.success) {
-      throw new UnreadableTailorReplyError();
-    }
-
-    return reconcileTailoredResume({ experiences, skillGroups }, selection.data);
+    this.logger.log("tailor.completed");
+    return result;
   }
 }

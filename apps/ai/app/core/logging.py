@@ -1,5 +1,5 @@
-"""Structured scan logs. Port of apps/web/src/lib/jobs-scraper/logging.ts, so a
-scan reads the same in this service's output as it did in the Next.js one.
+"""Structured service logs. Port of apps/web/src/lib/jobs-scraper/logging.ts, so
+a scan reads the same in this service's output as it did in the Next.js one.
 """
 
 from __future__ import annotations
@@ -11,36 +11,42 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 from typing import Literal
 
-JobsScraperLogLevel = Literal["error", "info", "warn"]
+LogLevel = Literal["error", "info", "warn"]
 
 
-def create_jobs_scraper_log(
-    level: JobsScraperLogLevel,
+def create_log(
+    level: LogLevel,
+    service: str,
     event: str,
-    scan_id: str,
     fields: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     return {
         "timestamp": to_iso_z(datetime.now(timezone.utc)),
         "level": level,
-        "service": "jobs-scraper",
+        "service": service,
         "event": event,
-        "scanId": scan_id,
         **(fields or {}),
     }
 
 
+def log_event(
+    level: LogLevel,
+    service: str,
+    event: str,
+    fields: Mapping[str, object] | None = None,
+) -> None:
+    line = json.dumps(create_log(level, service, event, fields), default=str)
+    stream = sys.stderr if level in ("error", "warn") else sys.stdout
+    print(line, file=stream, flush=True)
+
+
 def log_jobs_scraper(
-    level: JobsScraperLogLevel,
+    level: LogLevel,
     event: str,
     scan_id: str,
     fields: Mapping[str, object] | None = None,
 ) -> None:
-    line = json.dumps(
-        create_jobs_scraper_log(level, event, scan_id, fields), default=str
-    )
-    stream = sys.stderr if level in ("error", "warn") else sys.stdout
-    print(line, file=stream, flush=True)
+    log_event(level, "jobs-scraper", event, {"scanId": scan_id, **(fields or {})})
 
 
 def elapsed_ms(started_at: float) -> int:

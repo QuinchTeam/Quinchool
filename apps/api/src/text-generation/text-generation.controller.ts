@@ -10,17 +10,16 @@ import {
 import { SessionGuard } from "../auth/session";
 import { ZodValidationPipe } from "../common/zod-validation.pipe";
 import { getTextGenerationErrorResponse } from "./errors";
-import { buildEnhancedPrompt } from "./prompts";
-import { generateText } from "./service";
+import { enhancePrompt, generateText } from "./service";
 import {
   type TextGenerationValues,
   textGenerationSchema,
 } from "./text-generation.contract";
 
 /**
- * The two routes that are a single LLM call and nothing else. Both sit behind
- * the session guard: they spend provider quota, so they are not open to
- * anyone who finds the URL.
+ * The two routes that are a single LLM call and nothing else. The call itself
+ * happens in apps/ai; both routes sit behind the session guard because they
+ * spend provider quota, so they are not open to anyone who finds the URL.
  */
 @Controller()
 @UseGuards(SessionGuard)
@@ -43,12 +42,7 @@ export class TextGenerationController {
     body: TextGenerationValues,
   ) {
     try {
-      const result = await generateText({
-        modelId: body.modelId,
-        prompt: buildEnhancedPrompt(body.prompt),
-      });
-
-      return { enhancedPrompt: result.text };
+      return await enhancePrompt(body);
     } catch (error) {
       throw toHttpException(error, "Failed to enhance prompt");
     }

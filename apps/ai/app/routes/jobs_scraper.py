@@ -6,9 +6,7 @@ apps/web/src/app/api/jobs-scraper/route.ts used to do inline.
 
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
-from typing import cast
 
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
@@ -16,6 +14,7 @@ from google.genai import errors as genai_errors
 
 from app.core.exceptions import Crawl4AiUnavailableError
 from app.core.logging import log_jobs_scraper
+from app.lib.llm.errors import read_provider_error_message
 from app.services.jobs_scraper import scan_jobs
 from app.validations.jobs_scraper import ScanRequest, ScanResult
 
@@ -82,27 +81,3 @@ def get_scan_failure(
         # reads as "retry later" instead of a flat server error.
         status if 400 <= status <= 599 else 502,
     )
-
-
-def read_provider_error_message(error: genai_errors.APIError) -> str | None:
-    """The readable sentence behind a provider failure. Google can hand back the
-    whole HTTP error body, so the useful text arrives wrapped in a JSON
-    envelope: {"error":{"code":503,"message":"...","status":"UNAVAILABLE"}}.
-    """
-    message = error.message or ""
-
-    try:
-        payload = cast(object, json.loads(message))
-    except ValueError:
-        return message or None
-
-    if not isinstance(payload, dict):
-        return message or None
-
-    error_payload = cast(dict[str, object], payload).get("error")
-
-    if not isinstance(error_payload, dict):
-        return message or None
-
-    nested = cast(dict[str, object], error_payload).get("message")
-    return nested if isinstance(nested, str) and nested else (message or None)

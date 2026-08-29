@@ -8,9 +8,8 @@ import {
   type ScanResult,
 } from "./scan-contract";
 
-// A scan crawls two sources and then waits on Gemini, which is why the Next.js
-// route reserved 300s for it. Keep the ceiling here so the AI service, not this
-// client, is the one that decides a scan has gone on too long.
+// Crawling and classification can take several minutes. Keep the ceiling here
+// so the AI service, not this client, decides when a scan has gone on too long.
 const SCAN_TIMEOUT_MS = 300_000;
 
 @Injectable()

@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { TEXT_GENERATION_MODEL_IDS } from "../text-generation/types";
-
 export const chatMessageSchema = z.object({
   content: z.string().trim().min(1).max(8_000),
   role: z.enum(["user", "assistant"]),
@@ -10,7 +8,7 @@ export const chatMessageSchema = z.object({
 export const chatbotRequestSchema = z
   .object({
     messages: z.array(chatMessageSchema).min(1).max(24),
-    modelId: z.enum(TEXT_GENERATION_MODEL_IDS),
+    modelId: z.string().trim().min(1),
   })
   .refine((request) => request.messages.at(-1)?.role === "user", {
     message: "The last message must be from the user",

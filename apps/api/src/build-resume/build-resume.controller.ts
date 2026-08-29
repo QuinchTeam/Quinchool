@@ -16,9 +16,8 @@ import {
 } from "./build-resume.contract";
 import {
   BuildResumeService,
-  UnreadableTailorReplyError,
+  type TailoredResume,
 } from "./build-resume.service";
-import type { TailoredResume } from "./tailoring";
 
 @Controller("build-resume")
 @UseGuards(SessionGuard)
@@ -35,11 +34,6 @@ export class BuildResumeController {
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
-      }
-
-      if (error instanceof UnreadableTailorReplyError) {
-        // The model answered, just not with the selection that was asked for.
-        throw new HttpException({ error: error.message }, 502);
       }
 
       const response = getTextGenerationErrorResponse(error);

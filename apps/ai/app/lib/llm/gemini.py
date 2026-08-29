@@ -4,11 +4,10 @@ import json
 from datetime import datetime
 from typing import cast
 
-from google import genai
-
 from app.core.config import get_settings
 from app.core.logging import to_iso_z
 from app.lib.jobs_scraper.rules import get_job_date_window
+from app.lib.llm.providers import get_google_client
 from app.validations.jobs_scraper import (
     JobDocument,
     JobExtraction,
@@ -16,29 +15,13 @@ from app.validations.jobs_scraper import (
     parse_job_extraction,
 )
 
-_client: genai.Client | None = None
-
-
-def _get_client() -> genai.Client:
-    global _client
-
-    if _client is None:
-        api_key = get_settings().gemini_api_key.strip()
-
-        if not api_key:
-            raise RuntimeError("GEMINI_API_KEY is not configured")
-
-        _client = genai.Client(api_key=api_key)
-
-    return _client
-
 
 async def extract_jobs(
     scanned_at: datetime,
     config: JobScraperConfig,
     documents: list[JobDocument],
 ) -> JobExtraction:
-    response = await _get_client().aio.models.generate_content(  # pyright: ignore[reportUnknownMemberType]
+    response = await get_google_client().aio.models.generate_content(  # pyright: ignore[reportUnknownMemberType]
         model=get_settings().gemini_model,
         contents=_build_extraction_prompt(scanned_at, config, documents),
         config={

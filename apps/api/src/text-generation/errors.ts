@@ -1,8 +1,9 @@
-import { ApiError as GoogleApiError } from "@google/genai";
 import type { TextGenerationProviderId } from "./types";
 
 export const TEXT_GENERATION_ERROR_CODES = {
+  PROVIDER_ERROR: "provider_error",
   RATE_LIMIT: "rate_limit",
+  SERVICE_UNAVAILABLE: "service_unavailable",
 } as const;
 
 export type TextGenerationErrorCode =
@@ -45,40 +46,6 @@ export class TextGenerationError extends Error {
   }
 }
 
-export class TextGenerationProviderHttpError extends Error {
-  status: number;
-
-  constructor({ message, status }: { message: string; status: number }) {
-    super(message);
-    this.name = "TextGenerationProviderHttpError";
-    this.status = status;
-  }
-}
-
-export function mapTextGenerationProviderError({
-  error,
-  providerId,
-  providerModelId,
-}: {
-  error: unknown;
-  providerId: TextGenerationProviderId;
-  providerModelId: string;
-}): unknown {
-  if (isProviderRateLimitError(error)) {
-    return new TextGenerationError({
-      cause: error,
-      code: TEXT_GENERATION_ERROR_CODES.RATE_LIMIT,
-      message:
-        readProviderErrorMessage(error) ?? "Provider rate limit exceeded.",
-      providerId,
-      providerModelId,
-      status: 429,
-    });
-  }
-
-  return error;
-}
-
 export function getTextGenerationErrorResponse(
   error: unknown,
 ): { body: TextGenerationErrorResponse; status: number } | null {
@@ -95,35 +62,4 @@ export function getTextGenerationErrorResponse(
     },
     status: error.status,
   };
-}
-
-function isProviderRateLimitError(error: unknown): boolean {
-  return (
-    (error instanceof GoogleApiError ||
-      error instanceof TextGenerationProviderHttpError) &&
-    error.status === 429
-  );
-}
-
-/**
- * The readable sentence behind a provider failure. Google puts the whole HTTP
- * error body in `message`, so the useful text arrives wrapped in a JSON
- * envelope: {"error":{"code":503,"message":"...","status":"UNAVAILABLE"}}.
- */
-export function readProviderErrorMessage(error: unknown): string | undefined {
-  if (
-    !(error instanceof GoogleApiError) &&
-    !(error instanceof TextGenerationProviderHttpError)
-  ) {
-    return undefined;
-  }
-
-  try {
-    const body: unknown = JSON.parse(error.message);
-    const nested = (body as { error?: { message?: unknown } })?.error?.message;
-
-    return typeof nested === "string" && nested ? nested : error.message;
-  } catch {
-    return error.message;
-  }
 }

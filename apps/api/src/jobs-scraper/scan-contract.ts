@@ -126,9 +126,9 @@ export interface ScanFailure {
 
 /**
  * Turns an AI-service reply into the sentence the caller reads. The service
- * already phrases Crawl4AI and Gemini failures for a human — whether the model
- * is overloaded, the quota is spent, or the crawler is down — so its wording is
- * passed through rather than replaced with a generic message.
+ * already phrases crawler and classification failures for a human — whether
+ * the service is overloaded, quota is spent, or the crawler is down — so its
+ * wording is passed through rather than replaced with a generic message.
  */
 export function mapScanFailure(status: number, body: unknown): ScanFailure {
   const message =
@@ -138,9 +138,8 @@ export function mapScanFailure(status: number, body: unknown): ScanFailure {
 
   return {
     message: message ?? `The job scan failed. The AI service returned ${status}.`,
-    // The AI service already answers with a meaningful HTTP code (503 when
-    // Crawl4AI is offline, 429 on Gemini quota); forward it so a retryable
-    // failure still reads as one instead of collapsing to a flat 500.
+    // The AI service already answers with a meaningful HTTP code; forward it
+    // so a retryable failure still reads as one instead of collapsing to 500.
     status: status >= 400 && status <= 599 ? status : 502,
   };
 }
