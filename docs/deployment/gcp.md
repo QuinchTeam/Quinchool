@@ -30,8 +30,15 @@ gcloud services enable \
   artifactregistry.googleapis.com \
   sqladmin.googleapis.com \
   secretmanager.googleapis.com \
-  iamcredentials.googleapis.com
+  cloudresourcemanager.googleapis.com \
+  iam.googleapis.com \
+  iamcredentials.googleapis.com \
+  sts.googleapis.com
 ```
+
+`iam`, `iamcredentials`, and `sts` are what federation runs on: without them
+step 6 fails at pool creation, or later at token exchange with a confusing
+403.
 
 ## 2. Artifact Registry
 
