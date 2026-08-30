@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required by google-github-actions/auth for Workload Identity Federation.
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Private: only the API calls it, with an ID token. Generation is
+          # slow, so the request timeout matches the API's own client timeout.
+          - service: ai
+            flags: >-
+              --no-allow-unauthenticated
+              --memory=2Gi
+              --timeout=300
+              --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }}
+              --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
+          # Public: the browser calls it directly with the session cookie.
+          - service: api
+            flags: >-
+              --allow-unauthenticated
+              --timeout=300
+              --add-cloudsql-instances=${{ vars.CLOUD_SQL_INSTANCE }}
+              --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }}
+              --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest
+          - service: web
+            buildArgs: NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+            flags: --allow-unauthenticated
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authenticate Docker to Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push
+        env:
+          IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/quinchool/${{ matrix.service }}:${{ github.sha }}
+        run: |
+          docker build \
+            --file apps/${{ matrix.service }}/Dockerfile \
+            ${{ matrix.buildArgs && format('--build-arg {0}', matrix.buildArgs) || '' }} \
+            --tag "$IMAGE" \
+            .
+          docker push "$IMAGE"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy quinchool-${{ matrix.service }} \
+            --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/quinchool/${{ matrix.service }}:${{ github.sha }} \
+            --region ${{ vars.GCP_REGION }} \
+            --service-account ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }} \
+            --port 8080 \
+            --quiet \
+            ${{ matrix.flags }}
