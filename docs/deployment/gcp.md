@@ -210,6 +210,20 @@ secrets live in Secret Manager and are mounted by Cloud Run.
 | `CRAWL4AI_URL` | `gcloud run services describe quinchool-crawl4ai --region=$REGION --format='value(status.url)'` |
 | `COOKIE_DOMAIN` | `WEB_URL`'s host with a leading dot, e.g. `.quinchool.quinchy.dev` |
 | `GEMINI_MODEL` | `gemini-3.1-flash-lite` (the default in `apps/ai/app/core/config.py`) |
+| `LANGFUSE_HOST` | Copy from `apps/ai/.env` |
+| `SENTRY_DSN` | Copy from `apps/web/.env` |
+| `NEXT_PUBLIC_SENTRY_DSN` | Copy from `apps/web/.env` |
+| `SENTRY_ORG` | Copy from `apps/web/.env` |
+| `SENTRY_PROJECT` | Copy from `apps/web/.env` |
+
+One repository *secret* is also needed — `SENTRY_AUTH_TOKEN`, from
+`apps/web/.env`. It is the only value here that is genuinely sensitive: it
+uploads source maps during the web build, and is mounted into that one build
+step rather than passed as a build arg so it never lands in image history.
+Without it the build still succeeds and just skips the upload.
+
+Sentry DSNs are not secrets — the client one is shipped to every browser — so
+they stay variables.
 
 `AI_SERVICE_URL` and `CRAWL4AI_URL` must be the service's own `run.app` URL,
 not a custom domain: it is the ID token audience Cloud Run checks against.

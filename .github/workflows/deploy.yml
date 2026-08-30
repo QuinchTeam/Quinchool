@@ -25,7 +25,7 @@ jobs:
               --no-allow-unauthenticated
               --memory=2Gi
               --timeout=300
-              --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }}
+              --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }},LANGFUSE_HOST=${{ vars.LANGFUSE_HOST }}
               --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
           # Public: the browser calls it directly with the session cookie.
           - service: api
@@ -36,8 +36,15 @@ jobs:
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }}
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest
           - service: web
-            buildArgs: NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
-            flags: --allow-unauthenticated
+            buildArgs: >-
+              --build-arg NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+              --build-arg NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+              --build-arg SENTRY_ORG=${{ vars.SENTRY_ORG }}
+              --build-arg SENTRY_PROJECT=${{ vars.SENTRY_PROJECT }}
+              --secret id=sentry_auth_token,env=SENTRY_AUTH_TOKEN
+            flags: >-
+              --allow-unauthenticated
+              --set-env-vars=SENTRY_DSN=${{ vars.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,10 +62,14 @@ jobs:
       - name: Build and push
         env:
           IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/quinchool/${{ matrix.service }}:${{ github.sha }}
+          # Read by the web build's --secret mount, so the token never becomes
+          # an image layer. BuildKit is what makes that mount available.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          DOCKER_BUILDKIT: "1"
         run: |
           docker build \
             --file apps/${{ matrix.service }}/Dockerfile \
-            ${{ matrix.buildArgs && format('--build-arg {0}', matrix.buildArgs) || '' }} \
+            ${{ matrix.buildArgs }} \
             --tag "$IMAGE" \
             .
           docker push "$IMAGE"
