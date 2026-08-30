@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AiBeautifyIcon,
   Location01Icon,
   SquareArrowUpRightIcon,
 } from "@hugeicons/core-free-icons";
@@ -8,17 +9,23 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { SavedJob } from "@/lib/jobs-scraper/schema";
 import { cn } from "@/lib/utils";
 
 export function JobCard({
   footer,
+  isGeneratingResume = false,
   job,
+  onGenerateResume,
+  resumeDisabled = false,
   showClassification = false,
 }: {
   footer?: ReactNode;
+  isGeneratingResume?: boolean;
   job: SavedJob;
+  onGenerateResume?: () => void;
+  resumeDisabled?: boolean;
   showClassification?: boolean;
 }) {
   return (
@@ -85,7 +92,18 @@ export function JobCard({
         </p>
         {footer}
       </div>
-      <div className="flex items-start md:justify-end">
+      <div className="grid content-start gap-2 md:justify-end">
+        {onGenerateResume ? (
+          <Button
+            type="button"
+            disabled={resumeDisabled || isGeneratingResume}
+            onClick={onGenerateResume}
+            className="w-full md:w-auto"
+          >
+            <HugeiconsIcon icon={AiBeautifyIcon} strokeWidth={2} />
+            {isGeneratingResume ? "Generating..." : "Generate Resume"}
+          </Button>
+        ) : null}
         <a
           href={job.url}
           target="_blank"

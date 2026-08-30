@@ -149,6 +149,7 @@ test("filters bullets to the profile but only reorders skills", () => {
     { companyName: "Example", jobTitle: "Engineer", bullets: ["Shipped B"] },
     { companyName: "Example", jobTitle: "Intern", bullets: [] },
   ]);
+  assert.deepEqual(tailored.projects, []);
   // No skill is ever lost: picks first, then the rest in their original order.
   assert.deepEqual(tailored.skillGroups, [
     { label: "Frontend", skills: ["Next.js", "React"] },
@@ -159,14 +160,8 @@ test("filters bullets to the profile but only reorders skills", () => {
 test("renders labels only until a tailored result arrives", () => {
   const empty = applyTailoredResume(tailorProfile, null);
 
-  assert.deepEqual(
-    empty.experiences.map((experience) => experience.bullets),
-    [[], []],
-  );
-  assert.deepEqual(
-    empty.skillGroups,
-    tailorProfile.skillGroups.map((group) => ({ ...group, skills: [] })),
-  );
+  assert.deepEqual(empty.experiences, []);
+  assert.deepEqual(empty.skillGroups, []);
   assert.deepEqual(empty.projects, []);
   assert.equal(empty.name, tailorProfile.name);
 
@@ -175,6 +170,9 @@ test("renders labels only until a tailored result arrives", () => {
       { companyName: "Example", jobTitle: "Engineer", bullets: ["Shipped B"] },
       { companyName: "Example", jobTitle: "Intern", bullets: [] },
     ],
+    projects: [
+      { projectName: "Side project", bullets: ["Built it for production"] },
+    ],
     skillGroups: [
       { label: "Frontend", skills: ["Next.js"] },
       { label: "Backend", skills: [] },
@@ -182,7 +180,10 @@ test("renders labels only until a tailored result arrives", () => {
   });
 
   assert.deepEqual(tailored.experiences[0]?.bullets, [{ text: "Shipped B" }]);
-  assert.deepEqual(tailored.experiences[1]?.bullets, []);
+  assert.equal(tailored.experiences.length, 1);
+  assert.deepEqual(tailored.projects[0]?.bullets, [
+    { text: "Built it for production" },
+  ]);
   assert.deepEqual(tailored.skillGroups[0]?.skills, ["Next.js"]);
   assert.equal(tailorProfile.experiences[0]?.bullets.length, 2);
 });

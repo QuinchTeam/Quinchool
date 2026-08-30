@@ -22,7 +22,7 @@ export function ResumeTailor() {
     DEFAULT_TEXT_GENERATION_MODEL_ID,
   );
   const { careerProfile, isError, isLoading, refetch } = useCareerProfile();
-  const { buildResume } = useResumeBuilder();
+  const { buildResume } = useResumeBuilder(careerProfile);
   // Until a tailored result comes back this renders the personal details,
   // education and skill-group labels only — bullets and skills stay empty.
   const resumeProfile = useMemo(

@@ -136,8 +136,10 @@ function Bullet({ children }: { children: React.ReactNode }) {
 }
 
 export function ResumePdfDocument({
+  onRender,
   profile,
 }: {
+  onRender?: React.ComponentProps<typeof Document>["onRender"];
   profile: CareerProfileValues;
 }) {
   const contacts = [
@@ -165,6 +167,7 @@ export function ResumePdfDocument({
       language="en"
       subject="Resume"
       title={`${profile.name} Resume`}
+      onRender={onRender}
     >
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>

@@ -12,12 +12,35 @@ export class BuildResumeRepository {
       include: {
         experiences: {
           orderBy: { sortOrder: "asc" },
-          include: { bullets: { orderBy: { sortOrder: "asc" } } },
+          include: {
+            bullets: { orderBy: { sortOrder: "asc" } },
+            skills: { orderBy: { sortOrder: "asc" } },
+          },
         },
+        projects: {
+          orderBy: { sortOrder: "asc" },
+          include: {
+            bullets: { orderBy: { sortOrder: "asc" } },
+            skills: { orderBy: { sortOrder: "asc" } },
+          },
+        },
+        educations: true,
         skillGroups: {
           orderBy: { sortOrder: "asc" },
           include: { skills: { orderBy: { sortOrder: "asc" } } },
         },
+      },
+    });
+  }
+
+  findSavedJob(userId: string, jobId: string) {
+    return this.prisma.scrapedJob.findFirst({
+      where: { id: jobId, userId },
+      select: {
+        company: true,
+        description: true,
+        summary: true,
+        title: true,
       },
     });
   }

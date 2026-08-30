@@ -13,6 +13,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { JobCard } from "@/components/jobs-scraper/job-card";
 import { Badge } from "@/components/ui/badge";
@@ -26,16 +28,50 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCareerProfile } from "@/hooks/use-career-profile";
 import { useJobsScraper } from "@/hooks/use-jobs-scraper";
+import { useResumeBuilder } from "@/hooks/use-resume-builder";
+import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
 import type {
   JobScraperConfig,
   JobScraperState,
   JobSourceIssue,
   SavedJob,
 } from "@/lib/jobs-scraper/schema";
+import { applyTailoredResume } from "@/lib/resume";
 
 export function JobsScraper() {
   const { isError, isLoading, refetch, scan, state } = useJobsScraper();
+  const { careerProfile, isLoading: isProfileLoading } = useCareerProfile();
+  const { buildResume } = useResumeBuilder(careerProfile);
+  const [generatingJobId, setGeneratingJobId] = useState<string | null>(null);
+
+  async function generateResume(job: SavedJob) {
+    if (!careerProfile) {
+      toast.error("Add your career profile before generating a resume.");
+      return;
+    }
+
+    setGeneratingJobId(job.id);
+
+    try {
+      const tailored = await buildResume.mutateAsync({
+        jobId: job.id,
+        modelId: DEFAULT_TEXT_GENERATION_MODEL_ID,
+      });
+      const { downloadResumePdf } = await import(
+        "@/components/resume-builder/resume-pdf-preview"
+      );
+      await downloadResumePdf(applyTailoredResume(careerProfile, tailored));
+      toast.success(`Resume tailored for ${job.title} downloaded.`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Resume generation failed.",
+      );
+    } finally {
+      setGeneratingJobId(null);
+    }
+  }
 
   return (
     <main className="min-h-full bg-muted/20">
@@ -128,7 +164,12 @@ export function JobsScraper() {
               onRetry={() => scan.mutate()}
             />
           ) : state?.lastScannedAt ? (
-            <JobResults state={state} />
+            <JobResults
+              state={state}
+              generatingJobId={generatingJobId}
+              resumeDisabled={isProfileLoading || buildResume.isPending}
+              onGenerateResume={generateResume}
+            />
           ) : (
             <Empty className="min-h-96 border">
               <EmptyHeader>
@@ -213,7 +254,17 @@ function CriteriaGroup({
   );
 }
 
-function JobResults({ state }: { state: JobScraperState }) {
+function JobResults({
+  generatingJobId,
+  onGenerateResume,
+  resumeDisabled,
+  state,
+}: {
+  generatingJobId: string | null;
+  onGenerateResume: (job: SavedJob) => void;
+  resumeDisabled: boolean;
+  state: JobScraperState;
+}) {
   const matches = state.jobs.filter((job) => job.classification === "MATCH");
   const potentialJobs = state.jobs.filter(
     (job) => job.classification === "POTENTIAL",
@@ -278,13 +329,22 @@ function JobResults({ state }: { state: JobScraperState }) {
       <SourceIssues issues={state.sourceIssues} />
 
       {matches.length > 0 ? (
-        <JobSection title="Matches" jobs={matches} />
+        <JobSection
+          title="Matches"
+          jobs={matches}
+          generatingJobId={generatingJobId}
+          resumeDisabled={resumeDisabled}
+          onGenerateResume={onGenerateResume}
+        />
       ) : null}
       {potentialJobs.length > 0 ? (
         <JobSection
           title="Potential matches"
           description="Relevant listings with one or more details to review."
           jobs={potentialJobs}
+          generatingJobId={generatingJobId}
+          resumeDisabled={resumeDisabled}
+          onGenerateResume={onGenerateResume}
         />
       ) : null}
     </div>
@@ -293,11 +353,17 @@ function JobResults({ state }: { state: JobScraperState }) {
 
 function JobSection({
   description,
+  generatingJobId,
   jobs,
+  onGenerateResume,
+  resumeDisabled,
   title,
 }: {
   description?: string;
+  generatingJobId: string | null;
   jobs: SavedJob[];
+  onGenerateResume: (job: SavedJob) => void;
+  resumeDisabled: boolean;
   title: string;
 }) {
   return (
@@ -312,7 +378,13 @@ function JobSection({
       </div>
       <div className="divide-y overflow-hidden rounded-lg border bg-background">
         {jobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+          <JobCard
+            key={job.id}
+            job={job}
+            isGeneratingResume={generatingJobId === job.id}
+            resumeDisabled={resumeDisabled}
+            onGenerateResume={() => onGenerateResume(job)}
+          />
         ))}
       </div>
     </section>

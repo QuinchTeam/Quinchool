@@ -6,6 +6,7 @@ import type { CareerProfileValues } from "@/lib/validations/career-profile";
  * skill group is present even when nothing in it was selected. */
 export interface TailoredResume {
   experiences: { companyName: string; jobTitle: string; bullets: string[] }[];
+  projects: { projectName: string; bullets: string[] }[];
   skillGroups: { label: string; skills: string[] }[];
 }
 
@@ -80,6 +81,7 @@ export function reconcileTailoredResume(
         bulletsById.get(`exp-${index}`),
       ),
     })),
+    projects: [],
     skillGroups: source.skillGroups.map((group, index) => ({
       label: group.label,
       skills: orderKnown(group.skills, skillsById.get(`skill-${index}`), true),
@@ -87,26 +89,35 @@ export function reconcileTailoredResume(
   };
 }
 
-/** Career profile as the tailor renders it: personal details, education and
- * skill-group labels always; bullets and skills only once the model has picked
- * them. Projects are left out — the tailor only ranks experiences and skills. */
+/** Merge the stateless tailor result into the stored profile for rendering. */
 export function applyTailoredResume(
   profile: CareerProfileValues,
   tailored: TailoredResume | null | undefined,
 ): CareerProfileValues {
   return {
     ...profile,
-    experiences: profile.experiences.map((experience, index) => ({
-      ...experience,
-      bullets: (tailored?.experiences[index]?.bullets ?? []).map((text) => ({
-        text,
-      })),
-    })),
-    projects: [],
-    skillGroups: profile.skillGroups.map((group, index) => ({
-      ...group,
-      skills: tailored?.skillGroups[index]?.skills ?? [],
-    })),
+    experiences: profile.experiences
+      .map((experience, index) => ({
+        ...experience,
+        bullets: (tailored?.experiences[index]?.bullets ?? []).map((text) => ({
+          text,
+        })),
+      }))
+      .filter((experience) => experience.bullets.length > 0),
+    projects: profile.projects
+      .map((project, index) => ({
+        ...project,
+        bullets: (tailored?.projects[index]?.bullets ?? []).map((text) => ({
+          text,
+        })),
+      }))
+      .filter((project) => project.bullets.length > 0),
+    skillGroups: profile.skillGroups
+      .map((group, index) => ({
+        ...group,
+        skills: tailored?.skillGroups[index]?.skills ?? [],
+      }))
+      .filter((group) => group.skills.length > 0),
   };
 }
 
