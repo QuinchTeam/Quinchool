@@ -153,7 +153,7 @@ PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectN
 
 gcloud iam service-accounts add-iam-policy-binding "$DEPLOYER" \
   --role=roles/iam.workloadIdentityUser \
-  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attributes.repository/<owner>/quinchool"
+  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/<owner>/quinchool"
 ```
 
 The `attribute-condition` is what stops any other repository from minting
@@ -203,7 +203,6 @@ secrets live in Secret Manager and are mounted by Cloud Run.
 | `GCP_WIF_PROVIDER` | `gcloud iam workload-identity-pools providers describe github --location=global --workload-identity-pool=github --format='value(name)'` |
 | `GCP_DEPLOYER_SERVICE_ACCOUNT` | `quinchool-deployer@$PROJECT_ID.iam.gserviceaccount.com` |
 | `GCP_RUNTIME_SERVICE_ACCOUNT` | `quinchool-runtime@$PROJECT_ID.iam.gserviceaccount.com` |
-| `CLOUD_SQL_INSTANCE` | `gcloud sql instances describe quinchool --format='value(connectionName)'` |
 | `WEB_URL` | The domain you map in step 10, e.g. `https://quinchool.quinchy.dev` |
 | `API_URL` | The domain you map in step 10, e.g. `https://api.quinchool.quinchy.dev` |
 | `AI_SERVICE_URL` | Only exists after the first deploy: `gcloud run services describe quinchool-ai --region=$REGION --format='value(status.url)'` |

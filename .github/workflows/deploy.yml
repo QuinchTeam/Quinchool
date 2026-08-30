@@ -32,7 +32,6 @@ jobs:
             flags: >-
               --allow-unauthenticated
               --timeout=300
-              --add-cloudsql-instances=${{ vars.CLOUD_SQL_INSTANCE }}
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }}
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest
           - service: web
