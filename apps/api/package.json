@@ -19,6 +19,8 @@
     "@prisma/client": "^7.10.0",
     "better-auth": "1.6.25",
     "express": "^5.2.1",
+    "google-auth-library": "10.9.1",
+    "prisma": "7.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.5.2"

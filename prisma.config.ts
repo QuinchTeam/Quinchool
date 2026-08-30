@@ -7,8 +7,14 @@
 import { defineConfig } from "prisma/config";
 
 // The root .env holds DATABASE_URL for CLI work only; each app carries its own
-// copy for runtime, the way each service gets its own env when deployed.
-process.loadEnvFile();
+// copy for runtime, the way each service gets its own env when deployed. The
+// deployed API runs `migrate deploy` through this same config with no .env at
+// all, so a missing file is not an error.
+try {
+  process.loadEnvFile();
+} catch {
+  // No .env file; DATABASE_URL comes from the environment.
+}
 
 export default defineConfig({
   schema: "packages/prisma/schema.prisma",
