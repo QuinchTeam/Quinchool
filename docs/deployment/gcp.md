@@ -53,11 +53,19 @@ gcloud sql instances create quinchool \
   --database-version=POSTGRES_17 \
   --region="$REGION" \
   --edition=ENTERPRISE \
-  --tier=db-perf-optimized-N-2
+  --tier=db-g1-small \
+  --storage-size=10GB \
+  --availability-type=ZONAL
 
 gcloud sql databases create quinchool --instance=quinchool
 gcloud sql users create quinchool --instance=quinchool --password=<password>
 ```
+
+This is the cheapest instance that runs the schema — roughly USD 25–30/month,
+and it is the one line here that costs real money whether or not anyone uses
+the app. `db-g1-small` is shared-core; move up to `db-custom-2-7680` if it
+starts thrashing. Do not pass a `db-perf-optimized-*` tier: those are Enterprise
+Plus only and are rejected with `--edition=ENTERPRISE`.
 
 The API reaches it over the Cloud SQL unix socket attached by
 `--add-cloudsql-instances`, so `DATABASE_URL` uses the `host=` form:
@@ -181,20 +189,20 @@ Run this after the first deploy has created `quinchool-ai`.
 and variables → Actions → Variables). Nothing here is secret — the actual
 secrets live in Secret Manager and are mounted by Cloud Run.
 
-| Variable | Example |
+| Variable | Where the value comes from |
 | --- | --- |
-| `GCP_PROJECT_ID` | `quinchool` |
-| `GCP_REGION` | `asia-southeast1` |
-| `GCP_WIF_PROVIDER` | `projects/<number>/locations/global/workloadIdentityPools/github/providers/github` |
-| `GCP_DEPLOYER_SERVICE_ACCOUNT` | `quinchool-deployer@quinchool.iam.gserviceaccount.com` |
-| `GCP_RUNTIME_SERVICE_ACCOUNT` | `quinchool-runtime@quinchool.iam.gserviceaccount.com` |
-| `CLOUD_SQL_INSTANCE` | `quinchool:asia-southeast1:quinchool` |
-| `WEB_URL` | `https://quinchool.quinchy.dev` |
-| `API_URL` | `https://api.quinchool.quinchy.dev` |
-| `AI_SERVICE_URL` | `https://quinchool-ai-<hash>.<region>.run.app` |
-| `CRAWL4AI_URL` | `https://quinchool-crawl4ai-<hash>.<region>.run.app` |
-| `COOKIE_DOMAIN` | `.quinchool.quinchy.dev` |
-| `GEMINI_MODEL` | `gemini-3.1-flash-lite` |
+| `GCP_PROJECT_ID` | You chose it in step 1. `gcloud config get-value project` |
+| `GCP_REGION` | You chose it in step 1, e.g. `asia-southeast1`. `gcloud run regions list` |
+| `GCP_WIF_PROVIDER` | `gcloud iam workload-identity-pools providers describe github --location=global --workload-identity-pool=github --format='value(name)'` |
+| `GCP_DEPLOYER_SERVICE_ACCOUNT` | `quinchool-deployer@$PROJECT_ID.iam.gserviceaccount.com` |
+| `GCP_RUNTIME_SERVICE_ACCOUNT` | `quinchool-runtime@$PROJECT_ID.iam.gserviceaccount.com` |
+| `CLOUD_SQL_INSTANCE` | `gcloud sql instances describe quinchool --format='value(connectionName)'` |
+| `WEB_URL` | The domain you map in step 10, e.g. `https://quinchool.quinchy.dev` |
+| `API_URL` | The domain you map in step 10, e.g. `https://api.quinchool.quinchy.dev` |
+| `AI_SERVICE_URL` | Only exists after the first deploy: `gcloud run services describe quinchool-ai --region=$REGION --format='value(status.url)'` |
+| `CRAWL4AI_URL` | `gcloud run services describe quinchool-crawl4ai --region=$REGION --format='value(status.url)'` |
+| `COOKIE_DOMAIN` | `WEB_URL`'s host with a leading dot, e.g. `.quinchool.quinchy.dev` |
+| `GEMINI_MODEL` | `gemini-3.1-flash-lite` (the default in `apps/ai/app/core/config.py`) |
 
 `AI_SERVICE_URL` and `CRAWL4AI_URL` must be the service's own `run.app` URL,
 not a custom domain: it is the ID token audience Cloud Run checks against.
@@ -202,6 +210,13 @@ not a custom domain: it is the ID token audience Cloud Run checks against.
 `API_URL` is used three ways — the web app's `NEXT_PUBLIC_API_URL` build arg,
 better-auth's `baseURL`, and the browser's fetch target — so a mismatch shows up
 as CORS or cookie failures rather than a build error.
+
+There is one ordering wrinkle: `AI_SERVICE_URL` does not exist until the AI
+service has been deployed once, and the API refuses to boot without it
+(`env.ts` requires a URL). So the first workflow run deploys `ai` and `web`
+and fails on `api`. Fill in `AI_SERVICE_URL` from that run, do the step 8
+invoker grant, and re-run — the second run goes green. Every run after that is
+a normal three-service deploy.
 
 ## 10. Domains
 
