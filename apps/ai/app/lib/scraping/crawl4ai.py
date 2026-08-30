@@ -11,6 +11,8 @@ from collections.abc import Sequence
 from typing import ClassVar
 from urllib.parse import quote, urlparse, urlunparse
 
+import google.auth.transport.requests
+import google.oauth2.id_token
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -284,7 +286,9 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
     try:
         async with httpx.AsyncClient(timeout=CRAWL_TIMEOUT_SECONDS) as client:
             response = await client.post(
-                f"{settings.crawl4ai_base_url}/crawl", json=payload
+                f"{settings.crawl4ai_base_url}/crawl",
+                json=payload,
+                headers=_authorization_header(settings.crawl4ai_base_url),
             )
     except httpx.HTTPError as error:
         raise Crawl4AiUnavailableError(error) from error
@@ -301,6 +305,21 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
         raise Crawl4AiUnavailableError()
 
     return parsed.results
+
+
+def _authorization_header(base_url: str) -> dict[str, str]:
+    """On Cloud Run crawl4ai is private — a public one is an open proxy — so
+    calls to it carry an ID token minted for its URL and Cloud Run does the
+    verifying. Locally it is plain http on the compose network, with no token.
+    """
+    if not base_url.startswith("https://"):
+        return {}
+
+    token = google.oauth2.id_token.fetch_id_token(
+        google.auth.transport.requests.Request(), base_url
+    )
+
+    return {"Authorization": f"Bearer {token}"}
 
 
 def extract_job_urls(results: list[CrawlResult], source: JobSource) -> list[str]:
