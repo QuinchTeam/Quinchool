@@ -26,6 +26,15 @@ export function createAuth(prisma: PrismaService) {
     database: prismaAdapter(prisma, {
       provider: "postgresql",
     }),
+    advanced: {
+      // In production the API and the web app are different subdomains, and the
+      // web app's middleware reads this cookie itself. Without a shared parent
+      // domain the cookie stays host-only to the API and that check never sees
+      // it. Off locally, where a domain on localhost is meaningless.
+      crossSubDomainCookies: env.COOKIE_DOMAIN
+        ? { enabled: true, domain: env.COOKIE_DOMAIN }
+        : { enabled: false },
+    },
     emailAndPassword: {
       enabled: true,
       sendResetPassword: async ({ user, url }) => {
