@@ -25,7 +25,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on everything except Next internals and the favicon. The app serves
-  // no API routes of its own; /api is matched out because nothing lives there.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // Keep framework and metadata image routes public. The app serves no API
+  // routes of its own; /api is matched out because nothing lives there.
+  matcher: [
+    "/((?!api|_next/static|_next/image|icon|apple-icon|opengraph-image|quinchool-icon.webp).*)",
+  ],
 };

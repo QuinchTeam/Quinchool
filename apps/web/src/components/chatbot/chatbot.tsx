@@ -7,6 +7,7 @@ import {
   UserAiIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 import {
   type FormEvent,
   type KeyboardEvent,
@@ -176,11 +177,15 @@ export function Chatbot() {
       <main className="min-h-0 flex-1 overflow-y-auto">
         {messages.length === 0 ? (
           <section className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center gap-6 px-4 py-12 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
-            </div>
+            <Image
+              src="/quinchool-icon.webp"
+              alt=""
+              width={64}
+              height={64}
+              priority
+            />
             <div className="grid gap-2">
-              <h1 className="text-2xl font-semibold">Quinchool Assistant</h1>
+              <h1 className="text-2xl font-semibold">Quinch Bot</h1>
               <p className="text-sm text-muted-foreground">
                 What would you like to work on?
               </p>
@@ -262,7 +267,7 @@ export function Chatbot() {
               disabled={isPending}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Quinchool Assistant"
+              placeholder="Message Quinch Bot"
               value={input}
             />
             <InputGroupAddon align="block-end" className="justify-end">
