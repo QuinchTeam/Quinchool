@@ -1,16 +1,12 @@
 import { HttpException, Injectable, Logger } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 
-import { env } from "../../core/config/env";
+import { callAiService } from "../../shared/clients/ai/ai-client";
+import { AiServiceError } from "../../shared/clients/ai/ai-client.errors";
 import {
-  mapScanFailure,
   type ScanRequest,
   type ScanResult,
 } from "./jobs-scraper.contract";
-
-// Crawling and classification can take several minutes. Keep the ceiling here
-// so the AI service, not this client, decides when a scan has gone on too long.
-const SCAN_TIMEOUT_MS = 300_000;
 
 @Injectable()
 export class JobsScraperService {
@@ -34,46 +30,31 @@ export class JobsScraperService {
       })}`,
     );
 
-    let response: Response;
+    let result: ScanResult;
 
     try {
-      response = await fetch(`${env.AI_SERVICE_URL}/jobs-scraper/scan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(SCAN_TIMEOUT_MS),
-        body: JSON.stringify({
+      result = await callAiService<ScanResult>(
+        "/jobs-scraper/scan",
+        {
           config: request.config,
           scanId,
           scannedAt: request.scannedAt,
-        }),
-      });
-    } catch (error) {
-      this.logger.error(
-        `scan.unreachable ${JSON.stringify({
-          error: error instanceof Error ? error.message : String(error),
-          scanId,
-        })}`,
-      );
-
-      throw new HttpException(
-        {
-          error:
-            "The AI service is unreachable. Start the apps/ai FastAPI service.",
-          scanId,
         },
-        503,
+        "The job scan failed.",
       );
-    }
-
-    const body: unknown = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      const failure = mapScanFailure(response.status, body);
+    } catch (error) {
+      const failure =
+        error instanceof AiServiceError
+          ? { message: error.message, status: error.status }
+          : {
+              message:
+                "The AI service is unreachable. Start the apps/ai FastAPI service.",
+              status: 503,
+            };
 
       this.logger.error(
         `scan.failed ${JSON.stringify({
-          aiStatus: response.status,
-          error: failure.message,
+          error: error instanceof Error ? error.message : String(error),
           scanId,
         })}`,
       );
@@ -83,8 +64,6 @@ export class JobsScraperService {
         failure.status,
       );
     }
-
-    const result = body as ScanResult;
 
     this.logger.log(
       `scan.completed ${JSON.stringify({
