@@ -19,7 +19,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Quinchool",
-  description: "All-in-one tool platform of Quinch",
+  description:
+    "Quinchool is Quinch's personal all-in-one toolkit, bringing together the essential tools Quinch needs every day.",
 };
 
 export default function RootLayout({
