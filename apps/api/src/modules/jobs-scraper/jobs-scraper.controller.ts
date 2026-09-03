@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -16,6 +17,7 @@ import { JobsScraperRepository } from "./jobs-scraper.repository";
 import {
   type ClassificationUpdate,
   classificationUpdateSchema,
+  getUnsetScanCriteria,
   type JobScraperConfig,
   jobScraperConfigSchema,
   type JobScraperState,
@@ -75,6 +77,14 @@ export class JobsScraperController {
   @Post()
   async scan(@UserId() userId: string): Promise<JobScraperState> {
     const config = await this.repository.getConfig(userId);
+    const unset = getUnsetScanCriteria(config);
+
+    if (unset.length > 0) {
+      throw new BadRequestException({
+        error: `Edit your criteria to add ${unset.join(", ")} before scanning.`,
+      });
+    }
+
     const result = await this.jobsScraper.scan({
       config,
       scannedAt: new Date().toISOString(),

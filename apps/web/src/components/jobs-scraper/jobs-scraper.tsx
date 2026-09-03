@@ -32,11 +32,12 @@ import { useCareerProfile } from "@/hooks/use-career-profile";
 import { useJobsScraper } from "@/hooks/use-jobs-scraper";
 import { useResumeBuilder } from "@/hooks/use-resume-builder";
 import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
-import type {
-  JobScraperConfig,
-  JobScraperState,
-  JobSourceIssue,
-  SavedJob,
+import {
+  getUnsetScanCriteria,
+  type JobScraperConfig,
+  type JobScraperState,
+  type JobSourceIssue,
+  type SavedJob,
 } from "@/lib/jobs-scraper/schema";
 import { applyTailoredResume } from "@/lib/resume";
 
@@ -45,6 +46,7 @@ export function JobsScraper() {
   const { careerProfile, isLoading: isProfileLoading } = useCareerProfile();
   const { buildResume } = useResumeBuilder(careerProfile);
   const [generatingJobId, setGeneratingJobId] = useState<string | null>(null);
+  const unsetCriteria = state ? getUnsetScanCriteria(state.config) : [];
 
   async function generateResume(job: SavedJob) {
     if (!careerProfile) {
@@ -89,8 +91,12 @@ export function JobsScraper() {
             <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
               {state ? formatTimeRange(state.config) : "Loading criteria"}
-              {state ? <span aria-hidden="true">/</span> : null}
-              {state ? formatLocationModes(state.config) : null}
+              {state && formatLocationModes(state.config) ? (
+                <>
+                  <span aria-hidden="true">/</span>
+                  {formatLocationModes(state.config)}
+                </>
+              ) : null}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -113,7 +119,7 @@ export function JobsScraper() {
             </Button>
             <Button
               onClick={() => scan.mutate()}
-              disabled={scan.isPending || !state}
+              disabled={scan.isPending || !state || unsetCriteria.length > 0}
             >
               <HugeiconsIcon
                 icon={state?.lastScannedAt ? RefreshIcon : Search01Icon}
@@ -174,13 +180,32 @@ export function JobsScraper() {
             <Empty className="min-h-96 border">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <HugeiconsIcon icon={AiSearch02Icon} strokeWidth={2} />
+                  <HugeiconsIcon
+                    icon={unsetCriteria.length > 0 ? AiSettingIcon : AiSearch02Icon}
+                    strokeWidth={2}
+                  />
                 </EmptyMedia>
-                <EmptyTitle>No scan yet</EmptyTitle>
+                <EmptyTitle>
+                  {unsetCriteria.length > 0
+                    ? "Set your criteria"
+                    : "No scan yet"}
+                </EmptyTitle>
                 <EmptyDescription>
-                  Run a scan to save matching jobs to your account.
+                  {unsetCriteria.length > 0
+                    ? `Add ${unsetCriteria.join(", ")} to scan. Criteria are private to your account.`
+                    : "Run a scan to save matching jobs to your account."}
                 </EmptyDescription>
               </EmptyHeader>
+              {unsetCriteria.length > 0 ? (
+                <EmptyContent>
+                  <Button
+                    nativeButton={false}
+                    render={<Link href="/jobs-scraper/settings" />}
+                  >
+                    Edit criteria
+                  </Button>
+                </EmptyContent>
+              ) : null}
             </Empty>
           )}
         </section>

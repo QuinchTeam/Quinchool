@@ -2,6 +2,8 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  DEFAULT_JOB_SCRAPER_CONFIG,
+  getUnsetScanCriteria,
   jobScraperConfigSchema,
   mapScanFailure,
   scanRequestSchema,
@@ -30,15 +32,22 @@ test("dedupes criteria case-insensitively and keeps the first spelling", () => {
   assert.deepEqual(parsed.roles, ["Software Engineer", "Full Stack Engineer"]);
 });
 
-test("rejects a config with no location and work mode selected", () => {
-  const parsed = jobScraperConfigSchema.safeParse({
-    ...validConfig,
-    worldwideWorkModes: [],
-    philippinesWorkModes: [],
-  });
+test("an empty config stores and reads back, so a new account has one", () => {
+  const parsed = jobScraperConfigSchema.safeParse(DEFAULT_JOB_SCRAPER_CONFIG);
 
-  assert.equal(parsed.success, false);
-  assert.match(parsed.error!.issues[0]!.message, /at least one location/);
+  assert.equal(parsed.success, true);
+});
+
+test("a config missing what a scan needs names every unset criterion", () => {
+  const unset = getUnsetScanCriteria(DEFAULT_JOB_SCRAPER_CONFIG);
+
+  assert.deepEqual(unset, ["a role", "a level", "a location and work mode"]);
+});
+
+test("a filled config has nothing left to set", () => {
+  const config = jobScraperConfigSchema.parse(validConfig);
+
+  assert.deepEqual(getUnsetScanCriteria(config), []);
 });
 
 test("a CUSTOM range needs both dates", () => {

@@ -20,16 +20,16 @@ export const JOB_CLASSIFICATIONS = ["MATCH", "POTENTIAL", "REJECTED"] as const;
 
 const criterionSchema = z.string().trim().min(1).max(80);
 const criteriaSchema = z.array(criterionSchema).max(30).transform(uniqueStrings);
-const requiredCriteriaSchema = z
-  .array(criterionSchema)
-  .min(1)
-  .max(30)
-  .transform(uniqueStrings);
 
+/**
+ * Every criteria list may be empty here: a new account starts with nothing
+ * filled in, and a half-finished config is still worth storing. What a scan
+ * actually needs is `isScannableConfig`, checked at the scan boundary.
+ */
 export const jobScraperConfigSchema = z
   .object({
-    roles: requiredCriteriaSchema,
-    includedLevels: requiredCriteriaSchema,
+    roles: criteriaSchema,
+    includedLevels: criteriaSchema,
     requiredTechnologies: criteriaSchema,
     excludedLevels: criteriaSchema,
     excludedTechnologies: criteriaSchema,
@@ -43,17 +43,6 @@ export const jobScraperConfigSchema = z
       .transform(uniqueStrings),
   })
   .superRefine((value, context) => {
-    if (
-      value.worldwideWorkModes.length === 0 &&
-      value.philippinesWorkModes.length === 0
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "Select at least one location and work mode.",
-        path: ["worldwideWorkModes"],
-      });
-    }
-
     if (value.timeRange !== "CUSTOM") {
       return;
     }
@@ -157,65 +146,40 @@ function uniqueStrings<T extends string>(values: T[]): T[] {
 }
 
 /**
- * What a first-time user starts with. Ported from DEFAULT_JOB_SCRAPER_CONFIG in
- * apps/web, which no longer owns the criteria now that the API stores them.
+ * What a first-time user starts with: nothing. Criteria are personal, so the
+ * app asks rather than guesses. Only the two things that are not a preference —
+ * which boards exist, and a sane window — come pre-filled.
  */
 export const DEFAULT_JOB_SCRAPER_CONFIG: JobScraperConfig = {
-  roles: [
-    "Software Developer",
-    "Full Stack Developer",
-    "Software Engineer",
-    "Full Stack Engineer",
-  ],
-  includedLevels: ["Entry", "Junior", "Mid"],
-  requiredTechnologies: [
-    "React",
-    "Next.js",
-    "TypeScript",
-    "Node.js",
-    "Express",
-    "NestJS",
-    "FastAPI",
-    "AI",
-    "LLM",
-    "PostgreSQL",
-    "MySQL",
-    "SQL",
-  ],
-  excludedLevels: [
-    "Senior",
-    "Sr",
-    "Lead",
-    "Manager",
-    "Staff",
-    "Principal",
-    "Director",
-    "Head",
-    "CTO",
-  ],
-  excludedTechnologies: [
-    "C#",
-    ".NET",
-    "dotnet",
-    "Java",
-    "OOP",
-    "object-oriented programming",
-    "NoSQL",
-    "MongoDB",
-    "DynamoDB",
-    "Cassandra",
-    "Firestore",
-    "Cosmos DB",
-    "Neo4j",
-    "Redis",
-  ],
+  roles: [],
+  includedLevels: [],
+  requiredTechnologies: [],
+  excludedLevels: [],
+  excludedTechnologies: [],
   sources: [...JOB_SOURCES],
   timeRange: "TODAY",
   customStartDate: null,
   customEndDate: null,
-  worldwideWorkModes: ["Remote"],
-  philippinesWorkModes: ["Remote", "Hybrid"],
+  worldwideWorkModes: [],
+  philippinesWorkModes: [],
 };
+
+/**
+ * Whether a config can produce a scan. A search URL is built per role, filtered
+ * by work mode, so those cannot be empty; levels are what the classifier grades
+ * against. The AI service enforces the same four, and answers 422 without them.
+ */
+export function getUnsetScanCriteria(config: JobScraperConfig): string[] {
+  return [
+    config.roles.length === 0 ? "a role" : "",
+    config.includedLevels.length === 0 ? "a level" : "",
+    config.sources.length === 0 ? "a source" : "",
+    config.worldwideWorkModes.length === 0 &&
+    config.philippinesWorkModes.length === 0
+      ? "a location and work mode"
+      : "",
+  ].filter(Boolean);
+}
 
 export const jobClassificationSchema = z.enum(JOB_CLASSIFICATIONS);
 

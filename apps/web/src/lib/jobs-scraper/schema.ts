@@ -14,16 +14,16 @@ const criteriaSchema = z
   .array(criterionSchema)
   .max(30)
   .transform(uniqueStrings);
-const requiredCriteriaSchema = z
-  .array(criterionSchema)
-  .min(1)
-  .max(30)
-  .transform(uniqueStrings);
 
+/**
+ * Every criteria list may be empty: a new account starts with nothing filled
+ * in, and a half-finished config is still worth saving. Running a scan is what
+ * needs the criteria set — see getUnsetScanCriteria.
+ */
 export const jobScraperConfigSchema = z
   .object({
-    roles: requiredCriteriaSchema,
-    includedLevels: requiredCriteriaSchema,
+    roles: criteriaSchema,
+    includedLevels: criteriaSchema,
     requiredTechnologies: criteriaSchema,
     excludedLevels: criteriaSchema,
     excludedTechnologies: criteriaSchema,
@@ -39,17 +39,6 @@ export const jobScraperConfigSchema = z
       .transform(uniqueStrings),
   })
   .superRefine((value, context) => {
-    if (
-      value.worldwideWorkModes.length === 0 &&
-      value.philippinesWorkModes.length === 0
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "Select at least one location and work mode.",
-        path: ["worldwideWorkModes"],
-      });
-    }
-
     if (value.timeRange !== "CUSTOM") {
       return;
     }
@@ -84,6 +73,22 @@ export const jobScraperConfigSchema = z
   });
 
 export type JobScraperConfig = z.infer<typeof jobScraperConfigSchema>;
+
+/**
+ * The criteria a scan cannot run without, in the words the prompt uses. The API
+ * checks the same four before it calls the AI service.
+ */
+export function getUnsetScanCriteria(config: JobScraperConfig): string[] {
+  return [
+    config.roles.length === 0 ? "a role" : "",
+    config.includedLevels.length === 0 ? "a level" : "",
+    config.sources.length === 0 ? "a source" : "",
+    config.worldwideWorkModes.length === 0 &&
+    config.philippinesWorkModes.length === 0
+      ? "a location and work mode"
+      : "",
+  ].filter(Boolean);
+}
 
 export const JOB_CLASSIFICATIONS = ["MATCH", "POTENTIAL", "REJECTED"] as const;
 

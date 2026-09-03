@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useJobsScraper } from "@/hooks/use-jobs-scraper";
 import {
   getTodayInManila,
+  getUnsetScanCriteria,
   JOB_SOURCES,
   JOB_TIME_RANGES,
   JOB_WORK_MODES,
@@ -103,8 +104,13 @@ export function JobScraperSettings() {
 
     try {
       const saved = await saveConfig.mutateAsync(parsed.data);
+      const unset = getUnsetScanCriteria(saved.config);
       setDraft(structuredClone(saved.config));
-      setMessage("Settings saved.");
+      setMessage(
+        unset.length > 0
+          ? `Settings saved. Add ${unset.join(", ")} before a scan can run.`
+          : "Settings saved.",
+      );
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Settings could not be saved.",
@@ -258,7 +264,6 @@ export function JobScraperSettings() {
           <EditableCriteria
             label="Role"
             items={draft.roles}
-            required
             onChange={(items) => updateCriteria("roles", items)}
           />
         </SettingsSection>
@@ -267,7 +272,6 @@ export function JobScraperSettings() {
           <EditableCriteria
             label="Included level"
             items={draft.includedLevels}
-            required
             onChange={(items) => updateCriteria("includedLevels", items)}
           />
           <EditableCriteria
@@ -293,7 +297,7 @@ export function JobScraperSettings() {
         <div className="flex min-h-20 items-center justify-between gap-4 py-5">
           <p
             className={
-              message === "Settings saved."
+              message.startsWith("Settings saved")
                 ? "text-sm text-primary"
                 : "text-sm text-destructive"
             }
@@ -361,12 +365,10 @@ function EditableCriteria({
   items,
   label,
   onChange,
-  required = false,
 }: {
   items: string[];
   label: string;
   onChange: (items: string[]) => void;
-  required?: boolean;
 }) {
   const [newItem, setNewItem] = useState("");
 
@@ -411,7 +413,6 @@ function EditableCriteria({
               variant="ghost"
               aria-label={`Remove ${item}`}
               title={`Remove ${item}`}
-              disabled={required && items.length === 1}
               onClick={() =>
                 onChange(items.filter((_, itemIndex) => itemIndex !== index))
               }
