@@ -61,11 +61,13 @@ jobs:
       - name: Build and push
         env:
           IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/quinchool/${{ matrix.service }}:${{ github.sha }}
-          # Read by the web build's --secret mount, so the token never becomes
-          # an image layer. BuildKit is what makes that mount available.
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           DOCKER_BUILDKIT: "1"
         run: |
+          if [ "${{ matrix.service }}" = "web" ]; then
+            # Used only by the web build's BuildKit secret mount; never written
+            # to the image or command output.
+            export SENTRY_AUTH_TOKEN="$(gcloud secrets versions access latest --secret=sentry-auth-token)"
+          fi
           docker build \
             --file apps/${{ matrix.service }}/Dockerfile \
             ${{ matrix.buildArgs }} \

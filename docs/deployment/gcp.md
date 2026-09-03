@@ -93,7 +93,8 @@ for name in \
   database-url better-auth-secret \
   gemini-api-key cloudflare-account-id cloudflare-api-token \
   openrouter-api-key groq-api-key \
-  langfuse-public-key langfuse-secret-key
+  langfuse-public-key langfuse-secret-key \
+  sentry-auth-token
 do
   printf '%s' "<value>" | gcloud secrets create "$name" --data-file=-
 done
@@ -120,6 +121,10 @@ for role in roles/run.admin roles/artifactregistry.writer; do
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$DEPLOYER" --role="$role"
 done
+
+# Build-time only: upload Sentry source maps without storing the token in GitHub.
+gcloud secrets add-iam-policy-binding sentry-auth-token \
+  --member="serviceAccount:$DEPLOYER" --role=roles/secretmanager.secretAccessor
 
 # The deployer has to act as the runtime account to deploy services that use it.
 gcloud iam service-accounts add-iam-policy-binding "$RUNTIME" \
@@ -215,11 +220,10 @@ secrets live in Secret Manager and are mounted by Cloud Run.
 | `SENTRY_ORG` | Copy from `apps/web/.env` |
 | `SENTRY_PROJECT` | Copy from `apps/web/.env` |
 
-One repository *secret* is also needed — `SENTRY_AUTH_TOKEN`, from
-`apps/web/.env`. It is the only value here that is genuinely sensitive: it
-uploads source maps during the web build, and is mounted into that one build
-step rather than passed as a build arg so it never lands in image history.
-Without it the build still succeeds and just skips the upload.
+`SENTRY_AUTH_TOKEN` is stored as the `sentry-auth-token` Secret Manager secret.
+The deployer reads it only during the web build to upload source maps; BuildKit
+mounts it as a secret so it never lands in image history. Without it the build
+fails before building an image.
 
 Sentry DSNs are not secrets — the client one is shipped to every browser — so
 they stay variables.
