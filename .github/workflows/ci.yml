@@ -1,4 +1,4 @@
-name: CI
+name: "🧪 CI"
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   tailwind-tokens:
-    name: No Tailwind arbitrary values
+    name: "🎨 Reject arbitrary Tailwind values"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

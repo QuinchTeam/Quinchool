@@ -1,4 +1,4 @@
-name: Deploy
+name: "🚀 Deploy"
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy ${{ matrix.service }}
+    name: ${{ matrix.label }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -21,6 +21,7 @@ jobs:
           # Private: only the API calls it, with an ID token. Generation is
           # slow, so the request timeout matches the API's own client timeout.
           - service: ai
+            label: "🤖 AI"
             flags: >-
               --no-allow-unauthenticated
               --memory=2Gi
@@ -29,12 +30,14 @@ jobs:
               --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
           # Public: the browser calls it directly with the session cookie.
           - service: api
+            label: "⚙️ API"
             flags: >-
               --allow-unauthenticated
               --timeout=300
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }}
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest
           - service: web
+            label: "🌐 Web"
             buildArgs: >-
               --build-arg NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
               --build-arg NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
