@@ -25,7 +25,8 @@ async function fetchCareerProfile(
     throw new Error(body?.error ?? "Career profile request failed");
   }
 
-  return response.json() as Promise<CareerProfileValues | null>;
+  const body = await response.text();
+  return body ? (JSON.parse(body) as CareerProfileValues | null) : null;
 }
 
 export function useCareerProfile() {
