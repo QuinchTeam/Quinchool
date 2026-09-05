@@ -15,6 +15,73 @@ datasource db {
   provider = "postgresql"
 }
 
+enum FinanceWalletType {
+  CASH
+  EWALLET
+  TRADITIONAL_BANK
+  DIGITAL_BANK
+}
+
+enum FinanceTransactionType {
+  INCOME
+  EXPENSE
+}
+
+model FinanceWallet {
+  id             String            @id @default(cuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String            @db.VarChar(80)
+  type           FinanceWalletType
+  color          String            @db.VarChar(7)
+  openingBalance Decimal           @default(0) @db.Decimal(18, 2)
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @db.Timestamptz(3)
+  transactions   FinanceTransaction[]
+
+  @@unique([id, userId])
+  @@index([userId, sortOrder, id])
+  @@map("finance_wallet")
+}
+
+model FinanceLabel {
+  id             String                 @id @default(cuid())
+  userId         String
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String                 @db.VarChar(120)
+  normalizedName String                 @db.VarChar(240)
+  type           FinanceTransactionType
+  createdAt      DateTime               @default(now()) @db.Timestamptz(3)
+  transactions   FinanceTransaction[]
+
+  @@unique([userId, type, normalizedName])
+  @@unique([id, userId, type])
+  @@map("finance_label")
+}
+
+model FinanceTransaction {
+  id         String                 @id @default(cuid())
+  userId     String
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId   String
+  wallet     FinanceWallet          @relation(fields: [walletId, userId], references: [id, userId], onDelete: Restrict)
+  labelId    String
+  label      FinanceLabel           @relation(fields: [labelId, userId, type], references: [id, userId, type], onDelete: Restrict)
+  type       FinanceTransactionType
+  amount     Decimal                @db.Decimal(18, 2)
+  notes      String?                @db.VarChar(1000)
+  occurredAt DateTime               @db.Timestamptz(3)
+  createdAt  DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime               @updatedAt @db.Timestamptz(3)
+
+  @@index([userId, occurredAt(sort: Desc), id(sort: Desc)])
+  @@index([userId, walletId, occurredAt(sort: Desc), id(sort: Desc)])
+  @@index([userId, type, occurredAt(sort: Desc), id(sort: Desc)])
+  @@index([labelId, userId, type])
+  @@map("finance_transaction")
+}
+
 // better-auth core schema for the email + password setup
 // (user, session, account, verification).
 
@@ -31,6 +98,9 @@ model User {
   careerProfile    CareerProfile?
   jobScraperConfig JobScraperConfig?
   scrapedJobs      ScrapedJob[]
+  financeWallets   FinanceWallet[]
+  financeLabels    FinanceLabel[]
+  financeTransactions FinanceTransaction[]
 
   @@map("user")
 }
