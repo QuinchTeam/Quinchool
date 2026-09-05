@@ -4,6 +4,7 @@ import { AppController } from "./app.controller";
 import { BuildResumeModule } from "./modules/build-resume/build-resume.module";
 import { CareerProfileModule } from "./modules/career-profile/career-profile.module";
 import { ChatbotModule } from "./modules/chatbot/chatbot.module";
+import { FinanceTrackerModule } from "./modules/finance-tracker/finance-tracker.module";
 import { JobsScraperModule } from "./modules/jobs-scraper/jobs-scraper.module";
 import { PrismaModule } from "./core/database/prisma/prisma.module";
 import { TextGenerationModule } from "./modules/text-generation/text-generation.module";
@@ -15,6 +16,7 @@ import { TextGenerationModule } from "./modules/text-generation/text-generation.
     BuildResumeModule,
     CareerProfileModule,
     ChatbotModule,
+    FinanceTrackerModule,
     JobsScraperModule,
     TextGenerationModule,
   ],
