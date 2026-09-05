@@ -6,6 +6,7 @@ import {
   ChatBotIcon,
   FilePenIcon,
   Home01Icon,
+  Wallet01Icon,
   WorkflowSquareIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -116,6 +117,12 @@ export function AppSidebar() {
               <SidebarMenuButton render={<Link href="/node-based-flow" />}>
                 <HugeiconsIcon icon={WorkflowSquareIcon} strokeWidth={2} />
                 <span>Node Base Flow</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link href="/finance-tracker" />}>
+                <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />
+                <span>Finance Tracker</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

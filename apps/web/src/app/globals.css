@@ -49,6 +49,7 @@
   --spacing-a4-width: 210mm;
   --spacing-a4-height: 297mm;
   --spacing-a4-gutter: 12mm;
+  --spacing-finance-dialog: 85dvh;
 }
 
 :root {
@@ -129,5 +130,6 @@
   }
   html {
     @apply font-sans;
+    scrollbar-gutter: stable;
   }
 }
