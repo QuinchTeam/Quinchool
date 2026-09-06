@@ -30,14 +30,14 @@ export default function RegisterPage() {
   const router = useRouter();
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { name: "", email: "", password: "" },
   });
 
   async function onSubmit(values: RegisterValues) {
     const { error } = await signUp.email({
       email: values.email,
       password: values.password,
-      name: values.email.split("@")[0],
+      name: values.name,
     });
 
     if (error) {
@@ -60,6 +60,19 @@ export default function RegisterPage() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input autoComplete="name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"

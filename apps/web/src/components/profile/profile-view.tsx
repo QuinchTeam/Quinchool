@@ -1,14 +1,31 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SentryFeedbackButton } from "@/components/sentry-feedback-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { signOut, useSession } from "@/lib/auth-client";
+import { signOut, updateUser, useSession } from "@/lib/auth-client";
+import {
+  type ProfileNameValues,
+  profileNameSchema,
+} from "@/lib/validations/auth";
 
 const memberSince = new Intl.DateTimeFormat("en-PH", {
   dateStyle: "long",
@@ -28,7 +45,7 @@ function initialsOf(name: string) {
 
 export function ProfileView() {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending, refetch } = useSession();
   const user = session?.user;
 
   async function handleSignOut() {
@@ -62,12 +79,11 @@ export function ProfileView() {
                 {initialsOf(user.name)}
               </AvatarFallback>
             </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="break-words text-lg font-semibold">{user.name}</p>
-              <p className="break-all text-sm text-muted-foreground">
-                {user.email}
-              </p>
-            </div>
+            <NameEditor
+              email={user.email}
+              name={user.name}
+              onSaved={() => refetch()}
+            />
           </section>
           <dl className="grid min-w-0 gap-4 sm:grid-cols-2">
             <Detail label="Email">
@@ -117,6 +133,93 @@ export function ProfileView() {
         </p>
       )}
     </div>
+  );
+}
+
+/** Shows the name and email, and swaps the name for a one-field form on edit.
+ * better-auth serves /update-user out of the box, so there is no API route. */
+function NameEditor({
+  email,
+  name,
+  onSaved,
+}: {
+  email: string;
+  name: string;
+  onSaved: () => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const form = useForm<ProfileNameValues>({
+    resolver: zodResolver(profileNameSchema),
+    values: { name },
+  });
+
+  async function onSubmit(values: ProfileNameValues) {
+    const { error } = await updateUser({ name: values.name });
+
+    if (error) {
+      toast.error(error.message ?? "Could not update your name");
+      return;
+    }
+    toast.success("Name updated");
+    setIsEditing(false);
+    onSaved();
+  }
+
+  if (!isEditing) {
+    return (
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-lg font-semibold">{name}</p>
+          <p className="break-all text-sm text-muted-foreground">{email}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+          Edit name
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex min-w-0 flex-1 flex-col gap-3"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input autoComplete="name" autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            size="sm"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              form.reset({ name });
+              setIsEditing(false);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 
