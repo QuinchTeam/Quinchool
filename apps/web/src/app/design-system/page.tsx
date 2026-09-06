@@ -47,6 +47,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -553,20 +554,21 @@ export default function DesignSystem() {
             Open Menu
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} />
-              Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <HugeiconsIcon icon={Settings02Icon} strokeWidth={2} />
-              Settings
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} />
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HugeiconsIcon icon={Settings02Icon} strokeWidth={2} />
+                Settings
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <HugeiconsIcon icon={Logout03Icon} strokeWidth={2} />
