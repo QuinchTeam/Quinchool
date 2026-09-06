@@ -214,7 +214,7 @@ function StringListInput({
             {entry}
             <button
               type="button"
-              className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
               onClick={() =>
                 onChange(value.filter((candidate) => candidate !== entry))
               }

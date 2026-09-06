@@ -63,7 +63,7 @@ export function TextModelSelector({
           <ComboboxTrigger
             render={
               <Button
-                className="h-auto w-full justify-between py-2"
+                className="h-auto w-full justify-between border-input bg-card py-2 dark:bg-input/30"
                 type="button"
                 variant="outline"
               />
@@ -87,7 +87,7 @@ export function TextModelSelector({
 
               return (
                 <ComboboxItem key={model.id} value={model}>
-                  <div className="rounded-lg bg-muted p-2">
+                  <div className="rounded-lg bg-background p-2">
                     <ModelIcon modelId={model.id} />
                   </div>
                   <span className="grid min-w-0 gap-1">
@@ -148,7 +148,7 @@ function CanvasTextModelSelector({
         <button
           aria-expanded={open}
           aria-haspopup="listbox"
-          className="nodrag flex h-9 w-full items-center justify-between rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="nodrag flex h-9 w-full items-center justify-between rounded-md border border-input bg-card px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 dark:bg-input/30"
           onClick={() => setOpen((current) => !current)}
           onPointerDown={(event) => event.stopPropagation()}
           type="button"

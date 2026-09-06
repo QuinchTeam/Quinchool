@@ -410,7 +410,7 @@ export default function DesignSystem() {
               Manage your notification preferences from the settings page.
             </p>
           </CardContent>
-          <CardFooter className="gap-2">
+          <CardFooter>
             <Button variant="outline">Dismiss</Button>
             <Button>View</Button>
           </CardFooter>
