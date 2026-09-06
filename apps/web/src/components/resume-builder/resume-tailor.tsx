@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  CareerProfileFallback,
-  ResumePdfPreview,
-} from "@/components/resume-builder/resume-pdf-preview";
+import { CareerProfileFallback } from "@/components/career-profile/career-profile-fallback";
+import { ResumePdfPreview } from "@/components/resume-builder/resume-pdf-preview";
 import { TextModelSelector } from "@/components/text-model-selector";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

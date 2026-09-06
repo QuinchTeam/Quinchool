@@ -4,10 +4,8 @@ import { Refresh01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState } from "react";
 
-import {
-  CareerProfileFallback,
-  ResumePdfPreview,
-} from "@/components/resume-builder/resume-pdf-preview";
+import { CareerProfileFallback } from "@/components/career-profile/career-profile-fallback";
+import { ResumePdfPreview } from "@/components/resume-builder/resume-pdf-preview";
 import {
   type SortableCheckboxItem,
   SortableCheckboxList,

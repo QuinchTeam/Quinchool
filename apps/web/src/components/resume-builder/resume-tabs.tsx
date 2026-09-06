@@ -12,11 +12,6 @@ const RESUME_TABS = [
     href: "/resume/resume-tailor",
   },
   {
-    value: "/resume/career-profile",
-    label: "Career Profile",
-    href: "/resume/career-profile",
-  },
-  {
     value: "/resume/resume-builder",
     label: "Resume Builder",
     href: "/resume/resume-builder",
