@@ -7,15 +7,17 @@ export const chatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
 });
 
-export const chatbotRequestSchema = z
-  .object({
-    messages: z.array(chatMessageSchema).min(1).max(24),
-    modelId: z.enum(TEXT_GENERATION_MODEL_IDS),
-  })
-  .refine((request) => request.messages.at(-1)?.role === "user", {
-    message: "The last message must be from the user",
-    path: ["messages"],
-  });
+export const chatbotRequestSchema = z.object({
+  /** Absent for the first message of a new chat, which creates one. */
+  chatId: z.string().trim().min(1).optional(),
+  content: z.string().trim().min(1).max(8_000),
+  modelId: z.enum(TEXT_GENERATION_MODEL_IDS),
+});
+
+export const chatTitleSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+});
 
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatbotRequest = z.infer<typeof chatbotRequestSchema>;
+export type ChatTitle = z.infer<typeof chatTitleSchema>;

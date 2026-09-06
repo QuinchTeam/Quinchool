@@ -1,20 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { chatbotRequestSchema } from "./chatbot.ts";
+import { chatbotRequestSchema, chatTitleSchema } from "./chatbot.ts";
 
-test("accepts user-ended chat history and rejects assistant-ended history", () => {
+test("a first message needs no chat id, and a follow-up carries one", () => {
   const request = {
-    messages: [{ content: "Help me plan my week.", role: "user" }],
+    content: "Help me plan my week.",
     modelId: "gemini-3.1-flash-lite",
   };
 
   assert.equal(chatbotRequestSchema.safeParse(request).success, true);
   assert.equal(
-    chatbotRequestSchema.safeParse({
-      ...request,
-      messages: [{ content: "Here is the plan.", role: "assistant" }],
-    }).success,
+    chatbotRequestSchema.safeParse({ ...request, chatId: "chat-1" }).success,
+    true,
+  );
+  assert.equal(
+    chatbotRequestSchema.safeParse({ ...request, content: "   " }).success,
     false,
   );
+});
+
+test("a chat title cannot be blank", () => {
+  assert.equal(chatTitleSchema.safeParse({ title: "Week plan" }).success, true);
+  assert.equal(chatTitleSchema.safeParse({ title: "  " }).success, false);
 });

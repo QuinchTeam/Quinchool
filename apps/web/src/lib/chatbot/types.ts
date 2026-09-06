@@ -34,16 +34,30 @@ export interface DisplayMessage extends ChatMessage {
   pendingAction?: PendingToolAction;
   /** Set once the action is confirmed or dismissed, which retires the form. */
   actionOutcome?: "done" | "dismissed";
+  /** Absent until the server has stored it, which is what the optimistic user
+   * bubble and the streaming-free "Thinking..." gap look like. */
+  pending?: boolean;
 }
 
-export interface ChatbotResponse {
-  error?: string;
-  text?: string;
-  toolUsed?: boolean;
-  pendingAction?: PendingToolAction;
+/** A row in the chat list sidebar. */
+export interface ChatSummary {
+  id: string;
+  title: string | null;
+  updatedAt: string;
 }
 
-export interface ChatbotReply {
+/** A stored chat with its full history. */
+export interface StoredChat {
+  id: string;
+  title: string | null;
+  messages: DisplayMessage[];
+}
+
+/** What one send or confirmed action comes back as. */
+export interface ChatTurn {
+  chatId: string;
+  title: string | null;
+  messageId: string;
   text: string;
   toolUsed?: boolean;
   pendingAction?: PendingToolAction;

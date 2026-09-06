@@ -65,8 +65,8 @@ export function ChatMessage({
             action={pending}
             error={action.error}
             isPending={action.isPending}
-            onDismiss={() => action.dismiss(pending)}
-            onSubmit={(values) => action.submit(pending, values)}
+            onDismiss={() => action.dismiss(message)}
+            onSubmit={(values) => action.submit(message, values)}
           />
         ) : null}
         {message.actionOutcome ? (
