@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Open_Sans } from "next/font/google";
+import { Baloo_2, Geist_Mono, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -13,6 +13,11 @@ const openSans = Open_Sans({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const baloo2 = Baloo_2({
+  variable: "--font-baloo-2",
   subsets: ["latin"],
 });
 
@@ -30,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${openSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${openSans.variable} ${geistMono.variable} ${baloo2.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
