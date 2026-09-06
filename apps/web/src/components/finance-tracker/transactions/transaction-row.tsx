@@ -7,6 +7,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useDeleteTransaction } from "@/hooks/use-finance-tracker/use-transactions";
 import {
+  amountClassName,
   formatMoney,
   formatTransactionDate,
 } from "@/lib/finance-tracker/format";
@@ -64,9 +65,7 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
         <p
           className={cn(
             "break-all text-sm font-semibold tabular-nums",
-            income
-              ? "text-emerald-700 dark:text-emerald-400"
-              : "text-foreground",
+            amountClassName(transaction.type),
           )}
         >
           {income ? "+" : "-"}

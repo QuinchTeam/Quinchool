@@ -20,6 +20,16 @@ export function toLocalDateTime(value = new Date().toISOString()) {
   return local.toISOString().slice(0, 16);
 }
 
+/**
+ * How a signed amount reads: money in is emerald, money out is destructive.
+ * Shared so the dashboard and the tracker cannot drift apart.
+ */
+export function amountClassName(type: "INCOME" | "EXPENSE") {
+  return type === "INCOME"
+    ? "text-emerald-700 dark:text-emerald-400"
+    : "text-destructive";
+}
+
 export const WALLET_COLORS = [
   "#0f766e",
   "#2563eb",
