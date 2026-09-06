@@ -15,6 +15,53 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+}
+
+// Chatbot: one conversation per Chat, owned by a user.
+
+model Chat {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Null until the first exchange has been titled by the model.
+  title  String? @db.VarChar(120)
+  /// Rolling summary of every message at or before `summarizedUpTo`. Those
+  /// messages stay in the table for the user to read, but the model only ever
+  /// sees this instead of them.
+  summary        String?
+  summarizedUpTo Int      @default(0)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+  messages       ChatMessage[]
+
+  @@index([userId, updatedAt(sort: Desc), id(sort: Desc)])
+  @@map("chat")
+}
+
+model ChatMessage {
+  id       String          @id @default(cuid())
+  chatId   String
+  chat     Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role     ChatMessageRole
+  content  String
+  /// 1-based order within the chat. Also what `Chat.summarizedUpTo` points at.
+  position Int
+  modelId  String?
+  toolUsed Boolean         @default(false)
+  /// The confirmation form a write tool proposed, kept so the custom UI comes
+  /// back on reload exactly as the user left it.
+  pendingAction Json?
+  /// "done" or "dismissed" once the user has answered that form.
+  actionOutcome String?  @db.VarChar(16)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([chatId, position])
+  @@map("chat_message")
+}
+
 enum FinanceWalletType {
   CASH
   EWALLET
@@ -101,6 +148,7 @@ model User {
   financeWallets   FinanceWallet[]
   financeLabels    FinanceLabel[]
   financeTransactions FinanceTransaction[]
+  chats               Chat[]
 
   @@map("user")
 }

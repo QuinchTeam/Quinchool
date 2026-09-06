@@ -34,6 +34,15 @@ interface ToolResult {
   result: unknown;
 }
 
+/** One turn's worth of context: the recent window, plus the summary standing
+ * in for everything older. */
+export interface ChainInput {
+  messages: ChatMessage[];
+  modelId: TextGenerationModelId;
+  summary?: string;
+  userId: string;
+}
+
 const FALLBACK = "The assistant could not respond. Try again.";
 
 /**
@@ -49,11 +58,7 @@ export class ChatbotService {
 
   constructor(private readonly tools: ToolRegistry) {}
 
-  respond(input: {
-    messages: ChatMessage[];
-    modelId: TextGenerationModelId;
-    userId: string;
-  }): Promise<ChatbotResult> {
+  respond(input: ChainInput): Promise<ChatbotResult> {
     return this.runChain(input, []);
   }
 
@@ -63,7 +68,8 @@ export class ChatbotService {
    */
   async runAction(
     userId: string,
-    action: ToolAction,
+    action: Pick<ToolAction, "tool" | "arguments" | "values">,
+    context: Omit<ChainInput, "userId">,
   ): Promise<ChatbotResult> {
     const tool = this.tools.require(action.tool);
 
@@ -80,14 +86,9 @@ export class ChatbotService {
 
     const result = await tool.run(userId, args.data, values.data);
 
-    return this.runChain(
-      {
-        messages: action.messages,
-        modelId: action.modelId as TextGenerationModelId,
-        userId,
-      },
-      [{ name: tool.name, result }],
-    );
+    return this.runChain({ ...context, userId }, [
+      { name: tool.name, result },
+    ]);
   }
 
   /**
@@ -96,21 +97,13 @@ export class ChatbotService {
    * chain and comes back as a form, because nothing is saved without the user.
    */
   private async runChain(
-    {
-      messages,
-      modelId,
-      userId,
-    }: {
-      messages: ChatMessage[];
-      modelId: TextGenerationModelId;
-      userId: string;
-    },
+    { messages, modelId, summary, userId }: ChainInput,
     seed: ToolResult[],
   ): Promise<ChatbotResult> {
     const toolResults = [...seed];
 
     for (let step = 0; step < MAX_TOOL_STEPS; step += 1) {
-      const answer = await this.ask({ messages, modelId, toolResults });
+      const answer = await this.ask({ messages, modelId, summary, toolResults });
 
       if (!answer.toolCall) {
         return {
@@ -161,7 +154,7 @@ export class ChatbotService {
     this.logger.warn(`Tool chain hit the ${MAX_TOOL_STEPS} step cap`);
 
     // Out of steps, so answer with what has been gathered instead of looping.
-    const final = await this.ask({ messages, modelId, toolResults });
+    const final = await this.ask({ messages, modelId, summary, toolResults });
 
     return { ...stripToolCall(final), toolUsed: true };
   }
@@ -170,6 +163,7 @@ export class ChatbotService {
   protected ask(body: {
     messages: ChatMessage[];
     modelId: TextGenerationModelId;
+    summary?: string;
     toolResults: ToolResult[];
   }): Promise<AIChatbotResult> {
     return callAiService<AIChatbotResult>("/chatbot/respond", body, FALLBACK);
