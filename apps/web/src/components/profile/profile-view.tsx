@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/mode-toggle";
+import { SentryFeedbackButton } from "@/components/sentry-feedback-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,15 @@ export function ProfileView() {
               </p>
             </div>
             <ModeToggle />
+          </section>
+          <section className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-t pt-6">
+            <div className="min-w-0">
+              <h2 className="text-sm font-medium">Feedback</h2>
+              <p className="text-xs text-muted-foreground">
+                Something broken? Send a bug report with a screenshot.
+              </p>
+            </div>
+            <SentryFeedbackButton />
           </section>
           <div className="border-t pt-6">
             <Button variant="outline" onClick={handleSignOut}>

@@ -3,6 +3,7 @@
 import { MegaphoneIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,12 +20,13 @@ const SENTRY_FEEDBACK_OPTIONS = {
 export function SentryFeedbackButton() {
   const [isOpening, setIsOpening] = useState(false);
 
-  if (process.env.NODE_ENV !== "production") {
-    return null;
-  }
-
   async function handleClick() {
     if (isOpening) {
+      return;
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      toast.message("Bug reports are only available in production.");
       return;
     }
 
@@ -53,13 +55,12 @@ export function SentryFeedbackButton() {
   return (
     <Button
       type="button"
-      size="icon-lg"
-      aria-label="Report a bug"
+      variant="outline"
       disabled={isOpening}
       onClick={handleClick}
-      className="rounded-full"
     >
       <HugeiconsIcon icon={MegaphoneIcon} strokeWidth={2} />
+      Report a bug
     </Button>
   );
 }

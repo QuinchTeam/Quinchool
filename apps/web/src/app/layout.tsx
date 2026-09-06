@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist_Mono, Open_Sans } from "next/font/google";
 import "./globals.css";
 import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
-import { SentryFeedbackButton } from "@/components/sentry-feedback-button";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -44,9 +43,6 @@ export default function RootLayout({
           <TanstackQueryProvider>
             <TooltipProvider>
               {children}
-              <div className="fixed right-4 bottom-4 z-50">
-                <SentryFeedbackButton />
-              </div>
               <Toaster />
             </TooltipProvider>
           </TanstackQueryProvider>
