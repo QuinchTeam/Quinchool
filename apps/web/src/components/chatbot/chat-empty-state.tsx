@@ -18,7 +18,7 @@ export function ChatEmptyState({
   return (
     <section className="flex min-h-full w-full flex-col items-center justify-center gap-6 px-6 py-12 text-center">
       <Image
-        src="/quinchool-icon.webp"
+        src="/quinchool-icon-v2.webp"
         alt=""
         width={64}
         height={64}

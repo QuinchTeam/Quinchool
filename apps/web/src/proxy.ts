@@ -28,6 +28,6 @@ export const config = {
   // Keep framework and metadata image routes public. The app serves no API
   // routes of its own; /api is matched out because nothing lives there.
   matcher: [
-    "/((?!api|_next/static|_next/image|icon|apple-icon|opengraph-image|quinchool-icon.webp).*)",
+    "/((?!api|_next/static|_next/image|icon|apple-icon|opengraph-image|quinchool-icon-v2.webp).*)",
   ],
 };

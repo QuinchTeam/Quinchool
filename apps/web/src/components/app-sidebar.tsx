@@ -101,7 +101,7 @@ export function AppSidebar() {
       <SidebarHeader className="flex-row items-center justify-between group-data-[collapsible=icon]:justify-center">
         <div className="relative hidden size-8 shrink-0 items-center justify-center group-data-[collapsible=icon]:flex">
           <Image
-            src="/quinchool-icon.webp"
+            src="/quinchool-icon-v2.webp"
             alt=""
             width={32}
             height={32}
@@ -111,13 +111,15 @@ export function AppSidebar() {
         </div>
         <div className="flex min-w-0 items-center gap-2 px-2 py-1 group-data-[collapsible=icon]:hidden">
           <Image
-            src="/quinchool-icon.webp"
+            src="/quinchool-icon-v2.webp"
             alt=""
             width={32}
             height={32}
             className="size-8 shrink-0"
           />
-          <span className="truncate font-semibold">Quinchool</span>
+          <span className="truncate font-display text-2xl font-bold">
+            Quinchool
+          </span>
         </div>
         <SidebarTrigger className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
