@@ -15,7 +15,7 @@ export function FinanceDashboard() {
   const query = useFinanceOverview();
   const data = query.data;
   return (
-    <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-8 p-4 sm:p-6">
+    <div className="flex w-full min-w-0 flex-col gap-8 p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Finance Tracker</h1>
         <div className="flex flex-wrap items-center gap-2">

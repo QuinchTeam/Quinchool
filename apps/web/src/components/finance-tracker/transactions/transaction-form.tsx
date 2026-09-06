@@ -12,8 +12,8 @@ import { useSaveTransaction } from "@/hooks/use-finance-tracker/use-transactions
 import { useFinanceOverview } from "@/hooks/use-finance-tracker/use-wallets";
 import { toLocalDateTime } from "@/lib/finance-tracker/format";
 import {
-  transactionFormSchema,
   type TransactionFormValues,
+  transactionFormSchema,
 } from "@/lib/finance-tracker/schema";
 import type { Transaction } from "@/lib/finance-tracker/types";
 import { FinanceField } from "../shared/finance-field";

@@ -4,9 +4,8 @@ import { TransactionsLoading } from "../transactions/transaction-list";
 export function FinanceLoading() {
   return (
     <div
-      className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-8 p-4 sm:p-6"
-      role="status"
-      aria-label="Loading finance tracker"
+      className="flex w-full min-w-0 flex-col gap-8 p-6"
+      aria-busy="true"
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Finance Tracker</h1>
@@ -38,9 +37,8 @@ export function FinanceLoading() {
 export function FinanceHistoryLoading() {
   return (
     <div
-      className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6 p-4 sm:p-6"
-      role="status"
-      aria-label="Loading transaction history"
+      className="flex w-full min-w-0 flex-col gap-6 p-6"
+      aria-busy="true"
     >
       <div>
         <Skeleton className="h-8 w-40 rounded-md" />

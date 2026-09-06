@@ -153,8 +153,8 @@ export function Chatbot() {
 
   return (
     <div className="flex h-svh min-h-0 flex-col bg-background">
-      <header className="border-b bg-background px-4 py-3">
-        <div className="mx-auto flex max-w-4xl items-end justify-between gap-3">
+      <header className="border-b bg-background px-6 py-3">
+        <div className="flex w-full items-end justify-between gap-3">
           <div className="w-full max-w-xs">
             <TextModelSelector
               label="Model"
@@ -176,7 +176,7 @@ export function Chatbot() {
 
       <main className="min-h-0 flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <section className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center gap-6 px-4 py-12 text-center">
+          <section className="flex w-full min-h-full flex-col items-center justify-center gap-6 px-6 py-12 text-center">
             <Image
               src="/quinchool-icon.webp"
               alt=""
@@ -204,7 +204,7 @@ export function Chatbot() {
             </div>
           </section>
         ) : (
-          <div className="mx-auto grid max-w-3xl gap-8 px-4 py-8">
+          <div className="grid w-full gap-8 px-6 py-8">
             {messages.map((message) =>
               message.role === "user" ? (
                 <div key={message.id} className="flex justify-end">
@@ -253,9 +253,9 @@ export function Chatbot() {
         )}
       </main>
 
-      <footer className="border-t bg-background px-4 py-4">
+      <footer className="border-t bg-background px-6 py-4">
         <form
-          className="mx-auto max-w-3xl"
+          className="w-full"
           onSubmit={handleSubmit}
           aria-label="Chat message"
         >

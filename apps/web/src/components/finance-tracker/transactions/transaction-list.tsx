@@ -25,14 +25,10 @@ export function TransactionList({
 
 export function TransactionsLoading() {
   return (
-    <div
-      className="grid gap-3 py-4"
-      role="status"
-      aria-label="Loading transactions"
-    >
+    <output className="grid gap-3 py-4" aria-label="Loading transactions">
       {[1, 2, 3].map((row) => (
         <Skeleton key={row} className="h-16 w-full rounded-sm" />
       ))}
-    </div>
+    </output>
   );
 }
