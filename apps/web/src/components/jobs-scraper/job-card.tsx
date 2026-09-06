@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { SavedJob } from "@/lib/jobs-scraper/schema";
 import { cn } from "@/lib/utils";
 
@@ -29,95 +30,99 @@ export function JobCard({
   showClassification?: boolean;
 }) {
   return (
-    <article className="grid gap-4 p-5 sm:p-6 md:grid-cols-4">
-      <div className="grid min-w-0 gap-3 md:col-span-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {job.isNew ? <Badge>New</Badge> : null}
-          {showClassification ? (
-            <Badge
-              variant={
-                job.classification === "REJECTED" ? "destructive" : "secondary"
-              }
-            >
-              {CLASSIFICATION_LABELS[job.classification]}
-            </Badge>
-          ) : null}
-          {job.isManualClassification ? (
-            <Badge variant="outline">Set by you</Badge>
-          ) : null}
-          <Badge variant="outline">{job.source}</Badge>
-          <Badge variant="secondary">{job.workMode}</Badge>
-          <Badge variant="outline">{job.level}</Badge>
-          <Badge variant="outline">
-            {job.postedText ?? formatPostedDate(job.postedDate)}
-          </Badge>
-        </div>
-        <div>
-          <h3 className="text-base font-semibold">{job.title}</h3>
-          <p className="text-sm text-muted-foreground">{job.company}</p>
-        </div>
-        <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
-          <HugeiconsIcon
-            icon={Location01Icon}
-            className="mt-0.5 size-4 shrink-0"
-          />
-          {job.location}
-        </p>
-        <p className="text-sm leading-relaxed">{job.summary}</p>
-        {job.matchedSkills.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {job.matchedSkills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
+    <Card>
+      <CardContent className="grid gap-4 md:grid-cols-4">
+        <div className="grid min-w-0 gap-3 md:col-span-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {job.isNew ? <Badge>New</Badge> : null}
+            {showClassification ? (
+              <Badge
+                variant={
+                  job.classification === "REJECTED"
+                    ? "destructive"
+                    : "secondary"
+                }
+              >
+                {CLASSIFICATION_LABELS[job.classification]}
               </Badge>
-            ))}
+            ) : null}
+            {job.isManualClassification ? (
+              <Badge variant="outline">Set by you</Badge>
+            ) : null}
+            <Badge variant="outline">{job.source}</Badge>
+            <Badge variant="secondary">{job.workMode}</Badge>
+            <Badge variant="outline">{job.level}</Badge>
+            <Badge variant="outline">
+              {job.postedText ?? formatPostedDate(job.postedDate)}
+            </Badge>
           </div>
-        ) : null}
-        {job.reviewReasons.length > 0 ? (
-          <div className="rounded-md border bg-muted/40 p-3">
-            <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-              {job.classification === "REJECTED"
-                ? "Why it was rejected"
-                : "Needs review"}
-            </p>
-            <ul className="grid list-disc gap-1 pl-4 text-sm text-muted-foreground">
-              {job.reviewReasons.map((reason) => (
-                <li key={reason}>{reason}</li>
+          <div>
+            <h3 className="text-base font-semibold">{job.title}</h3>
+            <p className="text-sm text-muted-foreground">{job.company}</p>
+          </div>
+          <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
+            <HugeiconsIcon
+              icon={Location01Icon}
+              className="mt-0.5 size-4 shrink-0"
+            />
+            {job.location}
+          </p>
+          <p className="text-sm leading-relaxed">{job.summary}</p>
+          {job.matchedSkills.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {job.matchedSkills.map((skill) => (
+                <Badge key={skill} variant="secondary">
+                  {skill}
+                </Badge>
               ))}
-            </ul>
-          </div>
-        ) : null}
-        <p className="text-xs text-muted-foreground">
-          Last seen {formatDateTime(job.lastSeenAt)}
-        </p>
-        {footer}
-      </div>
-      <div className="grid content-start gap-2 md:justify-end">
-        {onGenerateResume ? (
-          <Button
-            type="button"
-            disabled={resumeDisabled || isGeneratingResume}
-            onClick={onGenerateResume}
-            className="w-full md:w-auto"
+            </div>
+          ) : null}
+          {job.reviewReasons.length > 0 ? (
+            <div className="rounded-md border bg-muted/40 p-3">
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                {job.classification === "REJECTED"
+                  ? "Why it was rejected"
+                  : "Needs review"}
+              </p>
+              <ul className="grid list-disc gap-1 pl-4 text-sm text-muted-foreground">
+                {job.reviewReasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <p className="text-xs text-muted-foreground">
+            Last seen {formatDateTime(job.lastSeenAt)}
+          </p>
+          {footer}
+        </div>
+        <div className="grid content-start gap-2 md:justify-end">
+          {onGenerateResume ? (
+            <Button
+              type="button"
+              disabled={resumeDisabled || isGeneratingResume}
+              onClick={onGenerateResume}
+              className="w-full md:w-auto"
+            >
+              <HugeiconsIcon icon={AiBeautifyIcon} strokeWidth={2} />
+              {isGeneratingResume ? "Generating..." : "Generate Resume"}
+            </Button>
+          ) : null}
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noreferrer"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "w-full md:w-auto",
+            )}
           >
-            <HugeiconsIcon icon={AiBeautifyIcon} strokeWidth={2} />
-            {isGeneratingResume ? "Generating..." : "Generate Resume"}
-          </Button>
-        ) : null}
-        <a
-          href={job.url}
-          target="_blank"
-          rel="noreferrer"
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "w-full md:w-auto",
-          )}
-        >
-          View job
-          <HugeiconsIcon icon={SquareArrowUpRightIcon} strokeWidth={2} />
-        </a>
-      </div>
-    </article>
+            View job
+            <HugeiconsIcon icon={SquareArrowUpRightIcon} strokeWidth={2} />
+          </a>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

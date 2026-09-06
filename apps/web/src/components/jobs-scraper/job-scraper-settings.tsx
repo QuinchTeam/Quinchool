@@ -62,7 +62,7 @@ export function JobScraperSettings() {
 
   if (isError) {
     return (
-      <main className="mx-auto grid max-w-5xl gap-4 px-4 py-8 sm:px-6">
+      <main className="grid w-full gap-4 px-6 py-8">
         <h1 className="text-xl font-semibold">Scraper settings unavailable</h1>
         <Button variant="outline" onClick={() => refetch()}>
           Try again
@@ -119,9 +119,9 @@ export function JobScraperSettings() {
   }
 
   return (
-    <main className="min-h-full bg-muted/20">
+    <main className="min-h-full">
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="grid gap-2">
             <Link
               href="/jobs-scraper"
@@ -151,7 +151,7 @@ export function JobScraperSettings() {
       <form
         id="job-scraper-settings"
         onSubmit={handleSubmit}
-        className="mx-auto max-w-5xl px-4 sm:px-6"
+        className="w-full px-6"
       >
         <SettingsSection
           title="Time window"
@@ -446,7 +446,7 @@ function EditableCriteria({
 
 function SettingsLoading() {
   return (
-    <main className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:px-6">
+    <main className="grid w-full gap-8 px-6 py-8">
       <div className="grid gap-2">
         <Skeleton className="h-7 w-48" />
         <Skeleton className="h-4 w-80 max-w-full" />

@@ -14,6 +14,7 @@ import {
   JobCard,
 } from "@/components/jobs-scraper/job-card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -40,9 +41,9 @@ export function JobReview() {
     ) ?? [];
 
   return (
-    <main className="min-h-full bg-muted/20">
+    <main className="min-h-full">
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid gap-2">
             <Link
               href="/jobs-scraper"
@@ -61,7 +62,7 @@ export function JobReview() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
+      <div className="grid w-full gap-6 px-6 py-6">
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((item) => (
             <Button
@@ -118,40 +119,36 @@ export function JobReview() {
         ) : (
           <div className="grid items-start gap-4 lg:grid-cols-2">
             {jobs.map((job) => (
-              <div
+              <JobCard
                 key={job.id}
-                className="overflow-hidden rounded-lg border bg-background"
-              >
-                <JobCard
-                  job={job}
-                  showClassification
-                  footer={
-                    <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-                      <span className="text-xs text-muted-foreground">
-                        Move to
-                      </span>
-                      {JOB_CLASSIFICATIONS.filter(
-                        (option) => option !== job.classification,
-                      ).map((option) => (
-                        <Button
-                          key={option}
-                          size="sm"
-                          variant="outline"
-                          disabled={updateClassification.isPending}
-                          onClick={() =>
-                            updateClassification.mutate({
-                              classification: option,
-                              id: job.id,
-                            })
-                          }
-                        >
-                          {CLASSIFICATION_LABELS[option]}
-                        </Button>
-                      ))}
-                    </div>
-                  }
-                />
-              </div>
+                job={job}
+                showClassification
+                footer={
+                  <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+                    <span className="text-xs text-muted-foreground">
+                      Move to
+                    </span>
+                    {JOB_CLASSIFICATIONS.filter(
+                      (option) => option !== job.classification,
+                    ).map((option) => (
+                      <Button
+                        key={option}
+                        size="sm"
+                        variant="outline"
+                        disabled={updateClassification.isPending}
+                        onClick={() =>
+                          updateClassification.mutate({
+                            classification: option,
+                            id: job.id,
+                          })
+                        }
+                      >
+                        {CLASSIFICATION_LABELS[option]}
+                      </Button>
+                    ))}
+                  </div>
+                }
+              />
             ))}
           </div>
         )}
@@ -168,17 +165,16 @@ function ReviewLoading() {
       aria-label="Loading scanned jobs"
     >
       {[0, 1, 2, 3].map((item) => (
-        <div
-          key={item}
-          className="grid gap-4 rounded-lg border bg-background p-6"
-        >
-          <div className="flex gap-2">
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-20" />
-          </div>
-          <Skeleton className="h-5 w-3/4" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <Card key={item}>
+          <CardContent className="grid gap-4">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-16 w-full" />
+          </CardContent>
+        </Card>
       ))}
     </output>
   );

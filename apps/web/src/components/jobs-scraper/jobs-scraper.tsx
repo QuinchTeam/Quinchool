@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { JobCard } from "@/components/jobs-scraper/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -76,9 +77,9 @@ export function JobsScraper() {
   }
 
   return (
-    <main className="min-h-full bg-muted/20">
+    <main className="min-h-full">
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid gap-2">
             <div className="flex items-center gap-2">
               <HugeiconsIcon
@@ -135,7 +136,7 @@ export function JobsScraper() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-4">
+      <div className="grid w-full gap-8 px-6 py-6 lg:grid-cols-4">
         <aside className="grid content-start gap-6 lg:col-span-1">
           <div className="flex items-center gap-2">
             <HugeiconsIcon
@@ -181,7 +182,9 @@ export function JobsScraper() {
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <HugeiconsIcon
-                    icon={unsetCriteria.length > 0 ? AiSettingIcon : AiSearch02Icon}
+                    icon={
+                      unsetCriteria.length > 0 ? AiSettingIcon : AiSearch02Icon
+                    }
                     strokeWidth={2}
                   />
                 </EmptyMedia>
@@ -401,7 +404,7 @@ function JobSection({
           <p className="text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      <div className="divide-y overflow-hidden rounded-lg border bg-background">
+      <div className="grid gap-4">
         {jobs.map((job) => (
           <JobCard
             key={job.id}
@@ -459,16 +462,18 @@ function LoadingResults() {
         </div>
         <Skeleton className="h-4 w-40" />
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="grid gap-4">
         {[0, 1, 2].map((item) => (
-          <div key={item} className="grid gap-4 border-b p-6 last:border-b-0">
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-16" />
-              <Skeleton className="h-5 w-20" />
-            </div>
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-16 w-full" />
-          </div>
+          <Card key={item}>
+            <CardContent className="grid gap-4">
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-16 w-full" />
+            </CardContent>
+          </Card>
         ))}
       </div>
     </output>
