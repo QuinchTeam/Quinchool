@@ -30,7 +30,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -180,7 +179,6 @@ export function AppSidebar() {
           </DropdownMenu>
         )}
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }
