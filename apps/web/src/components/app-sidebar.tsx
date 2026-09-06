@@ -97,7 +97,7 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton render={<Link href="/chatbot" />}>
                 <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
-                <span>Chatbot</span>
+                <span>Quinchbot</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
