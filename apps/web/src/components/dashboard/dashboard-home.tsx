@@ -75,7 +75,7 @@ export async function DashboardHome() {
     : 0;
 
   return (
-    <div className="flex w-full max-w-7xl flex-col gap-8 p-6">
+    <div className="flex w-full min-w-0 flex-col gap-8 p-6">
       <div className="flex items-start justify-between gap-4">
         <DashboardGreeting />
         <Button
