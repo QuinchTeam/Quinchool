@@ -1,57 +1,184 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 import { callAiService } from "../../shared/clients/ai/ai-client";
 import type {
   GenerateTextResult,
   TextGenerationModelId,
 } from "../text-generation/text-generation.types";
-import type { ChatMessage } from "./chatbot.contract";
-import { ChatbotRepository } from "./chatbot.repository";
+import type { ChatMessage, ToolAction } from "./chatbot.contract";
+import { ToolRegistry } from "./tools/tool.registry";
+import { ToolExecutionError, type ToolForm } from "./tools/tool.types";
 
-export interface ChatbotResult extends GenerateTextResult {
-  toolUsed: boolean;
+interface AIToolCall {
+  name: string;
+  arguments: Record<string, unknown>;
 }
 
 interface AIChatbotResult extends GenerateTextResult {
-  requiresCareerProfile: boolean;
+  toolCall: AIToolCall | null;
 }
+
+/** A write the user still has to confirm, with the form to confirm it in. */
+export interface PendingToolAction extends ToolForm {
+  tool: string;
+  arguments: Record<string, unknown>;
+}
+
+export interface ChatbotResult extends GenerateTextResult {
+  toolUsed: boolean;
+  pendingAction?: PendingToolAction;
+}
+
+interface ToolResult {
+  name: string;
+  result: unknown;
+}
+
+const FALLBACK = "The assistant could not respond. Try again.";
+
+/**
+ * How many reads may run before the model has to answer. One request can chain
+ * "look at my skills" then "look at my experience" then reply; the cap is what
+ * stops a model that keeps asking for the same thing from burning tokens.
+ */
+const MAX_TOOL_STEPS = 4;
 
 @Injectable()
 export class ChatbotService {
-  constructor(private readonly repository: ChatbotRepository) {}
+  private readonly logger = new Logger(ChatbotService.name);
 
-  /**
-   * Answers in one pass unless the AI service requests the career profile, in
-   * which case Nest reads it and makes the second stateless call.
-   */
-  async respond({
-    messages,
-    modelId,
-    userId,
-  }: {
+  constructor(private readonly tools: ToolRegistry) {}
+
+  respond(input: {
     messages: ChatMessage[];
     modelId: TextGenerationModelId;
     userId: string;
   }): Promise<ChatbotResult> {
-    const firstResponse = await callAiService<AIChatbotResult>(
-      "/chatbot/respond",
-      { messages, modelId },
-      "The assistant could not respond. Try again.",
-    );
-    const { requiresCareerProfile, ...firstResult } = firstResponse;
+    return this.runChain(input, []);
+  }
 
-    if (!requiresCareerProfile) {
-      return { ...firstResult, toolUsed: false };
+  /**
+   * Runs a write the user confirmed, then picks the chain back up so the model
+   * can react to what just changed instead of the conversation dead-ending.
+   */
+  async runAction(
+    userId: string,
+    action: ToolAction,
+  ): Promise<ChatbotResult> {
+    const tool = this.tools.require(action.tool);
+
+    if (tool.kind !== "write") {
+      throw new ToolExecutionError(`${action.tool} is not a confirmable action`);
     }
 
-    const careerProfile = await this.repository.findCareerProfile(userId);
-    const finalResponse = await callAiService<AIChatbotResult>(
-      "/chatbot/respond-with-profile",
-      { careerProfile, messages, modelId },
-      "The assistant could not respond. Try again.",
-    );
-    const { requiresCareerProfile: _, ...finalResult } = finalResponse;
+    const args = tool.arguments.safeParse(action.arguments);
+    const values = tool.values.safeParse(action.values);
 
-    return { ...finalResult, toolUsed: true };
+    if (!args.success || !values.success) {
+      throw new ToolExecutionError("That action is no longer valid.");
+    }
+
+    const result = await tool.run(userId, args.data, values.data);
+
+    return this.runChain(
+      {
+        messages: action.messages,
+        modelId: action.modelId as TextGenerationModelId,
+        userId,
+      },
+      [{ name: tool.name, result }],
+    );
   }
+
+  /**
+   * FastAPI decides whether a tool is needed; Nest decides what running it
+   * means. Reads run straight away and feed the next pass. A write stops the
+   * chain and comes back as a form, because nothing is saved without the user.
+   */
+  private async runChain(
+    {
+      messages,
+      modelId,
+      userId,
+    }: {
+      messages: ChatMessage[];
+      modelId: TextGenerationModelId;
+      userId: string;
+    },
+    seed: ToolResult[],
+  ): Promise<ChatbotResult> {
+    const toolResults = [...seed];
+
+    for (let step = 0; step < MAX_TOOL_STEPS; step += 1) {
+      const answer = await this.ask({ messages, modelId, toolResults });
+
+      if (!answer.toolCall) {
+        return {
+          ...stripToolCall(answer),
+          toolUsed: toolResults.length > 0,
+        };
+      }
+
+      const tool = this.tools.find(answer.toolCall.name);
+
+      if (!tool) {
+        this.logger.warn(`Model asked for an unknown tool: ${answer.toolCall.name}`);
+        return { ...stripToolCall(answer), toolUsed: toolResults.length > 0 };
+      }
+
+      const parsed = tool.arguments.safeParse(answer.toolCall.arguments);
+
+      if (!parsed.success) {
+        this.logger.warn(`Bad arguments for ${tool.name}: ${parsed.error.message}`);
+        return {
+          ...stripToolCall(answer),
+          text: "I could not work out the details for that. Could you rephrase it?",
+          toolUsed: toolResults.length > 0,
+        };
+      }
+
+      if (tool.kind === "write") {
+        const form = await tool.prepare(userId, parsed.data);
+
+        return {
+          ...stripToolCall(answer),
+          text: answer.text || form.description || "",
+          toolUsed: toolResults.length > 0,
+          pendingAction: {
+            ...form,
+            tool: tool.name,
+            arguments: parsed.data as Record<string, unknown>,
+          },
+        };
+      }
+
+      toolResults.push({
+        name: tool.name,
+        result: await tool.run(userId, parsed.data),
+      });
+    }
+
+    this.logger.warn(`Tool chain hit the ${MAX_TOOL_STEPS} step cap`);
+
+    // Out of steps, so answer with what has been gathered instead of looping.
+    const final = await this.ask({ messages, modelId, toolResults });
+
+    return { ...stripToolCall(final), toolUsed: true };
+  }
+
+  /** Seam for tests: the only place this service talks to the AI service. */
+  protected ask(body: {
+    messages: ChatMessage[];
+    modelId: TextGenerationModelId;
+    toolResults: ToolResult[];
+  }): Promise<AIChatbotResult> {
+    return callAiService<AIChatbotResult>("/chatbot/respond", body, FALLBACK);
+  }
+}
+
+function stripToolCall({
+  toolCall: _toolCall,
+  ...result
+}: AIChatbotResult): GenerateTextResult {
+  return result;
 }
