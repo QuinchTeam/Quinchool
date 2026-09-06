@@ -5,13 +5,14 @@ import {
   ChatBotIcon,
   FilePenIcon,
   Home01Icon,
+  UserAccountIcon,
   Wallet01Icon,
   Wrench01Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,8 +35,50 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "@/lib/auth-client";
 
+/**
+ * `match` is the route prefix that lights the item up, which is not always the
+ * href: Resume links at a tab, and the random tools are siblings of their hub
+ * rather than children of it.
+ */
+const NAV_ITEMS: {
+  href: string;
+  icon: HugeiconsIconProps["icon"];
+  label: string;
+  match?: string[];
+}[] = [
+  { href: "/", icon: Home01Icon, label: "Home", match: [] },
+  { href: "/chatbot", icon: ChatBotIcon, label: "Quinchbot" },
+  {
+    href: "/resume/resume-tailor",
+    icon: FilePenIcon,
+    label: "Resume",
+    match: ["/resume"],
+  },
+  { href: "/career-profile", icon: UserAccountIcon, label: "Career Profile" },
+  { href: "/jobs-scraper", icon: Briefcase01Icon, label: "Jobs Scraper" },
+  { href: "/finance-tracker", icon: Wallet01Icon, label: "Finance Tracker" },
+  {
+    href: "/tools",
+    icon: Wrench01Icon,
+    label: "All-Random Tools",
+    match: ["/tools", "/text-generation", "/node-based-flow"],
+  },
+];
+
+/** True on the route itself and on anything nested under it, so a child page
+ * keeps its parent lit. Home matches only itself, or it would match every
+ * route. */
+function isRouteActive(pathname: string, href: string, match?: string[]) {
+  if (pathname === href) return true;
+
+  return (match ?? [href]).some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 export function AppSidebar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending } = useSession();
   const user = session?.user;
 
@@ -81,42 +124,18 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/" />}>
-                <HugeiconsIcon icon={Home01Icon} strokeWidth={2} />
-                <span>Home</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/chatbot" />}>
-                <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
-                <span>Quinchbot</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/resume/resume-tailor" />}>
-                <HugeiconsIcon icon={FilePenIcon} strokeWidth={2} />
-                <span>Resume</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/jobs-scraper" />}>
-                <HugeiconsIcon icon={Briefcase01Icon} strokeWidth={2} />
-                <span>Jobs Scraper</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/finance-tracker" />}>
-                <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />
-                <span>Finance Tracker</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/tools" />}>
-                <HugeiconsIcon icon={Wrench01Icon} strokeWidth={2} />
-                <span>All-Random Tools</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {NAV_ITEMS.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  isActive={isRouteActive(pathname, item.href, item.match)}
+                  className="data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-primary"
+                  render={<Link href={item.href} />}
+                >
+                  <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
