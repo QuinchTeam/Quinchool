@@ -1,7 +1,8 @@
 "use client";
 
-import { ChatBotIcon, UserAiIcon } from "@hugeicons/core-free-icons";
+import { UserAiIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 import ReactMarkdown, { type Components } from "react-markdown";
 
 import { resolveToolAction } from "@/components/chatbot/tools/registry";
@@ -17,9 +18,13 @@ const markdownComponents: Components = {
 
 export function ChatAvatar() {
   return (
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-      <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
-    </div>
+    <Image
+      src="/quinchool-icon-v2.webp"
+      alt=""
+      width={32}
+      height={32}
+      className="size-8 shrink-0"
+    />
   );
 }
 
