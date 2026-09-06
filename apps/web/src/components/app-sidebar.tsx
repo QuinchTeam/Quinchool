@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  AiGenerativeIcon,
   Briefcase01Icon,
   ChatBotIcon,
   FilePenIcon,
   Home01Icon,
   Wallet01Icon,
-  WorkflowSquareIcon,
+  Wrench01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
@@ -89,12 +88,6 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/text-generation" />}>
-                <HugeiconsIcon icon={AiGenerativeIcon} strokeWidth={2} />
-                <span>Text Generation</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton render={<Link href="/chatbot" />}>
                 <HugeiconsIcon icon={ChatBotIcon} strokeWidth={2} />
                 <span>Quinchbot</span>
@@ -113,15 +106,15 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/node-based-flow" />}>
-                <HugeiconsIcon icon={WorkflowSquareIcon} strokeWidth={2} />
-                <span>Node Base Flow</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton render={<Link href="/finance-tracker" />}>
                 <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />
                 <span>Finance Tracker</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link href="/tools" />}>
+                <HugeiconsIcon icon={Wrench01Icon} strokeWidth={2} />
+                <span>All-Random Tools</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
