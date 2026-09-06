@@ -104,7 +104,7 @@ export function JobsScraper() {
             <Button
               variant="outline"
               nativeButton={false}
-              render={<Link href="/jobs-scraper/rejected" />}
+              render={<Link href="/jobs-scraper/review" />}
             >
               <HugeiconsIcon icon={Task01Icon} strokeWidth={2} />
               Review scan
@@ -324,9 +324,9 @@ function JobResults({
             <Button
               variant="outline"
               nativeButton={false}
-              render={<Link href="/jobs-scraper/rejected" />}
+              render={<Link href="/jobs-scraper/review" />}
             >
-              Review rejected listings
+              Review scanned jobs
             </Button>
           </EmptyContent>
         </Empty>

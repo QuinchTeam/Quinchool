@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   title: "Review Scanned Jobs - Quinchool",
 };
 
-export default function JobsScraperRejectedPage() {
+export default function JobsScraperReviewPage() {
   return <JobReview />;
 }
