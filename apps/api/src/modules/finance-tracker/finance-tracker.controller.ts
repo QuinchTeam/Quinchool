@@ -20,6 +20,8 @@ import {
   type TransactionQuery,
   transactionQuerySchema,
   transactionSchema,
+  type TransferInput,
+  transferSchema,
   type WalletInput,
   type WalletOrder,
   walletOrderSchema,
@@ -86,6 +88,14 @@ export class FinanceTrackerController {
     @Body(new ZodValidationPipe(transactionSchema)) input: TransactionInput,
   ) {
     return this.finance.saveTransaction(userId, input);
+  }
+
+  @Post("transfers")
+  createTransfer(
+    @UserId() userId: string,
+    @Body(new ZodValidationPipe(transferSchema)) input: TransferInput,
+  ) {
+    return this.finance.createTransfer(userId, input);
   }
 
   @Put("transactions/:id")

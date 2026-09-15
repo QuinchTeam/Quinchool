@@ -10,6 +10,7 @@ import {
 import type {
   TransactionFilters,
   TransactionInput,
+  TransferInput,
 } from "@/lib/finance-tracker/types";
 
 export function useTransactions(
@@ -45,6 +46,20 @@ export function useDeleteTransaction() {
   return useMutation({
     mutationFn: (id: string) =>
       financeRequest<void>(`/transactions/${id}`, { method: "DELETE" }),
+    onSuccess: () =>
+      client.invalidateQueries({ queryKey: financeKeys.all(userId) }),
+  });
+}
+
+export function useCreateTransfer() {
+  const userId = useFinanceUserId();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (values: TransferInput) =>
+      financeRequest<{ transactionIds: string[] }>("/transfers", {
+        method: "POST",
+        body: JSON.stringify(values),
+      }),
     onSuccess: () =>
       client.invalidateQueries({ queryKey: financeKeys.all(userId) }),
   });

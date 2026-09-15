@@ -37,6 +37,14 @@ export interface TransactionInput {
   occurredAt: string;
 }
 
+export interface TransferInput {
+  fromWalletId: string;
+  toWalletId: string;
+  amount: string;
+  notes: string;
+  occurredAt: string;
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;

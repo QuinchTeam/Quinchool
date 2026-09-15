@@ -43,6 +43,27 @@ export const transactionSchema = z.strictObject({
     ),
 });
 
+export const transferSchema = z
+  .strictObject({
+    fromWalletId: financeIdSchema,
+    toWalletId: financeIdSchema,
+    amount: moneySchema.refine(
+      (value) => /[1-9]/.test(value),
+      "Amount must be greater than zero.",
+    ),
+    notes: z.string().trim().max(1000).default(""),
+    occurredAt: z.iso
+      .datetime({ offset: true })
+      .refine(
+        (value) => new Date(value).getTime() <= Date.now(),
+        "Transfer date cannot be in the future.",
+      ),
+  })
+  .refine((input) => input.fromWalletId !== input.toWalletId, {
+    message: "Choose two different wallets.",
+    path: ["toWalletId"],
+  });
+
 export const transactionQuerySchema = z.strictObject({
   cursor: z.string().min(1).max(512).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
@@ -63,6 +84,7 @@ export const transactionCursorSchema = z.strictObject({
 export type WalletInput = z.infer<typeof walletSchema>;
 export type WalletOrder = z.infer<typeof walletOrderSchema>;
 export type TransactionInput = z.infer<typeof transactionSchema>;
+export type TransferInput = z.infer<typeof transferSchema>;
 export type TransactionQuery = z.infer<typeof transactionQuerySchema>;
 export type LabelQuery = z.infer<typeof labelQuerySchema>;
 export type TransactionCursor = z.infer<typeof transactionCursorSchema>;

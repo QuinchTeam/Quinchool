@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/finance-tracker/format";
 import { FinanceQueryError } from "./shared/query-error";
 import { RecentTransactions } from "./transactions/recent-transactions";
 import { TransactionDialog } from "./transactions/transaction-dialog";
+import { TransferDialog } from "./transfers/transfer-dialog";
 import { WalletDialog } from "./wallets/wallet-dialog";
 import { WalletGrid } from "./wallets/wallet-grid";
 
@@ -20,6 +21,7 @@ export function FinanceDashboard() {
         <h1 className="text-2xl font-semibold">Finance Tracker</h1>
         <div className="flex flex-wrap items-center gap-2">
           <WalletDialog />
+          <TransferDialog />
           <TransactionDialog />
         </div>
       </header>

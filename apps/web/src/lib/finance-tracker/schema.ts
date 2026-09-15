@@ -34,4 +34,29 @@ export const transactionFormSchema = z.object({
     ),
 });
 
+export const transferFormSchema = z
+  .object({
+    fromWalletId: z.string().min(1, "Choose a source wallet."),
+    toWalletId: z.string().min(1, "Choose a destination wallet."),
+    amount: moneySchema.refine(
+      (value) => /[1-9]/.test(value),
+      "Amount must be greater than zero.",
+    ),
+    notes: z.string().trim().max(1000),
+    occurredAt: z
+      .string()
+      .min(1, "Choose a date and time.")
+      .refine(
+        (value) =>
+          Number.isFinite(new Date(value).getTime()) &&
+          new Date(value).getTime() <= Date.now(),
+        "Choose a valid date and time that is not in the future.",
+      ),
+  })
+  .refine((values) => values.fromWalletId !== values.toWalletId, {
+    message: "Choose a different destination wallet.",
+    path: ["toWalletId"],
+  });
+
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
+export type TransferFormValues = z.infer<typeof transferFormSchema>;

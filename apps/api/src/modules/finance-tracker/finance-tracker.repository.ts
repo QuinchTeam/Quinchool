@@ -6,6 +6,7 @@ import type {
   TransactionCursor,
   TransactionInput,
   TransactionQuery,
+  TransferInput,
   WalletInput,
 } from "./finance-tracker.contract";
 
@@ -173,6 +174,107 @@ export class FinanceTrackerRepository {
           })
         : db.financeTransaction.create({ data, include: transactionInclude });
     });
+  }
+
+  createTransfer(userId: string, input: TransferInput) {
+    return this.prisma.$transaction(
+      async (db) => {
+        const wallets = await db.financeWallet.findMany({
+          where: {
+            userId,
+            id: { in: [input.fromWalletId, input.toWalletId] },
+          },
+          select: { id: true, name: true, openingBalance: true },
+        });
+        const source = wallets.find(
+          (wallet) => wallet.id === input.fromWalletId,
+        );
+        const destination = wallets.find(
+          (wallet) => wallet.id === input.toWalletId,
+        );
+        if (!source || !destination) {
+          return { status: "WALLET_NOT_FOUND" as const };
+        }
+
+        const totals = await db.financeTransaction.groupBy({
+          by: ["type"],
+          where: { userId, walletId: source.id },
+          _sum: { amount: true },
+        });
+        const sourceBalance = totals.reduce((balance, total) => {
+          const amount = total._sum.amount ?? new Prisma.Decimal(0);
+          return total.type === "INCOME"
+            ? balance.plus(amount)
+            : balance.minus(amount);
+        }, source.openingBalance);
+        const amount = new Prisma.Decimal(input.amount);
+        if (sourceBalance.lessThan(amount)) {
+          return { status: "INSUFFICIENT_FUNDS" as const };
+        }
+
+        const outgoingName = `Transfer to ${destination.name}`;
+        const incomingName = `Transfer from ${source.name}`;
+        const outgoingLabel = await db.financeLabel.upsert({
+          where: {
+            userId_type_normalizedName: {
+              userId,
+              type: "EXPENSE",
+              normalizedName: outgoingName.toLowerCase(),
+            },
+          },
+          create: {
+            userId,
+            type: "EXPENSE",
+            name: outgoingName,
+            normalizedName: outgoingName.toLowerCase(),
+          },
+          update: {},
+        });
+        const incomingLabel = await db.financeLabel.upsert({
+          where: {
+            userId_type_normalizedName: {
+              userId,
+              type: "INCOME",
+              normalizedName: incomingName.toLowerCase(),
+            },
+          },
+          create: {
+            userId,
+            type: "INCOME",
+            name: incomingName,
+            normalizedName: incomingName.toLowerCase(),
+          },
+          update: {},
+        });
+        const data = {
+          userId,
+          amount: input.amount,
+          notes: input.notes || null,
+          occurredAt: new Date(input.occurredAt),
+        };
+        const outgoing = await db.financeTransaction.create({
+          data: {
+            ...data,
+            walletId: source.id,
+            labelId: outgoingLabel.id,
+            type: "EXPENSE",
+          },
+        });
+        const incoming = await db.financeTransaction.create({
+          data: {
+            ...data,
+            walletId: destination.id,
+            labelId: incomingLabel.id,
+            type: "INCOME",
+          },
+        });
+        return {
+          status: "CREATED" as const,
+          transactionIds: [outgoing.id, incoming.id],
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   deleteTransaction(userId: string, id: string) {

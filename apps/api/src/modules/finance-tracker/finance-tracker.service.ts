@@ -10,6 +10,7 @@ import {
   type TransactionInput,
   type TransactionQuery,
   transactionCursorSchema,
+  type TransferInput,
   type WalletInput,
 } from "./finance-tracker.contract";
 import { FinanceTrackerRepository } from "./finance-tracker.repository";
@@ -134,6 +135,23 @@ export class FinanceTrackerService {
         error: "Wallet or transaction not found.",
       });
     return { id: transaction.id };
+  }
+
+  async createTransfer(userId: string, input: TransferInput) {
+    const result = await this.write(() =>
+      this.repository.createTransfer(userId, input),
+    );
+    if (result.status === "WALLET_NOT_FOUND") {
+      throw new NotFoundException({
+        error: "Source or destination wallet not found.",
+      });
+    }
+    if (result.status === "INSUFFICIENT_FUNDS") {
+      throw new BadRequestException({
+        error: "Source wallet does not have enough money.",
+      });
+    }
+    return { transactionIds: result.transactionIds };
   }
 
   async deleteTransaction(userId: string, id: string) {
