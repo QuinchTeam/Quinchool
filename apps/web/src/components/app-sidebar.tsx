@@ -26,6 +26,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -40,28 +41,52 @@ import { signOut, useSession } from "@/lib/auth-client";
  * href: Resume links at a tab, and the random tools are siblings of their hub
  * rather than children of it.
  */
-const NAV_ITEMS: {
+type NavItem = {
   href: string;
   icon: HugeiconsIconProps["icon"];
   label: string;
   match?: string[];
-}[] = [
-  { href: "/", icon: Home01Icon, label: "Home", match: [] },
-  { href: "/chatbot", icon: ChatBotIcon, label: "Quinchbot" },
+};
+
+const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   {
-    href: "/resume/resume-tailor",
-    icon: FilePenIcon,
-    label: "Resume",
-    match: ["/resume"],
+    items: [
+      { href: "/", icon: Home01Icon, label: "Home", match: [] },
+      { href: "/chatbot", icon: ChatBotIcon, label: "Quinchbot" },
+    ],
   },
-  { href: "/career-profile", icon: UserAccountIcon, label: "Career Profile" },
-  { href: "/jobs-scraper", icon: Briefcase01Icon, label: "Jobs Scraper" },
-  { href: "/finance-tracker", icon: Wallet01Icon, label: "Finance Tracker" },
   {
-    href: "/tools",
-    icon: Wrench01Icon,
-    label: "All-Random Tools",
-    match: ["/tools", "/text-generation", "/node-based-flow"],
+    label: "Work",
+    items: [
+      {
+        href: "/resume/resume-tailor",
+        icon: FilePenIcon,
+        label: "Resume",
+        match: ["/resume"],
+      },
+      {
+        href: "/career-profile",
+        icon: UserAccountIcon,
+        label: "Career Profile",
+      },
+      { href: "/jobs-scraper", icon: Briefcase01Icon, label: "Jobs Scraper" },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      {
+        href: "/finance-tracker",
+        icon: Wallet01Icon,
+        label: "Finance Tracker",
+      },
+      {
+        href: "/tools",
+        icon: Wrench01Icon,
+        label: "All-Random Tools",
+        match: ["/tools", "/text-generation", "/node-based-flow"],
+      },
+    ],
   },
 ];
 
@@ -98,7 +123,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="flex-row items-center justify-between group-data-[collapsible=icon]:justify-center">
+      <SidebarHeader className="flex-row items-center justify-between border-b border-sidebar-border group-data-[collapsible=icon]:justify-center">
         <div className="relative hidden size-8 shrink-0 items-center justify-center group-data-[collapsible=icon]:flex">
           <Image
             src="/quinchool-icon-v2.webp"
@@ -124,24 +149,36 @@ export function AppSidebar() {
         <SidebarTrigger className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu>
-            {NAV_ITEMS.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  isActive={isRouteActive(pathname, item.href, item.match)}
-                  className="data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-primary"
-                  render={<Link href={item.href} />}
-                >
-                  <HugeiconsIcon icon={item.icon} strokeWidth={2} />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group, groupIndex) => (
+          <SidebarGroup
+            key={group.label ?? "main"}
+            className={
+              groupIndex === 0 ? undefined : "border-t border-sidebar-border"
+            }
+          >
+            {group.label && (
+              <SidebarGroupLabel className="h-6 uppercase tracking-wider text-muted-foreground">
+                {group.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarMenu>
+              {group.items.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    isActive={isRouteActive(pathname, item.href, item.match)}
+                    className="text-muted-foreground data-active:border data-active:border-border data-active:bg-secondary data-active:bg-clip-border data-active:text-secondary-foreground data-active:outline-2 data-active:outline-solid data-active:outline-edge data-active:hover:bg-secondary/80"
+                    render={<Link href={item.href} />}
+                  >
+                    <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border">
         {isPending ? (
           <div className="flex h-12 items-center gap-2 p-2">
             <Skeleton className="size-6 shrink-0 rounded-full" />

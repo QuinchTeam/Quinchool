@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-open-sans);
+  --font-sans: var(--font-roboto);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --font-display: var(--font-baloo-2);
@@ -28,15 +28,17 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-edge: var(--destructive-edge);
+  --color-edge: var(--edge);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
-  --color-secondary-hover: var(--secondary-hover);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -48,6 +50,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* ponytail: 3px base (default 4px) compacts every p/m/gap/h/w/size utility at once */
+  --spacing: 0.1875rem;
   --spacing-a4-width: 210mm;
   --spacing-a4-height: 297mm;
   --spacing-a4-gutter: 12mm;
@@ -78,20 +82,23 @@
   --sidebar: var(--neutral-surface);
   --sidebar-foreground: var(--neutral-ink);
 
-  --primary: #019662;
+  --primary: #00986a;
+  /* --primary mixed with 20% white */
+  --primary-light: #33ad88;
   --primary-foreground: #f0fdfa;
   --secondary: var(--neutral-solid);
   --secondary-foreground: var(--neutral-strong);
-  /* --primary at 15% over --secondary, resolved so no alpha is involved */
-  --secondary-hover: #b5d3cc;
   --muted: var(--neutral-fill);
   --muted-foreground: var(--neutral-soft);
   --accent: var(--neutral-fill);
   --accent-foreground: var(--neutral-strong);
   --destructive: #e7000b;
+  /* Outer rings on raised buttons: gray-black for neutrals, dark red for destructive */
+  --edge: var(--neutral-strong);
+  --destructive-edge: #82181a;
 
-  --border: var(--neutral-line);
-  --input: var(--neutral-line);
+  --border: color-mix(in srgb, var(--neutral-line) 20%, transparent);
+  --input: var(--border);
   --ring: var(--neutral-ring);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
@@ -109,11 +116,11 @@
 }
 
 .dark {
-  --neutral-page: #090b0c;
-  /* --neutral-line at 30% over --neutral-page, i.e. what bg-input/30 paints */
-  --neutral-surface: #141719;
-  --neutral-fill: #1b2021;
-  --neutral-solid: #232b2d;
+  --black: #000000;
+  --neutral-page: #171717;
+  --neutral-surface: #151515;
+  --neutral-fill: #202020;
+  --neutral-solid: #292929;
   --neutral-line: #2d3436;
   --neutral-ring: #67787c;
   --neutral-soft: #9ca8ab;
@@ -128,20 +135,22 @@
   --sidebar: var(--neutral-surface);
   --sidebar-foreground: var(--neutral-strong);
 
-  --primary: #019662;
+  --primary: #00a674;
+  /* --primary mixed with 20% white */
+  --primary-light: #33b890;
   --primary-foreground: #f0fdfa;
   --secondary: var(--neutral-solid);
   --secondary-foreground: var(--neutral-strong);
-  /* --primary at 20% over --secondary, resolved so no alpha is involved */
-  --secondary-hover: #1c4038;
   --muted: var(--neutral-fill);
   --muted-foreground: var(--neutral-soft);
   --accent: var(--neutral-fill);
   --accent-foreground: var(--neutral-strong);
   --destructive: #ff6467;
+  --edge: #0f1213;
+  --destructive-edge: #330a0c;
 
-  --border: var(--neutral-line);
-  --input: var(--neutral-line);
+  --border: color-mix(in srgb, var(--neutral-line) 20%, transparent);
+  --input: var(--border);
   --ring: var(--neutral-ring);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
