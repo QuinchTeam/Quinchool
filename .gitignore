@@ -20,6 +20,7 @@ out/
 # build output
 build/
 dist/
+dist-test/
 
 # python
 __pycache__/
