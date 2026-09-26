@@ -7,7 +7,7 @@ import {
   jobScraperConfigSchema,
   mapScanFailure,
   scanRequestSchema,
-} from "./jobs-scraper.contract";
+} from "../../../src/modules/jobs-scraper/jobs-scraper.contract";
 
 const validConfig = {
   roles: ["Software Engineer"],

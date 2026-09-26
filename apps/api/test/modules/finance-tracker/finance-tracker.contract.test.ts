@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { transferSchema } from "./finance-tracker.contract";
+import { transferSchema } from "../../../src/modules/finance-tracker/finance-tracker.contract";
 
 const transfer = {
   fromWalletId: "cm123456789012345678901234",

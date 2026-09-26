@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { endOnUserTurn } from "./chat.service";
-import type { StoredMessage } from "./chat.repository";
+import { endOnUserTurn } from "../../../src/modules/chatbot/chat.service";
+import type { StoredMessage } from "../../../src/modules/chatbot/chat.repository";
 
 function message(
   role: "user" | "assistant",

@@ -1,10 +1,10 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { CareerProfileValues } from "../../career-profile/career-profile.contract";
-import type { CareerProfileService } from "../../career-profile/career-profile.service";
-import { CareerProfileTools } from "./career-profile.tools";
-import type { WriteTool } from "./tool.types";
+import type { CareerProfileValues } from "../../../../src/modules/career-profile/career-profile.contract";
+import type { CareerProfileService } from "../../../../src/modules/career-profile/career-profile.service";
+import { CareerProfileTools } from "../../../../src/modules/chatbot/tools/career-profile.tools";
+import type { WriteTool } from "../../../../src/modules/chatbot/tools/tool.types";
 
 const USER = "user-1";
 

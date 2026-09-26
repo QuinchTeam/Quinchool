@@ -1,9 +1,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { ChatbotService } from "./chatbot.service";
-import type { ToolRegistry } from "./tools/tool.registry";
-import type { AnyTool } from "./tools/tool.types";
+import { ChatbotService } from "../../../src/modules/chatbot/chatbot.service";
+import type { ToolRegistry } from "../../../src/modules/chatbot/tools/tool.registry";
+import type { AnyTool } from "../../../src/modules/chatbot/tools/tool.types";
 
 interface Scripted {
   text: string;

@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildResumeSchema } from "./build-resume.contract";
+import { buildResumeSchema } from "../../../src/modules/build-resume/build-resume.contract";
 
 test("accepts either pasted requirements or an owned saved-job id", () => {
   assert.equal(
