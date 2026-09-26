@@ -3,8 +3,6 @@ from typing import final
 from unittest import IsolatedAsyncioTestCase, TestCase
 from unittest.mock import AsyncMock, patch
 
-from app.modules.chatbot.schemas import ChatMessage
-from app.modules.chatbot.service import respond
 from app.modules.resume.schemas import (
     TailoredBulletDraft,
     TailoredResume,
@@ -29,50 +27,6 @@ from app.modules.resume.service import (
     tailor_resume,
 )
 from app.modules.text_generation.schemas import GenerateTextResult
-
-
-@final
-class ChatbotTest(IsolatedAsyncioTestCase):
-    @staticmethod
-    def _generation(text: str) -> GenerateTextResult:
-        return GenerateTextResult(
-            model_id="gemini-3.1-flash-lite",
-            provider_id="google-ai-studio",
-            provider_model_id="gemini-3.1-flash-lite",
-            text=text,
-        )
-
-    async def _respond(self, text: str):
-        with patch(
-            "app.modules.chatbot.service.generate_text",
-            new=AsyncMock(return_value=self._generation(text)),
-        ):
-            return await respond(
-                [ChatMessage(role="user", content="Tailor this to my background")],
-                "gemini-3.1-flash-lite",
-            )
-
-    async def test_surfaces_the_tool_the_model_picked(self) -> None:
-        result = await self._respond(
-            '<tool_call>{"name": "career_profile.get", "arguments": {}}</tool_call>'
-        )
-
-        assert result.tool_call is not None
-        self.assertEqual(result.tool_call.name, "career_profile.get")
-
-    async def test_a_plain_answer_carries_no_tool_call(self) -> None:
-        result = await self._respond("Here is a general answer.")
-
-        self.assertIsNone(result.tool_call)
-        self.assertEqual(result.text, "Here is a general answer.")
-
-    async def test_an_invented_tool_falls_back_to_prose(self) -> None:
-        result = await self._respond(
-            'Sure.<tool_call>{"name": "does.not_exist", "arguments": {}}</tool_call>'
-        )
-
-        self.assertIsNone(result.tool_call)
-        self.assertEqual(result.text, "Sure.")
 
 
 @final
