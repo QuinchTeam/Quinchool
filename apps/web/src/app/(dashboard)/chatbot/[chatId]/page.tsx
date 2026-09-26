@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Chatbot } from "@/components/chatbot/chatbot";
+import { Chatbot } from "@/features/chatbot/components/chatbot";
 
 export const metadata: Metadata = { title: "Quinchbot - Quinchool" };
 

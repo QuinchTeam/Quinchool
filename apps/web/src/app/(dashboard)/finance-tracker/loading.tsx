@@ -1,1 +1,1 @@
-export { FinanceLoading as default } from "@/components/finance-tracker/shared/finance-loading";
+export { FinanceLoading as default } from "@/features/finance-tracker/components/shared/finance-loading";

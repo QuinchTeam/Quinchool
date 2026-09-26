@@ -1,0 +1,56 @@
+import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { apiUrl, withCredentials } from "@/lib/api";
+import type { TextGenerationValues } from "@/lib/ai/text-generation/validations";
+
+export type PromptEnhancerInput = {
+  modelId: TextGenerationModelId;
+  prompt: string;
+};
+
+export type PromptEnhancerResult = {
+  enhancedPrompt: string;
+};
+
+export type TextGenerationResult = {
+  text: string;
+};
+
+export async function enhancePrompt(
+  input: PromptEnhancerInput,
+): Promise<PromptEnhancerResult> {
+  const response = await fetch(apiUrl("/prompt-enhancer"), {
+    ...withCredentials,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = (await response.json()) as PromptEnhancerResult & {
+    error?: string;
+  };
+
+  if (!response.ok) {
+    throw new Error(data.error ?? "Failed to enhance prompt");
+  }
+
+  return data;
+}
+
+export async function generateText(
+  input: TextGenerationValues,
+): Promise<TextGenerationResult> {
+  const response = await fetch(apiUrl("/text-generation"), {
+    ...withCredentials,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = (await response.json()) as TextGenerationResult & {
+    error?: string;
+  };
+
+  if (!response.ok) {
+    throw new Error(data.error ?? "Failed to generate text");
+  }
+
+  return data;
+}

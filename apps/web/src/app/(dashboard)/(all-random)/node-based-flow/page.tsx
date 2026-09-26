@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Canvas } from "@/components/node-based-builder/canvas";
+import { Canvas } from "@/features/node-based-builder/components/canvas";
 
 export const metadata: Metadata = {
   title: "Node Based Flow — Quinchool",

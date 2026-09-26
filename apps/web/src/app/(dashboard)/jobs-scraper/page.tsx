@@ -1,4 +1,4 @@
-import { JobsScraper } from "@/components/jobs-scraper/jobs-scraper";
+import { JobsScraper } from "@/features/jobs-scraper/components/jobs-scraper";
 
 export default function JobsScraperPage() {
   return <JobsScraper />;

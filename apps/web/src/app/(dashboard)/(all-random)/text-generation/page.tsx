@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { TextModelSelector } from "@/components/text-model-selector";
+import { TextModelSelector } from "@/components/shared/text-model-selector";
 import { Button } from "@/components/ui/button";
 import { useTextGeneration } from "@/hooks/use-text-generation";
 import {
@@ -20,7 +20,7 @@ import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/model
 import {
   type TextGenerationValues,
   textGenerationSchema,
-} from "@/lib/validations/text-generation";
+} from "@/lib/ai/text-generation/validations";
 
 export default function TextGenerationPage() {
   const [generatedText, setGeneratedText] = useState("");

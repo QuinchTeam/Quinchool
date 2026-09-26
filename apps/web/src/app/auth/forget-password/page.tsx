@@ -26,7 +26,7 @@ import { requestPasswordReset } from "@/lib/auth-client";
 import {
   type ForgetPasswordValues,
   forgetPasswordSchema,
-} from "@/lib/validations/auth";
+} from "@/features/auth/validations/auth";
 
 export default function ForgetPasswordPage() {
   const form = useForm<ForgetPasswordValues>({

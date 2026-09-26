@@ -28,7 +28,7 @@ import { resetPassword } from "@/lib/auth-client";
 import {
   type UpdatePasswordValues,
   updatePasswordSchema,
-} from "@/lib/validations/auth";
+} from "@/features/auth/validations/auth";
 
 function UpdatePasswordForm() {
   const router = useRouter();

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { JobReview } from "@/components/jobs-scraper/job-review";
+import { JobReview } from "@/features/jobs-scraper/components/job-review";
 
 export const metadata: Metadata = {
   title: "Review Scanned Jobs - Quinchool",

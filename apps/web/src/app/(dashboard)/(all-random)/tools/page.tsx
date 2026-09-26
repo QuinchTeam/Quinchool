@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ToolsHub } from "@/components/tools/tools-hub";
+import { ToolsHub } from "@/features/tools/components/tools-hub";
 
 export const metadata: Metadata = {
   title: "All Random Tools — Quinchool",

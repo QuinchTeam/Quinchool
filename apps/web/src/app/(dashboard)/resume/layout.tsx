@@ -1,4 +1,4 @@
-import { ResumeTabs } from "@/components/resume-builder/resume-tabs";
+import { ResumeTabs } from "@/features/resume-builder/components/resume-tabs";
 
 export default function ResumeLayout({
   children,

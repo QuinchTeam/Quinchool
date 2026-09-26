@@ -13,8 +13,8 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import type * as React from "react";
 import { toast } from "sonner";
-import { DatePicker } from "@/components/date-picker";
-import { ModeToggle } from "@/components/mode-toggle";
+import { DatePicker } from "@/components/shared/date-picker";
+import { ModeToggle } from "@/components/shared/mode-toggle";
 import {
   Avatar,
   AvatarFallback,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FinanceServerPage } from "@/components/finance-tracker/finance-server-page";
+import { FinanceServerPage } from "@/features/finance-tracker/components/finance-server-page";
 
 export const metadata: Metadata = { title: "Finance Tracker - Quinchool" };
 

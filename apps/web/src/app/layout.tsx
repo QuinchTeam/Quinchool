@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Baloo_2, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 

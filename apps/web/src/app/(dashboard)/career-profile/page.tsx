@@ -1,4 +1,4 @@
-import { CareerProfileForm } from "@/components/career-profile/career-profile-form";
+import { CareerProfileForm } from "@/features/career-profile/components/career-profile-form";
 
 export default function CareerProfilePage() {
   return (
