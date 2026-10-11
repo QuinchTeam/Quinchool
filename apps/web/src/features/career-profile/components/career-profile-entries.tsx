@@ -11,9 +11,49 @@ import {
   CareerProfileField as Field,
   SkillsField,
 } from "@/features/career-profile/components/career-profile-field";
+import {
+  DragHandle,
+  SortableList,
+} from "@/features/career-profile/components/sortable-list";
+import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { cn } from "@/lib/utils";
 
 type EntryName = "educations" | "skillGroups" | "experiences" | "projects";
+
+function EntryCard({
+  children,
+  id,
+  label,
+  onRemove,
+}: {
+  children: ReactNode;
+  id: string;
+  label: string;
+  onRemove: () => void;
+}) {
+  const { handleProps, isDragging, itemProps } = useSortableItem(id);
+
+  return (
+    <div
+      {...itemProps}
+      className={cn(
+        "grid gap-5 rounded-md border p-5",
+        isDragging && "relative z-10 bg-background shadow-sm",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <DragHandle label={label.toLowerCase()} {...handleProps} />
+        <h3 className="flex-1 text-sm font-semibold">{label}</h3>
+        <Button type="button" variant="ghost" size="icon-sm" onClick={onRemove}>
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+          <span className="sr-only">Remove {label.toLowerCase()}</span>
+        </Button>
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export function EntryList({
   addLabel,
@@ -30,7 +70,7 @@ export function EntryList({
   renderItem: (index: number) => ReactNode;
   title: string;
 }) {
-  const { append, fields, remove } = useFieldArray<
+  const { append, fields, move, remove } = useFieldArray<
     CareerProfileValues,
     EntryName
   >({ name });
@@ -49,27 +89,18 @@ export function EntryList({
           {addLabel}
         </Button>
       </div>
-      {fields.map((entry, index) => (
-        <div key={entry.id} className="grid gap-5 rounded-md border p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold">
-              {itemLabel} {index + 1}
-            </h3>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => remove(index)}
-            >
-              <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
-              <span className="sr-only">
-                Remove {itemLabel.toLowerCase()} {index + 1}
-              </span>
-            </Button>
-          </div>
-          {renderItem(index)}
-        </div>
-      ))}
+      <SortableList ids={fields.map((entry) => entry.id)} onMove={move}>
+        {fields.map((entry, index) => (
+          <EntryCard
+            key={entry.id}
+            id={entry.id}
+            label={`${itemLabel} ${index + 1}`}
+            onRemove={() => remove(index)}
+          >
+            {renderItem(index)}
+          </EntryCard>
+        ))}
+      </SortableList>
       {!fields.length && (
         <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
           No {title.toLowerCase()} added.

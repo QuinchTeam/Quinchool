@@ -1,9 +1,43 @@
 "use client";
 
+import { arrayMove } from "@dnd-kit/sortable";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
+import { SortableList } from "@/features/career-profile/components/sortable-list";
+import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
+import { cn } from "@/lib/utils";
+
+function Chip({ onRemove, value }: { onRemove: () => void; value: string }) {
+  const { handleProps, isDragging, itemProps } = useSortableItem(value);
+
+  return (
+    <span
+      {...handleProps}
+      {...itemProps}
+      // The whole chip is the drag handle.
+      ref={(node) => {
+        itemProps.ref(node);
+        handleProps.ref(node);
+      }}
+      className={cn(
+        "inline-flex cursor-grab touch-none items-center gap-1 rounded-sm bg-muted px-2 py-1 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/20 active:cursor-grabbing",
+        isDragging && "relative z-10 shadow-sm",
+      )}
+    >
+      {value}
+      <button
+        type="button"
+        className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
+        onClick={onRemove}
+      >
+        <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3" />
+        <span className="sr-only">Remove {value}</span>
+      </button>
+    </span>
+  );
+}
 
 export function StringListInput({
   allowedValues,
@@ -68,28 +102,21 @@ export function StringListInput({
         className="flex min-h-10 flex-wrap items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 shadow-xs has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20"
         aria-invalid={invalid || undefined}
       >
-        {value.map((entry) => (
-          <span
-            key={entry}
-            className="inline-flex items-center gap-1 rounded-sm bg-muted px-2 py-1 text-xs font-medium"
-          >
-            {entry}
-            <button
-              type="button"
-              className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
-              onClick={() =>
+        <SortableList
+          ids={value}
+          wrap
+          onMove={(from, to) => onChange(arrayMove(value, from, to))}
+        >
+          {value.map((entry) => (
+            <Chip
+              key={entry}
+              value={entry}
+              onRemove={() =>
                 onChange(value.filter((candidate) => candidate !== entry))
               }
-            >
-              <HugeiconsIcon
-                icon={Cancel01Icon}
-                strokeWidth={2}
-                className="size-3"
-              />
-              <span className="sr-only">Remove {entry}</span>
-            </button>
-          </span>
-        ))}
+            />
+          ))}
+        </SortableList>
         <input
           className="min-w-32 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           aria-label={ariaLabel}

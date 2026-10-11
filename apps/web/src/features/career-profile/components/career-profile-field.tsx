@@ -13,9 +13,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DragHandle,
+  SortableList,
+} from "@/features/career-profile/components/sortable-list";
 import { StringListInput } from "@/features/career-profile/components/string-list-input";
 import { useAvailableSkills } from "@/features/career-profile/hooks/use-available-skills";
+import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { cn } from "@/lib/utils";
 
 type Values = CareerProfileValues;
 type BulletsPath = `${"experiences" | "projects"}.${number}.bullets`;
@@ -134,7 +140,7 @@ export function BulletsField({
   itemLabel: string;
   name: BulletsPath;
 }) {
-  const { append, fields, remove } = useFieldArray<Values, BulletsPath>({
+  const { append, fields, move, remove } = useFieldArray<Values, BulletsPath>({
     name,
   });
 
@@ -152,29 +158,68 @@ export function BulletsField({
           Add bullet
         </Button>
       </div>
-      {fields.map((bullet, index) => (
-        <div key={bullet.id} className="flex items-start gap-2">
-          <div className="flex-1">
-            <CareerProfileField
-              aria-label={`${itemLabel} bullet ${index + 1}`}
-              label={`Bullet ${index + 1}`}
-              multiline
-              name={`${name}.${index}.text`}
-              required
-            />
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            disabled={fields.length === 1}
-            onClick={() => remove(index)}
-          >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
-            <span className="sr-only">Remove bullet</span>
-          </Button>
-        </div>
-      ))}
+      <SortableList ids={fields.map((bullet) => bullet.id)} onMove={move}>
+        {fields.map((bullet, index) => (
+          <BulletRow
+            key={bullet.id}
+            id={bullet.id}
+            label={`${itemLabel} bullet ${index + 1}`}
+            name={`${name}.${index}.text`}
+            removable={fields.length > 1}
+            onRemove={() => remove(index)}
+            title={`Bullet ${index + 1}`}
+          />
+        ))}
+      </SortableList>
+    </div>
+  );
+}
+
+function BulletRow({
+  id,
+  label,
+  name,
+  onRemove,
+  removable,
+  title,
+}: {
+  id: string;
+  label: string;
+  name: `${BulletsPath}.${number}.text`;
+  onRemove: () => void;
+  removable: boolean;
+  title: string;
+}) {
+  const { handleProps, isDragging, itemProps } = useSortableItem(id);
+
+  return (
+    <div
+      {...itemProps}
+      className={cn(
+        "flex items-start gap-2",
+        isDragging && "relative z-10 bg-background shadow-sm",
+      )}
+    >
+      <DragHandle label={label.toLowerCase()} {...handleProps} />
+      <div className="flex-1">
+        <CareerProfileField
+          aria-label={label}
+          label={title}
+          multiline
+          name={name}
+          required
+        />
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        disabled={!removable}
+        onClick={onRemove}
+      >
+        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        <span className="sr-only">Remove bullet</span>
+      </Button>
     </div>
   );
 }
