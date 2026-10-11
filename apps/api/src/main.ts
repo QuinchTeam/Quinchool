@@ -1,3 +1,5 @@
+import "./core/observability/instrumentation";
+
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { toNodeHandler } from "better-auth/node";
@@ -14,6 +16,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
+  app.enableShutdownHooks();
 
   // The browser calls this API directly and authenticates with the session
   // cookie, so the allowlist has to admit credentials.

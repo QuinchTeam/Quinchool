@@ -1,4 +1,13 @@
 services:
+  otel-collector:
+    image: otel/opentelemetry-collector:0.162.0
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol/config.yaml"]
+    ports:
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - ./infra/otel-collector/config.local.yaml:/etc/otelcol/config.yaml:ro
+
   crawl4ai:
     image: unclecode/crawl4ai:0.8.0
     container_name: quinchool-crawl4ai

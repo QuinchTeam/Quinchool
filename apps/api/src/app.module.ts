@@ -1,4 +1,6 @@
-import { Module } from "@nestjs/common";
+import { Module, type OnApplicationShutdown } from "@nestjs/common";
+
+import { telemetrySdk } from "./core/observability/instrumentation";
 
 import { AppController } from "./app.controller";
 import { BuildResumeModule } from "./modules/build-resume/build-resume.module";
@@ -21,4 +23,8 @@ import { TextGenerationModule } from "./modules/text-generation/text-generation.
     TextGenerationModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationShutdown {
+  async onApplicationShutdown() {
+    await telemetrySdk?.shutdown();
+  }
+}

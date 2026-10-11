@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     langfuse_secret_key: str = ""
     langfuse_host: str = ""
 
+    otel_exporter_otlp_endpoint: str = ""
+
     # The job scraper pins its own model: its prompt and JSON schema are tuned
     # for Gemini, so it does not go through the text-generation provider chain.
     gemini_model: str = "gemini-3.1-flash-lite"

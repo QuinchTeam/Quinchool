@@ -49,11 +49,16 @@ def _get_client() -> Any:
 
     try:
         from langfuse import Langfuse
+        from opentelemetry.sdk.trace import TracerProvider
 
         _client = Langfuse(
             public_key=public_key,
             secret_key=secret_key,
             host=settings.langfuse_host.strip() or None,
+            # Share trace context, but keep AI payloads out of infrastructure exports.
+            tracer_provider=(
+                TracerProvider() if settings.otel_exporter_otlp_endpoint else None
+            ),
         )
     except Exception:  # noqa: BLE001 - a broken tracer must not take generation down
         _client = None
