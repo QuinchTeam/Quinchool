@@ -11,11 +11,22 @@ test("HTTP requests propagate their trace through Node fetch", async () => {
   const exportPort = (reservation.address() as AddressInfo).port;
   await new Promise<void>((resolve) => reservation.close(() => resolve()));
   process.env.OTEL_EXPORTER_OTLP_ENDPOINT = `http://127.0.0.1:${exportPort}`;
-  const { telemetrySdk } = await import("../../../src/core/observability/instrumentation");
+  const { telemetrySdk } = await import(
+    "../../../src/core/observability/instrumentation"
+  );
+  const { requestTelemetry } = await import(
+    "../../../src/core/observability/request"
+  );
   // Load HTTP after instrumentation, just as main.ts loads Nest afterwards.
   const { createServer } = await import("node:http");
   let exports = 0;
+  const signals = new Set<string>();
+  const exportedData: string[] = [];
   const collector = createServer((request, response) => {
+    signals.add(request.url ?? "");
+    request.on("data", (chunk: Buffer) =>
+      exportedData.push(chunk.toString("utf8")),
+    );
     request.resume();
     request.on("end", () => {
       exports += 1;
@@ -32,20 +43,41 @@ test("HTTP requests propagate their trace through Node fetch", async () => {
   });
   ai.listen(0, "127.0.0.1");
   await once(ai, "listening");
-  const api = createServer(async (_request, response) => {
-    await fetch(`http://127.0.0.1:${(ai.address() as AddressInfo).port}/health`);
-    response.end("ok");
-  });
+  const api = createServer((request, response) =>
+    requestTelemetry(
+      Object.assign(request, {
+        path: "/career-profile",
+      }) as unknown as import("express").Request,
+      response as unknown as import("express").Response,
+      () => {
+        void (async () => {
+          await fetch(
+            `http://127.0.0.1:${(ai.address() as AddressInfo).port}/health?token=private-telemetry-test`,
+          );
+          response.end("ok");
+        })();
+      },
+    ),
+  );
   api.listen(0, "127.0.0.1");
   await once(api, "listening");
   try {
     // The uninstrumented test client must not replace the supplied parent.
     const { execFile } = await import("node:child_process");
     await new Promise<void>((resolve, reject) => {
-      execFile(process.execPath, ["-e", `fetch('http://127.0.0.1:${(api.address() as AddressInfo).port}', {headers: {traceparent: '00-11111111111111111111111111111111-2222222222222222-01'}}).then(r => r.text())`],
-        (error) => error ? reject(error) : resolve());
+      execFile(
+        process.execPath,
+        [
+          "-e",
+          `fetch('http://127.0.0.1:${(api.address() as AddressInfo).port}', {headers: {traceparent: '00-11111111111111111111111111111111-2222222222222222-01'}}).then(r => r.text())`,
+        ],
+        (error) => (error ? reject(error) : resolve()),
+      );
     });
-    assert.match(propagated, /^00-11111111111111111111111111111111-[a-f0-9]{16}-01$/);
+    assert.match(
+      propagated,
+      /^00-11111111111111111111111111111111-[a-f0-9]{16}-01$/,
+    );
   } finally {
     api.closeAllConnections();
     ai.closeAllConnections();
@@ -55,5 +87,14 @@ test("HTTP requests propagate their trace through Node fetch", async () => {
     collector.closeAllConnections();
     collector.close();
     assert.ok(exports > 0, "completed spans reach the OTLP exporter");
+    assert.ok(signals.has("/v1/traces"));
+    assert.ok(
+      signals.has("/v1/logs"),
+      "domain logs reach the same OTLP collector",
+    );
+    assert.equal(
+      exportedData.join("").includes("private-telemetry-test"),
+      false,
+    );
   }
 });

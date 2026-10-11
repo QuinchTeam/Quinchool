@@ -1,4 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { domainLog } from "../../core/observability/logger";
 
 import { callAiService } from "../../shared/clients/ai/ai-client";
 import type { TextGenerationModelId } from "../text-generation/text-generation.types";
@@ -40,8 +41,6 @@ export interface ChatTurn {
 
 @Injectable()
 export class ChatService {
-  private readonly logger = new Logger(ChatService.name);
-
   constructor(
     private readonly chats: ChatRepository,
     private readonly chatbot: ChatbotService,
@@ -127,7 +126,8 @@ export class ChatService {
       toolUsed: result.toolUsed,
       pendingAction: result.pendingAction,
     });
-    const title = currentTitle ?? (await this.titleFor(userId, chatId, modelId));
+    const title =
+      currentTitle ?? (await this.titleFor(userId, chatId, modelId));
 
     return {
       chatId,
@@ -197,7 +197,10 @@ export class ChatService {
 
       return summary.trim() || null;
     } catch (error) {
-      this.logger.warn(`Could not summarize chat: ${String(error)}`);
+      domainLog("warn", "chat.summary.failed", {
+        domain: "chatbot",
+        errorType: error instanceof Error ? error.name : typeof error,
+      });
       return null;
     }
   }
@@ -225,7 +228,10 @@ export class ChatService {
 
       if (generated.title.trim()) title = generated.title.trim();
     } catch (error) {
-      this.logger.warn(`Could not title chat: ${String(error)}`);
+      domainLog("warn", "chat.title.failed", {
+        domain: "chatbot",
+        errorType: error instanceof Error ? error.name : typeof error,
+      });
     }
 
     const saved = await this.chats.setTitle(userId, chatId, title);
@@ -244,9 +250,7 @@ function toChatMessage({ content, role }: StoredMessage): ChatMessage {
  * request that prompted the write, now with the tool result in hand.
  */
 export function endOnUserTurn(messages: StoredMessage[]): StoredMessage[] {
-  const lastUser = messages.findLastIndex(
-    (message) => message.role === "user",
-  );
+  const lastUser = messages.findLastIndex((message) => message.role === "user");
 
   return lastUser === -1 ? messages : messages.slice(0, lastUser + 1);
 }

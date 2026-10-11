@@ -1,4 +1,6 @@
 import { Module, type OnApplicationShutdown } from "@nestjs/common";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { DomainInterceptor } from "./core/observability/domain.interceptor";
 
 import { telemetrySdk } from "./core/observability/instrumentation";
 
@@ -10,8 +12,10 @@ import { FinanceTrackerModule } from "./modules/finance-tracker/finance-tracker.
 import { JobsScraperModule } from "./modules/jobs-scraper/jobs-scraper.module";
 import { PrismaModule } from "./core/database/prisma/prisma.module";
 import { TextGenerationModule } from "./modules/text-generation/text-generation.module";
+import { ObservabilityModule } from "./modules/observability/observability.module";
 
 @Module({
+  providers: [{ provide: APP_INTERCEPTOR, useClass: DomainInterceptor }],
   controllers: [AppController],
   imports: [
     PrismaModule,
@@ -21,6 +25,7 @@ import { TextGenerationModule } from "./modules/text-generation/text-generation.
     FinanceTrackerModule,
     JobsScraperModule,
     TextGenerationModule,
+    ObservabilityModule,
   ],
 })
 export class AppModule implements OnApplicationShutdown {

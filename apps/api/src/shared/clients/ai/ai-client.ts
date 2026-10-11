@@ -1,6 +1,7 @@
 import { GoogleAuth, type IdTokenClient } from "google-auth-library";
 
 import { env } from "../../../core/config/env";
+import { observeDomain } from "../../../core/observability/logger";
 import {
   AI_ERROR_CODES,
   type AiErrorResponse,
@@ -31,6 +32,7 @@ export async function callAiService<T>(
   body: unknown,
   fallback: string,
 ): Promise<T> {
+  return observeDomain("ai.request", async () => {
   let response: Response;
 
   try {
@@ -71,4 +73,5 @@ export async function callAiService<T>(
   }
 
   return responseBody as T;
+  });
 }

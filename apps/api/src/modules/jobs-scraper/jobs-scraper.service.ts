@@ -1,5 +1,6 @@
-import { HttpException, Injectable, Logger } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
+import { domainLog } from "../../core/observability/logger";
 
 import { callAiService } from "../../shared/clients/ai/ai-client";
 import { AiServiceError } from "../../shared/clients/ai/ai-client.errors";
@@ -10,7 +11,6 @@ import {
 
 @Injectable()
 export class JobsScraperService {
-  private readonly logger = new Logger(JobsScraperService.name);
 
   /**
    * Runs one scan against the AI service. This owns the scan id so every log
@@ -21,14 +21,11 @@ export class JobsScraperService {
     const scanId = request.scanId ?? randomUUID();
     const startedAt = Date.now();
 
-    this.logger.log(
-      `scan.started ${JSON.stringify({
-        roles: request.config.roles,
+    domainLog("info", "scan.started", {
+        domain: "jobs-scraper",
         scanId,
-        sources: request.config.sources,
-        timeRange: request.config.timeRange,
-      })}`,
-    );
+        roleCount: request.config.roles.length,
+    });
 
     let result: ScanResult;
 
@@ -52,12 +49,11 @@ export class JobsScraperService {
               status: 503,
             };
 
-      this.logger.error(
-        `scan.failed ${JSON.stringify({
-          error: error instanceof Error ? error.message : String(error),
+      domainLog("error", "scan.failed", {
+          domain: "jobs-scraper",
+          errorType: error instanceof Error ? error.name : typeof error,
           scanId,
-        })}`,
-      );
+      });
 
       throw new HttpException(
         { error: failure.message, scanId },
@@ -65,15 +61,14 @@ export class JobsScraperService {
       );
     }
 
-    this.logger.log(
-      `scan.completed ${JSON.stringify({
+    domainLog("info", "scan.completed", {
+        domain: "jobs-scraper",
         documentCount: result.documentCount,
         durationMs: Date.now() - startedAt,
         jobCount: result.jobs?.length ?? 0,
         scanId,
-        sourceIssues: result.sourceIssues,
-      })}`,
-    );
+        sourceIssueCount: result.sourceIssues?.length ?? 0,
+    });
 
     return result;
   }

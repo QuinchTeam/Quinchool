@@ -1,4 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { observeDomain } from "../../core/observability/logger";
 
 import { callAiService } from "../../shared/clients/ai/ai-client";
 import type {
@@ -84,7 +85,7 @@ export class ChatbotService {
       throw new ToolExecutionError("That action is no longer valid.");
     }
 
-    const result = await tool.run(userId, args.data, values.data);
+    const result = await observeDomain("chatbot.tool.write", () => tool.run(userId, args.data, values.data));
 
     return this.runChain({ ...context, userId }, [
       { name: tool.name, result },
@@ -115,14 +116,14 @@ export class ChatbotService {
       const tool = this.tools.find(answer.toolCall.name);
 
       if (!tool) {
-        this.logger.warn(`Model asked for an unknown tool: ${answer.toolCall.name}`);
+        this.logger.warn("chat.tool.unknown");
         return { ...stripToolCall(answer), toolUsed: toolResults.length > 0 };
       }
 
       const parsed = tool.arguments.safeParse(answer.toolCall.arguments);
 
       if (!parsed.success) {
-        this.logger.warn(`Bad arguments for ${tool.name}: ${parsed.error.message}`);
+        this.logger.warn("chat.tool.invalid-arguments");
         return {
           ...stripToolCall(answer),
           text: "I could not work out the details for that. Could you rephrase it?",
@@ -131,7 +132,7 @@ export class ChatbotService {
       }
 
       if (tool.kind === "write") {
-        const form = await tool.prepare(userId, parsed.data);
+        const form = await observeDomain("chatbot.tool.prepare", () => tool.prepare(userId, parsed.data));
 
         return {
           ...stripToolCall(answer),
@@ -147,11 +148,11 @@ export class ChatbotService {
 
       toolResults.push({
         name: tool.name,
-        result: await tool.run(userId, parsed.data),
+        result: await observeDomain("chatbot.tool.read", () => tool.run(userId, parsed.data)),
       });
     }
 
-    this.logger.warn(`Tool chain hit the ${MAX_TOOL_STEPS} step cap`);
+    this.logger.warn("chat.tool.step-limit");
 
     // Out of steps, so answer with what has been gathered instead of looping.
     const final = await this.ask({ messages, modelId, summary, toolResults });

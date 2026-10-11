@@ -1,7 +1,9 @@
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { SafeTraceExporter } from "./trace-exporter";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
 import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 
 try {
   process.loadEnvFile();
@@ -14,9 +16,14 @@ export const telemetrySdk = process.env.OTEL_EXPORTER_OTLP_ENDPOINT
       serviceName: "quinchool-api",
       autoDetectResources: false,
       metricReaders: [],
-      logRecordProcessors: [],
-      traceExporter: new OTLPTraceExporter(),
-      instrumentations: [new HttpInstrumentation(), new UndiciInstrumentation()],
+      logRecordProcessors: [
+        new BatchLogRecordProcessor({ exporter: new OTLPLogExporter() }),
+      ],
+      traceExporter: new SafeTraceExporter(),
+      instrumentations: [
+        new HttpInstrumentation(),
+        new UndiciInstrumentation(),
+      ],
     })
   : undefined;
 
