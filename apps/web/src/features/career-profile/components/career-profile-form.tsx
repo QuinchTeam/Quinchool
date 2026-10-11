@@ -35,6 +35,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
+import { emptyCareerProfile } from "@/features/career-profile/lib/empty-career-profile";
+import { syncPersonalDetails } from "@/features/career-profile/lib/sync-personal-details";
 import {
   validationFieldNames,
   validationMessages,
@@ -79,19 +81,6 @@ const emptyProject = (): CareerProfileValues["projects"][number] => ({
   isCurrent: false,
   startDate: "",
   endDate: "",
-});
-
-const emptyCareerProfile = (): CareerProfileValues => ({
-  name: "",
-  email: "",
-  contactNumber: "",
-  linkedin: "",
-  github: "",
-  personalWebsite: "",
-  educations: [emptyEducation()],
-  skillGroups: [emptySkillGroup()],
-  experiences: [emptyExperience()],
-  projects: [],
 });
 
 function Field({
@@ -798,6 +787,11 @@ export function CareerProfileForm() {
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
+          // Browser-visible personal details can differ from uncontrolled form state.
+          syncPersonalDetails(
+            new FormData(event.currentTarget),
+            (name, value) => form.setValue(name, value, { shouldDirty: true }),
+          );
           void Sentry.startSpan(
             { name: "career-profile.save", op: "career-profile.save" },
             () => {
@@ -898,6 +892,12 @@ export function CareerProfileForm() {
         </section>
 
         <Separator />
+
+        <p className="text-sm text-muted-foreground">
+          Education, skills, experiences, and projects are optional. Add them
+          now or save your personal details and return later. Complete or remove
+          any entries you add before saving.
+        </p>
 
         <section className="grid gap-5">
           <SectionHeader
