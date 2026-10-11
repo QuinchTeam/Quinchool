@@ -25,3 +25,39 @@ jobs:
         run: pnpm test:tailwind
       - name: Check for Tailwind arbitrary values
         run: pnpm lint:tailwind
+
+  observability:
+    name: Observability migration
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      BETTER_AUTH_SECRET: observability-test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm --filter @quinchool/api test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: apps/ai/requirements.txt
+      - run: python -m pip install -r apps/ai/requirements.txt pytest
+      - run: python -m pytest tests -q
+        working-directory: apps/ai
+      - run: pnpm --filter @quinchool/web exec next typegen
+      - run: pnpm --filter @quinchool/web exec tsc --noEmit
+      - name: Compile and test web telemetry
+        working-directory: apps/web
+        run: |
+          pnpm exec tsc --module commonjs --moduleResolution node --target es2020 --esModuleInterop --skipLibCheck --rewriteRelativeImportExtensions --outDir .next/observability-tests tests/src/lib/observability/logger.test.ts tests/src/lib/observability/trace-propagation.test.ts tests/src/lib/observability/telemetry.test.ts tests/src/lib/observability/operation.test.ts tests/src/lib/observability/trace-exporter.test.ts
+          pnpm exec node --test ".next/observability-tests/tests/src/lib/observability/*.test.js"
+      - name: Validate production collector
+        run: |
+          docker build --file infra/otel-collector/Dockerfile --tag quinchool-otel-validation .
+          docker run --rm -e GOOGLE_CLOUD_PROJECT=validation-project quinchool-otel-validation validate --config=/etc/otelcol-google/config.yaml

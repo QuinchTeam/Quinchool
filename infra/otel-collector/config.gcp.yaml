@@ -1,0 +1,54 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 127.0.0.1:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+  resourcedetection:
+    detectors: [gcp]
+    timeout: 10s
+  resource/project:
+    attributes:
+      - key: gcp.project_id
+        value: ${env:GOOGLE_CLOUD_PROJECT}
+        action: insert
+  batch:
+    send_batch_size: 200
+    send_batch_max_size: 200
+    timeout: 5s
+  metricstarttime:
+    strategy: subtract_initial_point
+
+exporters:
+  otlp_grpc:
+    endpoint: telemetry.googleapis.com:443
+    headers:
+      x-goog-user-project: ${env:GOOGLE_CLOUD_PROJECT}
+    auth:
+      authenticator: googleclientauth
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  googleclientauth: {}
+
+service:
+  extensions: [health_check, googleclientauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, resource/project, batch]
+      exporters: [otlp_grpc]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, resource/project, batch]
+      exporters: [otlp_grpc]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, resource/project, metricstarttime, batch]
+      exporters: [otlp_grpc]
