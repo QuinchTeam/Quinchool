@@ -22,22 +22,21 @@ jobs:
           # slow, so the request timeout matches the API's own client timeout.
           - service: ai
             label: "🤖 AI"
+            serviceFlags: --no-allow-unauthenticated --timeout=300
             flags: >-
-              --no-allow-unauthenticated
               --memory=2Gi
-              --timeout=300
               --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }},LANGFUSE_HOST=${{ vars.LANGFUSE_HOST }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-ai
               --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
           # Public: the browser calls it directly with the session cookie.
           - service: api
             label: "⚙️ API"
+            serviceFlags: --allow-unauthenticated --timeout=300
             flags: >-
-              --allow-unauthenticated
-              --timeout=300
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-api
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest
           - service: web
             label: "🌐 Web"
+            serviceFlags: --allow-unauthenticated
             buildArgs: >-
               --build-arg NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
               --build-arg NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
@@ -45,7 +44,6 @@ jobs:
               --build-arg SENTRY_PROJECT=${{ vars.SENTRY_PROJECT }}
               --secret id=sentry_auth_token,env=SENTRY_AUTH_TOKEN
             flags: >-
-              --allow-unauthenticated
               --set-env-vars=SENTRY_DSN=${{ vars.SENTRY_DSN }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-web
     steps:
       - uses: actions/checkout@v4
@@ -89,13 +87,14 @@ jobs:
           APP_CONTAINER="${APP_CONTAINER:-app}"
           gcloud run deploy quinchool-${{ matrix.service }} \
             --no-cpu-throttling \
+            --region ${{ vars.GCP_REGION }} \
+            --service-account ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }} \
+            --quiet \
+            ${{ matrix.serviceFlags }} \
             --container "$APP_CONTAINER" \
             --depends-on otel-collector \
             --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/quinchool/${{ matrix.service }}:${{ github.sha }} \
-            --region ${{ vars.GCP_REGION }} \
-            --service-account ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }} \
             --port 8080 \
-            --quiet \
             ${{ matrix.flags }} \
             --container otel-collector \
             --image "$COLLECTOR_IMAGE" \
