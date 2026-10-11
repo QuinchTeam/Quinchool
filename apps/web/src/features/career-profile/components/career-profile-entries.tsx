@@ -1,9 +1,21 @@
 "use client";
 
-import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import type { ReactNode } from "react";
-import { type FieldArray, useFieldArray, useWatch } from "react-hook-form";
+import { type ReactNode, useId, useState } from "react";
+import {
+  type FieldArray,
+  type FieldPath,
+  useFieldArray,
+  useFormContext,
+  useFormState,
+  useWatch,
+} from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   BulletsField,
@@ -21,18 +33,38 @@ import { cn } from "@/lib/utils";
 
 type EntryName = "educations" | "skillGroups" | "experiences" | "projects";
 
+const titleFields = {
+  educations: "institutionName",
+  skillGroups: "label",
+  experiences: "jobTitle",
+  projects: "projectName",
+} as const;
+
 function EntryCard({
   children,
   id,
   label,
   onRemove,
+  path,
+  titleField,
 }: {
   children: ReactNode;
   id: string;
   label: string;
   onRemove: () => void;
+  path: `${EntryName}.${number}`;
+  titleField: string;
 }) {
+  const bodyId = useId();
+  const [collapsed, setCollapsed] = useState(false);
   const { handleProps, isDragging, itemProps } = useSortableItem(id);
+  const { getFieldState } = useFormContext<CareerProfileValues>();
+  const { invalid } = getFieldState(path, useFormState({ name: path }));
+  const title = useWatch<CareerProfileValues>({
+    name: `${path}.${titleField}` as FieldPath<CareerProfileValues>,
+  });
+  // Entries with errors stay open so their messages are never hidden.
+  const open = !collapsed || invalid;
 
   return (
     <div
@@ -44,13 +76,41 @@ function EntryCard({
     >
       <div className="flex items-center gap-2">
         <DragHandle label={label.toLowerCase()} {...handleProps} />
-        <h3 className="flex-1 text-sm font-semibold">{label}</h3>
+        <h3 className="min-w-0 flex-1 truncate text-sm font-semibold">
+          {label}
+          {typeof title === "string" && title && (
+            <span className="font-normal text-muted-foreground">
+              {" "}
+              · {title}
+            </span>
+          )}
+        </h3>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-controls={bodyId}
+          aria-expanded={open}
+          disabled={invalid}
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          <HugeiconsIcon
+            icon={open ? ArrowDown01Icon : ArrowRight01Icon}
+            strokeWidth={2}
+          />
+          <span className="sr-only">
+            {open ? "Collapse" : "Expand"} {label.toLowerCase()}
+          </span>
+        </Button>
         <Button type="button" variant="ghost" size="icon-sm" onClick={onRemove}>
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
           <span className="sr-only">Remove {label.toLowerCase()}</span>
         </Button>
       </div>
-      {children}
+      {/* Hidden, not unmounted, so collapsed fields keep their registration. */}
+      <div id={bodyId} className={open ? "grid gap-5" : "hidden"}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -96,6 +156,8 @@ export function EntryList({
             id={entry.id}
             label={`${itemLabel} ${index + 1}`}
             onRemove={() => remove(index)}
+            path={`${name}.${index}`}
+            titleField={titleFields[name]}
           >
             {renderItem(index)}
           </EntryCard>
