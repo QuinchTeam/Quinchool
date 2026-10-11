@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { validationMessages } from "../../../../../src/features/career-profile/lib/validation-errors.ts";
+import {
+  validationFieldNames,
+  validationMessages,
+} from "../../../../../src/features/career-profile/lib/validation-errors.ts";
 
 test("validation summary includes nested and array-root errors without reading DOM refs", () => {
   const ref: Record<string, unknown> = {};
@@ -18,4 +21,18 @@ test("validation summary includes nested and array-root errors without reading D
     ],
   );
   assert.deepEqual(validationMessages({}), []);
+});
+
+test("validation telemetry contains field paths, never values, messages or DOM refs", () => {
+  assert.deepEqual(
+    validationFieldNames({
+      name: {
+        message: "private profile value",
+        ref: { value: "private input" },
+      },
+      experiences: [{ endDate: { message: "private exception detail" } }],
+      "private-field-value": { message: "private" },
+    }),
+    ["name", "experiences.0.endDate"],
+  );
 });

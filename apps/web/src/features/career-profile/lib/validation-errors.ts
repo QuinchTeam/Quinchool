@@ -11,3 +11,13 @@ export function validationMessages(errors: unknown, path = ""): string[] {
     ),
   );
 }
+
+export function validationFieldNames(errors: unknown): string[] {
+  return validationMessages(errors)
+    .map((message) => message.split(":")[0])
+    .filter((path) =>
+      /^(name|email|contactNumber|linkedin|github|personalWebsite|educations|skillGroups|experiences|projects)(\.[a-zA-Z0-9]+)*$/.test(
+        path,
+      ),
+    );
+}

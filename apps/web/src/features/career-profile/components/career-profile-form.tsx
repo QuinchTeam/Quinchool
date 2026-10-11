@@ -8,6 +8,7 @@ import {
   FloppyDiskIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import * as Sentry from "@sentry/nextjs";
 import {
   cloneElement,
   isValidElement,
@@ -34,11 +35,15 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
-import { validationMessages } from "@/features/career-profile/lib/validation-errors";
+import {
+  validationFieldNames,
+  validationMessages,
+} from "@/features/career-profile/lib/validation-errors";
 import {
   type CareerProfileValues,
   careerProfileSchema,
 } from "@/features/career-profile/validations/career-profile";
+import { logInfo, logWarn } from "@/lib/observability/logger";
 
 const emptyEducation = (): CareerProfileValues["educations"][number] => ({
   institutionName: "",
@@ -790,11 +795,29 @@ export function CareerProfileForm() {
     <Form {...form}>
       <form
         className="grid gap-10"
-        onSubmit={form.handleSubmit(onSubmit, (errors) =>
-          toast.error("Review the required fields", {
-            description: validationMessages(errors)[0],
-          }),
-        )}
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          void Sentry.startSpan(
+            { name: "career-profile.save", op: "career-profile.save" },
+            () => {
+              logInfo("career-profile.save.attempted");
+              return form.handleSubmit(onSubmit, (errors) => {
+                const fields = validationFieldNames(errors);
+                logWarn(
+                  `career-profile.save.validation-rejected errorCount=${fields.length} fields=${fields.join(",")}`,
+                );
+                Sentry.getActiveSpan()?.setAttribute(
+                  "validation.error_count",
+                  fields.length,
+                );
+                toast.error("Review the required fields", {
+                  description: validationMessages(errors)[0],
+                });
+              })(event);
+            },
+          );
+        }}
       >
         {form.formState.submitCount > 0 &&
           validationMessages(form.formState.errors).length > 0 && (
