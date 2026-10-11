@@ -12,6 +12,7 @@ from datetime import datetime
 
 from app.core.config import get_settings
 from app.core.logging import elapsed_ms, log_jobs_scraper
+from app.core.telemetry import domain_operation
 from app.lib.jobs_scraper.rules import (
     get_job_date_window,
     get_job_rejection_reasons,
@@ -33,6 +34,7 @@ from app.modules.jobs_scraper.schemas import (
 )
 
 
+@domain_operation("jobs-scraper.scan")
 async def scan_jobs(
     scan_id: str, config: JobScraperConfig, scanned_at: datetime
 ) -> ScanResult:
@@ -95,9 +97,7 @@ async def scan_jobs(
         },
     )
 
-    descriptions = {
-        document.url.lower(): document.content for document in documents
-    }
+    descriptions = {document.url.lower(): document.content for document in documents}
     classified = [
         _to_scanned_job(entry, descriptions)
         for entry in classify_scanned_jobs(result, config, scanned_at)
@@ -159,9 +159,7 @@ def classify_scanned_jobs(
         classification: JobClassification = (
             "REJECTED" if proposed == "REJECTED" or failures else proposed
         )
-        model_reasons = (
-            job.review_reasons if isinstance(job, PotentialJob) else []
-        )
+        model_reasons = job.review_reasons if isinstance(job, PotentialJob) else []
         reasons = list(dict.fromkeys([*model_reasons, *failures]))[:6]
         classified.append((classification, job, reasons))
 
@@ -253,4 +251,3 @@ def _to_logged_job(job: DiscoveredJob | PotentialJob) -> dict[str, object]:
         logged["reviewReasons"] = job.review_reasons
 
     return logged
-

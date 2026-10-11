@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.core.config import get_settings
 from app.core.exceptions import Crawl4AiUnavailableError
 from app.core.logging import elapsed_ms, log_jobs_scraper
+from app.core.telemetry import domain_operation
 from app.lib.jobs_scraper.rules import (
     get_crawl_lookback_seconds,
     get_job_source_from_url,
@@ -80,6 +81,7 @@ class CrawlResponse(BaseModel):
     success: bool
 
 
+@domain_operation("jobs-scraper.collect-documents")
 async def collect_job_documents(
     scan_id: str, config: JobScraperConfig
 ) -> tuple[list[JobDocument], list[JobSourceIssue]]:
@@ -244,6 +246,7 @@ def _build_linkedin_search_url(
     )
 
 
+@domain_operation("jobs-scraper.crawl")
 async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
     if not urls:
         return []
@@ -379,8 +382,7 @@ def _summarize_crawl_batch(
     urls: list[str], results: list[CrawlResult]
 ) -> dict[str, dict[str, int]]:
     return {
-        source: _summarize_source_crawl(source, urls, results)
-        for source in JOB_SOURCES
+        source: _summarize_source_crawl(source, urls, results) for source in JOB_SOURCES
     }
 
 

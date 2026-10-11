@@ -5,6 +5,7 @@ import re
 
 from pydantic import ValidationError
 
+from app.core.telemetry import domain_operation
 from app.modules.resume.schemas import (
     TailoredBulletDraft,
     TailoredResume,
@@ -90,6 +91,7 @@ class UnreadableTailorReplyError(Exception):
     pass
 
 
+@domain_operation("resume-builder.tailor")
 async def tailor_resume(request: TailorResumeRequest) -> TailoredResume:
     prompt = build_tailor_resume_prompt(request)
 

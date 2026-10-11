@@ -8,10 +8,32 @@ import json
 import sys
 import time
 from collections.abc import Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Literal
 
+from opentelemetry import trace
+from opentelemetry._logs import SeverityNumber
+
 LogLevel = Literal["error", "info", "warn"]
+_logger = None
+_span: ContextVar[trace.Span | None] = ContextVar("domain_log_span", default=None)
+
+
+@contextmanager
+def use_log_span(span):
+    # Langfuse has its own provider; infrastructure logs must link to an exported infrastructure span.
+    token = _span.set(span)
+    try:
+        yield
+    finally:
+        _span.reset(token)
+
+
+def configure_logs(provider):
+    global _logger
+    _logger = provider.get_logger("quinchool.domains") if provider is not None else None
 
 
 def create_log(
@@ -20,12 +42,34 @@ def create_log(
     event: str,
     fields: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    span = (_span.get() or trace.get_current_span()).get_span_context()
+    safe_fields = {
+        key: value
+        for key, value in (fields or {}).items()
+        if isinstance(value, (int, float, bool))
+        or key
+        in {
+            "scanId",
+            "providerId",
+            "providerModelId",
+            "errorName",
+            "domain",
+            "method",
+            "operation",
+        }
+    }
     return {
         "timestamp": to_iso_z(datetime.now(timezone.utc)),
         "level": level,
         "service": service,
         "event": event,
-        **(fields or {}),
+        **safe_fields,
+        "severity": "WARNING" if level == "warn" else level.upper(),
+        **(
+            {"traceId": f"{span.trace_id:032x}", "spanId": f"{span.span_id:016x}"}
+            if span.is_valid
+            else {}
+        ),
     }
 
 
@@ -35,7 +79,35 @@ def log_event(
     event: str,
     fields: Mapping[str, object] | None = None,
 ) -> None:
-    line = json.dumps(create_log(level, service, event, fields), default=str)
+    record = create_log(level, service, event, fields)
+    if _logger is not None:
+        span = _span.get() or trace.get_current_span()
+        _logger.emit(
+            body=event,
+            context=trace.set_span_in_context(span),
+            severity_number={
+                "info": SeverityNumber.INFO,
+                "warn": SeverityNumber.WARN,
+                "error": SeverityNumber.ERROR,
+            }[level],
+            severity_text=record["severity"],
+            attributes={
+                "app.domain": "resume-builder" if service == "resume" else service,
+                **{
+                    key: value
+                    for key, value in record.items()
+                    if key not in {"timestamp", "level", "service", "event", "severity"}
+                },
+            },
+        )
+        if level == "error" or event == "provider.failed":
+            span.set_status(trace.Status(trace.StatusCode.ERROR))
+            span.add_event(
+                "exception",
+                {"exception.type": str(record.get("errorName", "DomainError"))},
+            )
+        return
+    line = json.dumps(record, default=str)
     stream = sys.stderr if level in ("error", "warn") else sys.stdout
     print(line, file=stream, flush=True)
 

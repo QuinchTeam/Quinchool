@@ -12,7 +12,11 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any, Literal, Protocol, final
 
+from opentelemetry import trace
+
 from app.core.config import get_settings
+from app.core.logging import log_event, use_log_span
+from app.core.telemetry import domain_tracer
 
 ObservationType = Literal["chain", "generation", "span"]
 
@@ -70,16 +74,33 @@ def _get_client() -> Any:
 def observe(
     name: str, *, as_type: ObservationType, **fields: Any
 ) -> Iterator[Observation]:
-    client = _get_client()
-
-    if client is None:
-        yield NoObservation()
-        return
-
-    with client.start_as_current_observation(
-        name=name, as_type=as_type, **fields
-    ) as observation:
-        yield observation
+    with (
+        domain_tracer().start_as_current_span(
+            name,
+            attributes={"app.domain": "llm"},
+            record_exception=False,
+            set_status_on_exception=False,
+        ) as span,
+        use_log_span(span),
+    ):
+        client = _get_client()
+        log_event("info", "llm", "operation.started")
+        try:
+            if client is None:
+                yield NoObservation()
+            else:
+                with client.start_as_current_observation(
+                    name=name, as_type=as_type, **fields
+                ) as observation:
+                    yield observation
+            log_event("info", "llm", "operation.completed")
+        except Exception as error:
+            span.set_status(trace.Status(trace.StatusCode.ERROR))
+            span.add_event("exception", {"exception.type": type(error).__name__})
+            log_event(
+                "error", "llm", "operation.failed", {"errorName": type(error).__name__}
+            )
+            raise
 
 
 def usage_details(

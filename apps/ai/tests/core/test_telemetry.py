@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
 from app.core.config import Settings
-from app.core.telemetry import instrument_app
+from app.core.telemetry import instrument_app, shutdown_logs
 
 
 def test_tracing_disabled_without_endpoint():
@@ -26,7 +26,7 @@ def test_incoming_trace_context_is_preserved():
                 _env_file=None, otel_exporter_otlp_endpoint="http://localhost:4318"
             ),
         ),
-        patch("app.core.telemetry.OTLPSpanExporter", return_value=exporter),
+        patch("app.core.telemetry.SafeTraceExporter", return_value=exporter),
     ):
         provider = instrument_app(app)
 
@@ -53,3 +53,4 @@ def test_incoming_trace_context_is_preserved():
     finally:
         if provider is not None:
             provider.shutdown()
+        shutdown_logs()

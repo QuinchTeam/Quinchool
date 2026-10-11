@@ -6,6 +6,7 @@ Port of apps/api/src/text-generation/{service.ts,prompts.ts}.
 from __future__ import annotations
 
 from app.core.logging import log_event
+from app.core.telemetry import domain_operation
 from app.core.tracing import observe, usage_details
 from app.lib.llm.errors import map_provider_error
 from app.lib.llm.models import get_provider_chain
@@ -19,6 +20,7 @@ from app.modules.text_generation.schemas import (
 SERVICE = "text-generation"
 
 
+@domain_operation("text-generation.generate")
 async def generate_text(
     model_id: TextGenerationModelId, prompt: str
 ) -> GenerateTextResult:
@@ -68,6 +70,17 @@ async def generate_text(
                     continue
 
                 usage = response.usage
+                log_event(
+                    "info",
+                    SERVICE,
+                    "provider.completed",
+                    {
+                        "providerId": provider_id,
+                        "providerModelId": provider_model_id,
+                        "inputTokens": usage.input_tokens if usage else None,
+                        "outputTokens": usage.output_tokens if usage else None,
+                    },
+                )
                 _ = generation.update(
                     output=response.text,
                     usage_details=usage_details(
@@ -100,6 +113,7 @@ async def generate_text(
         raise error
 
 
+@domain_operation("prompt-enhancer.enhance")
 async def enhance_prompt(
     model_id: TextGenerationModelId, raw_prompt: str
 ) -> PromptEnhancerResult:

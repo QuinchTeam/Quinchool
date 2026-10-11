@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from app.core.telemetry import domain_operation
 from app.lib.tools.protocol import TOOL_CALL_CLOSE, TOOL_CALL_OPEN, parse_tool_call
 from app.lib.tools.registry import describe_tool_result, register_tools
 from app.modules.chatbot.schemas import (
@@ -19,6 +20,7 @@ PERSONA = (
 )
 
 
+@domain_operation("chatbot.respond")
 async def respond(
     messages: list[ChatMessage],
     model_id: TextGenerationModelId,
@@ -117,6 +119,7 @@ SUMMARY_PROMPT = (
 )
 
 
+@domain_operation("chatbot.summarize")
 async def summarize(
     messages: list[ChatMessage],
     model_id: TextGenerationModelId,
@@ -161,6 +164,7 @@ def clean_title(text: str) -> str:
     return title[:120]
 
 
+@domain_operation("chatbot.title")
 async def generate_title(
     messages: list[ChatMessage], model_id: TextGenerationModelId
 ) -> str:
