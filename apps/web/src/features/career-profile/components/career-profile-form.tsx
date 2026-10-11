@@ -8,9 +8,16 @@ import {
   FloppyDiskIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useId, useState } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Controller,
+  type FieldPath,
   useFieldArray,
   useForm,
   useFormContext,
@@ -27,6 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
+import { validationMessages } from "@/features/career-profile/lib/validation-errors";
 import {
   type CareerProfileValues,
   careerProfileSchema,
@@ -92,6 +100,18 @@ function Field({
   label: string;
   optional?: boolean;
 }) {
+  const form = useFormContext<CareerProfileValues>();
+  const child = isValidElement<{
+    name?: FieldPath<CareerProfileValues>;
+    "aria-invalid"?: boolean;
+    "aria-describedby"?: string;
+  }>(children)
+    ? children
+    : null;
+  const error = child?.props.name
+    ? form.getFieldState(child.props.name, form.formState).error
+    : undefined;
+  const errorId = `${htmlFor}-error`;
   return (
     <div className="grid gap-2">
       <Label htmlFor={htmlFor}>
@@ -100,7 +120,19 @@ function Field({
           <span className="font-normal text-muted-foreground"> (optional)</span>
         )}
       </Label>
-      {children}
+      {child
+        ? cloneElement(child, {
+            "aria-invalid": error ? true : undefined,
+            "aria-describedby": error
+              ? errorId
+              : child.props["aria-describedby"],
+          })
+        : children}
+      {error?.message && (
+        <p id={errorId} className="text-sm text-destructive">
+          {error.message}
+        </p>
+      )}
     </div>
   );
 }
@@ -512,11 +544,21 @@ function ExperienceEditor({
         </div>
         {bullets.fields.map((bullet, bulletIndex) => (
           <div key={bullet.id} className="flex items-start gap-2">
-            <Textarea
-              aria-label={`Experience ${index + 1} bullet ${bulletIndex + 1}`}
-              required
-              {...register(`experiences.${index}.bullets.${bulletIndex}.text`)}
-            />
+            <div className="flex-1">
+              <Field
+                htmlFor={`experience-${index}-bullet-${bulletIndex}`}
+                label={`Bullet ${bulletIndex + 1}`}
+              >
+                <Textarea
+                  id={`experience-${index}-bullet-${bulletIndex}`}
+                  aria-label={`Experience ${index + 1} bullet ${bulletIndex + 1}`}
+                  required
+                  {...register(
+                    `experiences.${index}.bullets.${bulletIndex}.text`,
+                  )}
+                />
+              </Field>
+            </div>
             <Button
               type="button"
               variant="ghost"
@@ -637,11 +679,19 @@ function ProjectEditor({
         </div>
         {bullets.fields.map((bullet, bulletIndex) => (
           <div key={bullet.id} className="flex items-start gap-2">
-            <Textarea
-              aria-label={`Project ${index + 1} bullet ${bulletIndex + 1}`}
-              required
-              {...register(`projects.${index}.bullets.${bulletIndex}.text`)}
-            />
+            <div className="flex-1">
+              <Field
+                htmlFor={`project-${index}-bullet-${bulletIndex}`}
+                label={`Bullet ${bulletIndex + 1}`}
+              >
+                <Textarea
+                  id={`project-${index}-bullet-${bulletIndex}`}
+                  aria-label={`Project ${index + 1} bullet ${bulletIndex + 1}`}
+                  required
+                  {...register(`projects.${index}.bullets.${bulletIndex}.text`)}
+                />
+              </Field>
+            </div>
             <Button
               type="button"
               variant="ghost"
@@ -740,10 +790,26 @@ export function CareerProfileForm() {
     <Form {...form}>
       <form
         className="grid gap-10"
-        onSubmit={form.handleSubmit(onSubmit, () =>
-          toast.error("Review the required fields"),
+        onSubmit={form.handleSubmit(onSubmit, (errors) =>
+          toast.error("Review the required fields", {
+            description: validationMessages(errors)[0],
+          }),
         )}
       >
+        {form.formState.submitCount > 0 &&
+          validationMessages(form.formState.errors).length > 0 && (
+            <div
+              role="alert"
+              className="rounded-md border border-destructive p-4 text-sm text-destructive"
+            >
+              <p>Fix these fields before saving:</p>
+              <ul className="list-disc pl-5">
+                {validationMessages(form.formState.errors).map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         <section className="grid gap-6">
           <h2 className="text-lg font-semibold">Personal details</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
