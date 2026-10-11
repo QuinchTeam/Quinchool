@@ -7,7 +7,10 @@ export async function register() {
   // we're booting in, so we load the matching config (different runtimes
   // have different capabilities — Node has profiling/Prisma, Edge doesn't).
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    if (process.env.NODE_ENV === "production") {
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+    ) {
       // Langfuse moved to apps/api with the text generation it traces.
       await import("../sentry.server.config");
     }
@@ -35,7 +38,8 @@ export async function register() {
 // Fastify error handler from the source guide.
 export async function onRequestError(...args: Parameters<CaptureRequestError>) {
   if (
-    process.env.NODE_ENV === "production" &&
+    (process.env.NODE_ENV === "production" ||
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT) &&
     !isAbortedConnectionError(args[0])
   ) {
     const { captureRequestError } = await import("@sentry/nextjs");

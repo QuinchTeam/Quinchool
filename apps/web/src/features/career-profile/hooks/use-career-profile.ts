@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 import { apiUrl, withCredentials } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const CAREER_PROFILE_KEY = ["career-profile"] as const;
 
@@ -10,22 +11,27 @@ async function fetchCareerProfile(
   input: string,
   init?: RequestInit,
 ): Promise<CareerProfileValues | null> {
-  const response = await fetch(input, {
-    ...withCredentials,
-    headers: { "Content-Type": "application/json" },
-    ...init,
+  return observeOperation("career-profile.request", async () => {
+    const response = await apiFetch(input, {
+      ...withCredentials,
+      headers: { "Content-Type": "application/json" },
+      ...init,
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      throw Object.assign(
+        new Error(body?.error ?? "Career profile request failed"),
+        { status: response.status },
+      );
+    }
+
+    const body = await response.text();
+    return body ? (JSON.parse(body) as CareerProfileValues | null) : null;
   });
-
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-
-    throw new Error(body?.error ?? "Career profile request failed");
-  }
-
-  const body = await response.text();
-  return body ? (JSON.parse(body) as CareerProfileValues | null) : null;
 }
 
 export function useCareerProfile() {

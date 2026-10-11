@@ -1,6 +1,7 @@
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
-import { apiUrl, withCredentials } from "@/lib/api";
 import type { TextGenerationValues } from "@/lib/ai/text-generation/validations";
+import { apiUrl, withCredentials } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 export type PromptEnhancerInput = {
   modelId: TextGenerationModelId;
@@ -18,39 +19,47 @@ export type TextGenerationResult = {
 export async function enhancePrompt(
   input: PromptEnhancerInput,
 ): Promise<PromptEnhancerResult> {
-  const response = await fetch(apiUrl("/prompt-enhancer"), {
-    ...withCredentials,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
+  return observeOperation("prompt-enhancer.request", async () => {
+    const response = await apiFetch(apiUrl("/prompt-enhancer"), {
+      ...withCredentials,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = (await response.json()) as PromptEnhancerResult & {
+      error?: string;
+    };
+
+    if (!response.ok) {
+      throw Object.assign(new Error(data.error ?? "Failed to enhance prompt"), {
+        status: response.status,
+      });
+    }
+
+    return data;
   });
-  const data = (await response.json()) as PromptEnhancerResult & {
-    error?: string;
-  };
-
-  if (!response.ok) {
-    throw new Error(data.error ?? "Failed to enhance prompt");
-  }
-
-  return data;
 }
 
 export async function generateText(
   input: TextGenerationValues,
 ): Promise<TextGenerationResult> {
-  const response = await fetch(apiUrl("/text-generation"), {
-    ...withCredentials,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
+  return observeOperation("text-generation.request", async () => {
+    const response = await apiFetch(apiUrl("/text-generation"), {
+      ...withCredentials,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = (await response.json()) as TextGenerationResult & {
+      error?: string;
+    };
+
+    if (!response.ok) {
+      throw Object.assign(new Error(data.error ?? "Failed to generate text"), {
+        status: response.status,
+      });
+    }
+
+    return data;
   });
-  const data = (await response.json()) as TextGenerationResult & {
-    error?: string;
-  };
-
-  if (!response.ok) {
-    throw new Error(data.error ?? "Failed to generate text");
-  }
-
-  return data;
 }

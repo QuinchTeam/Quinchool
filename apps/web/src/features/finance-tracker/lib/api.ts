@@ -1,4 +1,5 @@
 import { apiUrl, withCredentials } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 export class FinanceApiError extends Error {
   constructor(
@@ -14,23 +15,25 @@ export async function financeRequest<T>(
   path = "",
   init: RequestInit = {},
 ): Promise<T> {
-  const headers = new Headers(init.headers);
-  if (init.body) headers.set("Content-Type", "application/json");
-  const response = await fetch(apiUrl(`/finance-tracker${path}`), {
-    ...withCredentials,
-    ...init,
-    headers,
-    cache: "no-store",
+  return observeOperation("finance-tracker.request", async () => {
+    const headers = new Headers(init.headers);
+    if (init.body) headers.set("Content-Type", "application/json");
+    const response = await apiFetch(apiUrl(`/finance-tracker${path}`), {
+      ...withCredentials,
+      ...init,
+      headers,
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      throw new FinanceApiError(
+        body?.error ?? "Finance request failed. Please try again.",
+        response.status,
+      );
+    }
+    if (response.status === 204) return undefined as T;
+    return response.json() as Promise<T>;
   });
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-    throw new FinanceApiError(
-      body?.error ?? "Finance request failed. Please try again.",
-      response.status,
-    );
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
 }

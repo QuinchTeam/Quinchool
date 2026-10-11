@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { resumeFileName } from "@/features/resume-builder/lib/resume";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { resumeFileName } from "@/features/resume-builder/lib/resume";
+import { observeOperation } from "@/lib/observability/operation";
 
 const previewClassName =
   "mx-auto block h-a4-height w-a4-width shrink-0 border border-black/20 bg-white shadow-sm";
@@ -31,60 +32,64 @@ export interface RenderedResumePdf {
 export async function renderResumePdf(
   profile: CareerProfileValues,
 ): Promise<RenderedResumePdf> {
-  const [{ pdf }, { ResumePdfDocument }] = await Promise.all([
-    import("@react-pdf/renderer"),
-    import("@/features/resume-builder/components/resume-pdf-document"),
-  ]);
-  let layout: PdfLayoutNode | undefined;
-  const blob = await pdf(
-    <ResumePdfDocument
-      profile={profile}
-      onRender={(props) => {
-        layout = (
-          props as typeof props & {
-            _INTERNAL__LAYOUT__DATA_?: PdfLayoutNode;
-          }
-        )._INTERNAL__LAYOUT__DATA_;
-      }}
-    />,
-  ).toBlob();
-  const pages = layout?.children ?? [];
+  return observeOperation("resume-builder.pdf-render", async () => {
+    const [{ pdf }, { ResumePdfDocument }] = await Promise.all([
+      import("@react-pdf/renderer"),
+      import("@/features/resume-builder/components/resume-pdf-document"),
+    ]);
+    let layout: PdfLayoutNode | undefined;
+    const blob = await pdf(
+      <ResumePdfDocument
+        profile={profile}
+        onRender={(props) => {
+          layout = (
+            props as typeof props & {
+              _INTERNAL__LAYOUT__DATA_?: PdfLayoutNode;
+            }
+          )._INTERNAL__LAYOUT__DATA_;
+        }}
+      />,
+    ).toBlob();
+    const pages = layout?.children ?? [];
 
-  if (pages.length === 0) {
-    throw new Error("Could not measure the generated resume PDF.");
-  }
+    if (pages.length === 0) {
+      throw new Error("Could not measure the generated resume PDF.");
+    }
 
-  const firstPage = pages[0];
-  const pageTop = firstPage?.box?.paddingTop ?? 0;
-  const pageBottom =
-    (firstPage?.box?.height ?? 0) - (firstPage?.box?.paddingBottom ?? 0);
-  const contentBottom = Math.max(
-    pageTop,
-    ...(firstPage?.children ?? []).map(
-      (child) => (child.box?.top ?? 0) + (child.box?.height ?? 0),
-    ),
-  );
+    const firstPage = pages[0];
+    const pageTop = firstPage?.box?.paddingTop ?? 0;
+    const pageBottom =
+      (firstPage?.box?.height ?? 0) - (firstPage?.box?.paddingBottom ?? 0);
+    const contentBottom = Math.max(
+      pageTop,
+      ...(firstPage?.children ?? []).map(
+        (child) => (child.box?.top ?? 0) + (child.box?.height ?? 0),
+      ),
+    );
 
-  return {
-    blob,
-    fillRatio:
-      pageBottom > pageTop
-        ? (contentBottom - pageTop) / (pageBottom - pageTop)
-        : 0,
-    pageCount: pages.length,
-  };
+    return {
+      blob,
+      fillRatio:
+        pageBottom > pageTop
+          ? (contentBottom - pageTop) / (pageBottom - pageTop)
+          : 0,
+      pageCount: pages.length,
+    };
+  });
 }
 
 export async function downloadResumePdf(profile: CareerProfileValues) {
-  const { blob } = await renderResumePdf(profile);
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = resumeFileName(profile.name);
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  return observeOperation("resume-builder.pdf-download", async () => {
+    const { blob } = await renderResumePdf(profile);
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = resumeFileName(profile.name);
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  });
 }
 
 function ResumeSkeleton() {
@@ -150,8 +155,7 @@ export function ResumePdfPreview({
         } else {
           URL.revokeObjectURL(generatedUrl);
         }
-      } catch (error) {
-        console.error("Could not generate the resume PDF", error);
+      } catch {
         if (active) setPdfError(true);
       }
     }

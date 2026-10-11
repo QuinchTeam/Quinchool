@@ -11,12 +11,11 @@ import {
 import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-
-import { DashboardGreeting } from "@/features/dashboard/components/dashboard-greeting";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import { apiUrl } from "@/lib/api";
+import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { DashboardGreeting } from "@/features/dashboard/components/dashboard-greeting";
 import {
   amountClassName,
   formatMoney,
@@ -27,20 +26,23 @@ import type {
   TransactionPage,
 } from "@/features/finance-tracker/lib/types";
 import type { JobScraperState } from "@/features/jobs-scraper/lib/schema";
+import { apiUrl } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 import { cn } from "@/lib/utils";
-import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 
 /** Every tile degrades to "unavailable" on its own, so one API being down
  * still leaves the rest of the dashboard useful. */
 async function load<T>(path: string, cookie: string): Promise<T | null> {
   try {
-    const response = await fetch(apiUrl(path), {
-      headers: { cookie },
-      cache: "no-store",
+    return await observeOperation("dashboard.tile", async () => {
+      const response = await apiFetch(apiUrl(path), {
+        headers: { cookie },
+        cache: "no-store",
+      });
+      if (!response.ok) return null;
+      const body = await response.text();
+      return body ? (JSON.parse(body) as T) : null;
     });
-    if (!response.ok) return null;
-    const body = await response.text();
-    return body ? (JSON.parse(body) as T) : null;
   } catch {
     return null;
   }
@@ -54,12 +56,16 @@ const lastScanned = new Intl.DateTimeFormat("en-PH", {
 
 export async function DashboardHome() {
   const cookie = (await cookies()).toString();
-  const [finance, jobs, career, transactions] = await Promise.all([
-    load<FinanceOverview>("/finance-tracker", cookie),
-    load<JobScraperState>("/jobs-scraper", cookie),
-    load<CareerProfileValues>("/career-profile", cookie),
-    load<TransactionPage>("/finance-tracker/transactions?limit=5", cookie),
-  ]);
+  const [finance, jobs, career, transactions] = await observeOperation(
+    "dashboard.load",
+    () =>
+      Promise.all([
+        load<FinanceOverview>("/finance-tracker", cookie),
+        load<JobScraperState>("/jobs-scraper", cookie),
+        load<CareerProfileValues>("/career-profile", cookie),
+        load<TransactionPage>("/finance-tracker/transactions?limit=5", cookie),
+      ]),
+  );
 
   const bulletCount = career
     ? [...career.experiences, ...career.projects].reduce(

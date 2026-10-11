@@ -1,11 +1,12 @@
-import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
-import { apiUrl, withCredentials } from "@/lib/api";
 import type {
   ChatSummary,
   ChatTurn,
   PendingToolAction,
   StoredChat,
 } from "@/features/chatbot/lib/types";
+import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { apiUrl, withCredentials } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const FALLBACK_ERROR = "The assistant could not respond.";
 
@@ -41,14 +42,16 @@ export async function sendChatMessage(body: {
   content: string;
   modelId: TextGenerationModelId;
 }): Promise<ChatTurn> {
-  const turn = await request<ChatTurn>("/chatbot", { method: "POST", body });
+  return observeOperation("chatbot.send-message", async () => {
+    const turn = await request<ChatTurn>("/chatbot", { method: "POST", body });
 
-  // A tool call can leave the text empty, but a pending form is still a reply.
-  if (!turn.text && !turn.pendingAction) {
-    throw new Error(FALLBACK_ERROR);
-  }
+    // A tool call can leave the text empty, but a pending form is still a reply.
+    if (!turn.text && !turn.pendingAction) {
+      throw new Error(FALLBACK_ERROR);
+    }
 
-  return turn;
+    return turn;
+  });
 }
 
 /**
@@ -92,23 +95,27 @@ async function request<T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
 ): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    ...withCredentials,
-    method: init.method ?? "GET",
-    headers: init.body ? { "Content-Type": "application/json" } : undefined,
-    body: init.body ? JSON.stringify(init.body) : undefined,
-    cache: "no-store",
+  return observeOperation("chatbot.request", async () => {
+    const response = await apiFetch(apiUrl(path), {
+      ...withCredentials,
+      method: init.method ?? "GET",
+      headers: init.body ? { "Content-Type": "application/json" } : undefined,
+      body: init.body ? JSON.stringify(init.body) : undefined,
+      cache: "no-store",
+    });
+
+    if (response.status === 204) return undefined as T;
+
+    const parsed = (await response.json().catch(() => null)) as
+      | (T & { error?: string })
+      | null;
+
+    if (!response.ok || !parsed) {
+      throw Object.assign(new Error(parsed?.error || FALLBACK_ERROR), {
+        status: response.status,
+      });
+    }
+
+    return parsed;
   });
-
-  if (response.status === 204) return undefined as T;
-
-  const parsed = (await response.json().catch(() => null)) as
-    | (T & { error?: string })
-    | null;
-
-  if (!response.ok || !parsed) {
-    throw new Error(parsed?.error || FALLBACK_ERROR);
-  }
-
-  return parsed;
 }

@@ -1,20 +1,42 @@
 import * as Sentry from "@sentry/nextjs";
+import { localTransport } from "./lib/observability/local-transport";
+import {
+  mirrorError,
+  mirrorLog,
+  mirrorTransaction,
+} from "./lib/observability/telemetry";
+import { apiTracePropagationTargets } from "./lib/observability/trace-propagation";
 
-if (process.env.NODE_ENV === "production") {
+{
+  const production = process.env.NODE_ENV === "production";
   Sentry.init({
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    dsn: production
+      ? process.env.NEXT_PUBLIC_SENTRY_DSN
+      : "https://local@localhost/1",
+    transport: production ? undefined : localTransport,
 
-    tracesSampleRate: 0.1,
+    tracesSampleRate: production ? 0.1 : 1,
+    tracePropagationTargets: apiTracePropagationTargets(
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001",
+    ),
+    propagateTraceparent: true,
 
-    integrations: [Sentry.replayIntegration()],
+    integrations: [
+      Sentry.browserTracingIntegration({
+        shouldCreateSpanForRequest: (url) =>
+          !url.includes("/observability/web"),
+      }),
+      ...(production ? [Sentry.replayIntegration()] : []),
+    ],
 
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     enableLogs: true,
+    beforeSend: mirrorError,
+    beforeSendLog: mirrorLog,
+    beforeSendTransaction: mirrorTransaction,
   });
 }
 
 export const onRouterTransitionStart: typeof Sentry.captureRouterTransitionStart =
-  process.env.NODE_ENV === "production"
-    ? Sentry.captureRouterTransitionStart
-    : () => {};
+  Sentry.captureRouterTransitionStart;

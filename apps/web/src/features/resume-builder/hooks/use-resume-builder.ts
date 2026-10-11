@@ -1,10 +1,14 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import {
+  applyTailoredResume,
+  type TailoredResume,
+} from "@/features/resume-builder/lib/resume";
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
 import { apiUrl, withCredentials } from "@/lib/api";
-import { applyTailoredResume, type TailoredResume } from "@/features/resume-builder/lib/resume";
-import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 export interface BuildResumeInput {
   jobId?: string;
@@ -16,7 +20,7 @@ const MAX_FIT_ATTEMPTS = 4;
 const MIN_FILL_RATIO = 0.82;
 
 async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, {
+  const response = await apiFetch(input, {
     ...withCredentials,
     headers: { "Content-Type": "application/json" },
     ...init,
@@ -27,7 +31,10 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
       error?: string;
     } | null;
 
-    throw new Error(body?.error ?? "Resume tailoring request failed");
+    throw Object.assign(
+      new Error(body?.error ?? "Resume tailoring request failed"),
+      { status: response.status },
+    );
   }
 
   if (response.status === 204) {
@@ -39,59 +46,60 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
 
 export function useResumeBuilder(careerProfile?: CareerProfileValues | null) {
   const buildResume = useMutation({
-    mutationFn: async (input: BuildResumeInput) => {
-      const candidates: {
-        fillRatio: number;
-        pageCount: number;
-        tailored: TailoredResume;
-      }[] = [];
-      let previousResume: TailoredResume | undefined;
-      let fit: "expand" | "reduce" | undefined;
-      let renderedFillRatio: number | undefined;
-      let renderedPageCount: number | undefined;
+    mutationFn: (input: BuildResumeInput) =>
+      observeOperation("resume-builder.tailor", async () => {
+        const candidates: {
+          fillRatio: number;
+          pageCount: number;
+          tailored: TailoredResume;
+        }[] = [];
+        let previousResume: TailoredResume | undefined;
+        let fit: "expand" | "reduce" | undefined;
+        let renderedFillRatio: number | undefined;
+        let renderedPageCount: number | undefined;
 
-      for (let attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt += 1) {
-        const tailored = await fetchJson<TailoredResume>(
-          apiUrl("/build-resume"),
-          {
-            method: "POST",
-            body: JSON.stringify({
-              ...input,
-              fit,
-              previousResume,
-              renderedFillRatio,
-              renderedPageCount,
-            }),
-          },
-        );
+        for (let attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt += 1) {
+          const tailored = await fetchJson<TailoredResume>(
+            apiUrl("/build-resume"),
+            {
+              method: "POST",
+              body: JSON.stringify({
+                ...input,
+                fit,
+                previousResume,
+                renderedFillRatio,
+                renderedPageCount,
+              }),
+            },
+          );
 
-        if (!careerProfile) return tailored;
+          if (!careerProfile) return tailored;
 
-        const { renderResumePdf } = await import(
-          "@/features/resume-builder/components/resume-pdf-preview"
-        );
-        const { fillRatio, pageCount } = await renderResumePdf(
-          applyTailoredResume(careerProfile, tailored),
-        );
-        candidates.push({ fillRatio, pageCount, tailored });
+          const { renderResumePdf } = await import(
+            "@/features/resume-builder/components/resume-pdf-preview"
+          );
+          const { fillRatio, pageCount } = await renderResumePdf(
+            applyTailoredResume(careerProfile, tailored),
+          );
+          candidates.push({ fillRatio, pageCount, tailored });
 
-        if (pageCount === 1 && fillRatio >= MIN_FILL_RATIO) {
-          return tailored;
+          if (pageCount === 1 && fillRatio >= MIN_FILL_RATIO) {
+            return tailored;
+          }
+
+          fit = pageCount > 1 ? "reduce" : "expand";
+          previousResume = tailored;
+          renderedFillRatio = fillRatio;
+          renderedPageCount = pageCount;
         }
 
-        fit = pageCount > 1 ? "reduce" : "expand";
-        previousResume = tailored;
-        renderedFillRatio = fillRatio;
-        renderedPageCount = pageCount;
-      }
-
-      return (
-        candidates
-          .filter((candidate) => candidate.pageCount === 1)
-          .sort((left, right) => right.fillRatio - left.fillRatio)[0] ??
-        candidates.sort((left, right) => left.pageCount - right.pageCount)[0]
-      ).tailored;
-    },
+        return (
+          candidates
+            .filter((candidate) => candidate.pageCount === 1)
+            .sort((left, right) => right.fillRatio - left.fillRatio)[0] ??
+          candidates.sort((left, right) => left.pageCount - right.pageCount)[0]
+        ).tailored;
+      }),
   });
 
   return {

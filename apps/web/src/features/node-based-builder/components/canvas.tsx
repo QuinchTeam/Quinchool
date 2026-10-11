@@ -20,11 +20,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import "@xyflow/react/dist/style.css";
 
+import { usePromptEnhancer } from "@/features/node-based-builder/hooks/use-prompt-enhancer";
+import { useTextGeneration } from "@/hooks/use-text-generation";
+import { logWarn } from "@/lib/observability/logger";
+import { observeOperation } from "@/lib/observability/operation";
 import { CanvasMainToolbar } from "./canvas-main-toolbar";
 import { CanvasNodeToolbar } from "./canvas-node-toolbar";
 import { edgeTypes, REMOVABLE_EDGE_TYPE } from "./edges";
-import { usePromptEnhancer } from "@/features/node-based-builder/hooks/use-prompt-enhancer";
-import { useTextGeneration } from "@/hooks/use-text-generation";
 import {
   createNodeData,
   NODE_DRAG_MIME,
@@ -175,50 +177,55 @@ function CanvasContent() {
       visited.add(id);
       updateNode(id, { executionState: "running" });
 
-      let output: string;
+      let output: string | undefined;
 
       try {
-        switch (node.type) {
-          case "prompt": {
-            output = input ?? (node.data as PromptNodeData).text;
-            updateNode(id, { text: output });
-            break;
-          }
-          case "enhancer": {
-            const data = node.data as EnhancerNodeData;
-            const prompt = input ?? data.prompt;
-            if (!prompt.trim()) {
-              throw new Error("Prompt is required");
+        output = await observeOperation("node-based-builder.node", async () => {
+          switch (node.type) {
+            case "prompt": {
+              const text = input ?? (node.data as PromptNodeData).text;
+              updateNode(id, { text });
+              return text;
             }
+            case "enhancer": {
+              const data = node.data as EnhancerNodeData;
+              const prompt = input ?? data.prompt;
+              if (!prompt.trim()) {
+                throw Object.assign(new Error("Prompt is required"), {
+                  status: 422,
+                });
+              }
 
-            updateNode(id, { enhancedPrompt: "", prompt });
-            const { enhancedPrompt } = await enhancePrompt.mutateAsync({
-              modelId: data.modelId,
-              prompt,
-            });
-            output = enhancedPrompt;
-            updateNode(id, { enhancedPrompt });
-            break;
-          }
-          case "textGenerator": {
-            const data = node.data as TextGeneratorNodeData;
-            const prompt = input ?? data.prompt;
-            if (!prompt.trim()) {
-              throw new Error("Prompt is required");
+              updateNode(id, { enhancedPrompt: "", prompt });
+              const { enhancedPrompt } = await enhancePrompt.mutateAsync({
+                modelId: data.modelId,
+                prompt,
+              });
+              updateNode(id, { enhancedPrompt });
+              return enhancedPrompt;
             }
+            case "textGenerator": {
+              const data = node.data as TextGeneratorNodeData;
+              const prompt = input ?? data.prompt;
+              if (!prompt.trim()) {
+                throw Object.assign(new Error("Prompt is required"), {
+                  status: 422,
+                });
+              }
 
-            updateNode(id, { generatedText: "", prompt });
-            const { text } = await generateText.mutateAsync({
-              modelId: data.modelId,
-              prompt,
-            });
-            output = text;
-            updateNode(id, { generatedText: text });
-            break;
+              updateNode(id, { generatedText: "", prompt });
+              const { text } = await generateText.mutateAsync({
+                modelId: data.modelId,
+                prompt,
+              });
+              updateNode(id, { generatedText: text });
+              return text;
+            }
+            default:
+              return undefined;
           }
-          default:
-            return;
-        }
+        });
+        if (output === undefined) return;
       } catch (error) {
         updateNode(id, {
           executionError:
@@ -240,9 +247,12 @@ function CanvasContent() {
     const startNodes = nodes.filter((node) => !targets.has(node.id));
 
     try {
-      for (const node of startNodes.length ? startNodes : nodes) {
-        await runNode(node.id);
-      }
+      await observeOperation("node-based-builder.run", async () => {
+        for (const node of startNodes.length ? startNodes : nodes)
+          await runNode(node.id);
+        if ([...flowNodes.values()].some((node) => node.data.executionError))
+          logWarn("node-based-builder.run.partial-failure");
+      });
     } finally {
       setActiveEdge();
       setIsRunning(false);

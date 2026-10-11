@@ -1,38 +1,43 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { apiUrl, withCredentials } from "@/lib/api";
 import type {
   JobScraperConfig,
   JobScraperState,
   SavedJob,
 } from "@/features/jobs-scraper/lib/schema";
+import { apiUrl, withCredentials } from "@/lib/api";
+import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const JOBS_SCRAPER_KEY = ["jobs-scraper"] as const;
 
 async function requestJobsScraper(
   init?: RequestInit,
 ): Promise<JobScraperState> {
-  const response = await fetch(apiUrl("/jobs-scraper"), {
-    ...withCredentials,
-    headers: { "Content-Type": "application/json" },
-    ...init,
+  return observeOperation("jobs-scraper.request", async () => {
+    const response = await apiFetch(apiUrl("/jobs-scraper"), {
+      ...withCredentials,
+      headers: { "Content-Type": "application/json" },
+      ...init,
+    });
+    const body = (await response.json().catch(() => null)) as
+      | JobScraperState
+      | { error?: string }
+      | null;
+
+    if (!response.ok) {
+      throw Object.assign(
+        new Error(
+          body && "error" in body && body.error
+            ? body.error
+            : "Jobs scraper request failed.",
+        ),
+        { status: response.status },
+      );
+    }
+
+    return body as JobScraperState;
   });
-  const body = (await response.json().catch(() => null)) as
-    | JobScraperState
-    | { error?: string }
-    | null;
-
-  if (!response.ok) {
-    throw new Error(
-      body && "error" in body && body.error
-        ? body.error
-        : "Jobs scraper request failed.",
-    );
-  }
-
-  return body as JobScraperState;
 }
 
 export function useJobsScraper() {
