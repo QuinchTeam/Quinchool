@@ -1,18 +1,21 @@
-import * as Sentry from "@sentry/nextjs";
+import { exportLog } from "./telemetry";
 
+// Logs go to OpenTelemetry; Sentry only receives captured errors.
 export function logInfo(message: string) {
-  Sentry.logger.info(message);
+  exportLog("INFO", message);
   if (process.env.NODE_ENV !== "production") console.info(message);
 }
 
 export function logWarn(message: string) {
-  Sentry.logger.warn(message);
+  exportLog("WARNING", message);
   if (process.env.NODE_ENV !== "production") console.warn(message);
 }
 
 export function logError(message: string, error: unknown) {
-  Sentry.logger.error(message, {
-    "error.type": error instanceof Error ? error.name : typeof error,
-  });
+  exportLog(
+    "ERROR",
+    message,
+    error instanceof Error ? error.name : typeof error,
+  );
   if (process.env.NODE_ENV !== "production") console.error(message, error);
 }

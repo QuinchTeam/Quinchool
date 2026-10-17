@@ -100,8 +100,7 @@ test("local instrumentation exports real spans and safe errors without a Sentry 
 });
 
 test("API failure responses and request options remain unchanged; aborts are warnings", async () => {
-  const logs = vi.spyOn(Sentry.logger, "warn").mockImplementation(() => {});
-  vi.spyOn(console, "warn").mockImplementation(() => {});
+  const logs = vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "info").mockImplementation(() => {});
   const response = new Response("private response", { status: 422 });
   const fetchMock = vi

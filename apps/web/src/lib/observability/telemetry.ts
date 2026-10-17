@@ -1,4 +1,4 @@
-import type { Event, Log } from "@sentry/nextjs";
+import type { Event } from "@sentry/nextjs";
 import { getTraceData } from "@sentry/nextjs";
 import { apiUrl, withCredentials } from "../api";
 import { pageDomain } from "./operation";
@@ -146,29 +146,30 @@ export function mirrorError<T extends Event>(event: T): T {
   return event;
 }
 
-export function mirrorLog(log: Log): Log {
+export function exportLog(
+  severity: "INFO" | "WARNING" | "ERROR",
+  message: string,
+  errorType?: string,
+) {
+  // Local servers without a collector only log to the console (see logger.ts).
+  if (
+    typeof window === "undefined" &&
+    process.env.NODE_ENV !== "production" &&
+    !process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+  )
+    return;
   const trace = getTraceData()["sentry-trace"]?.split("-");
-  const errorType = log.attributes?.["error.type"];
   report([
     {
       kind: "log",
-      domain: telemetryDomain(log.message),
-      message: log.message.slice(0, 512),
-      errorType:
-        typeof errorType === "string" ? errorType.slice(0, 80) : undefined,
-      severity:
-        log.level === "warn"
-          ? "WARNING"
-          : log.level === "fatal"
-            ? "CRITICAL"
-            : log.level === "trace"
-              ? "DEBUG"
-              : log.level.toUpperCase(),
+      domain: telemetryDomain(message),
+      message: message.slice(0, 512),
+      errorType: errorType?.slice(0, 80),
+      severity,
       traceId: trace?.[0],
       spanId: trace?.[1],
     },
   ]);
-  return log;
 }
 
 function telemetryDomain(operation: string): string {
@@ -192,9 +193,10 @@ function telemetryDomain(operation: string): string {
     : "application";
 }
 
-export function mirrorTransaction<T extends Event>(event: T): T {
+// Traces go to the collector only; returning null keeps them out of Sentry.
+export function exportTransaction(event: Event): null {
   const root = event.contexts?.trace;
-  if (!root?.trace_id || !root.span_id) return event;
+  if (!root?.trace_id || !root.span_id) return null;
   const rootDomain = event.transaction?.startsWith("/")
     ? pageDomain(event.transaction.split("?")[0])
     : telemetryDomain(root.op ?? "");
@@ -232,5 +234,5 @@ export function mirrorTransaction<T extends Event>(event: T): T {
   for (let offset = 0; offset < records.length; offset += 50) {
     report(records.slice(offset, offset + 50));
   }
-  return event;
+  return null;
 }

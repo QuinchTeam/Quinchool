@@ -1,10 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { localTransport } from "./lib/observability/local-transport";
-import {
-  mirrorError,
-  mirrorLog,
-  mirrorTransaction,
-} from "./lib/observability/telemetry";
+import { exportTransaction, mirrorError } from "./lib/observability/telemetry";
 import { apiTracePropagationTargets } from "./lib/observability/trace-propagation";
 
 {
@@ -29,12 +25,10 @@ import { apiTracePropagationTargets } from "./lib/observability/trace-propagatio
       ...(production ? [Sentry.replayIntegration()] : []),
     ],
 
-    replaysSessionSampleRate: 0.1,
+    // Sentry is for errors: replays only record sessions that hit one.
     replaysOnErrorSampleRate: 1.0,
-    enableLogs: true,
     beforeSend: mirrorError,
-    beforeSendLog: mirrorLog,
-    beforeSendTransaction: mirrorTransaction,
+    beforeSendTransaction: exportTransaction,
   });
 }
 

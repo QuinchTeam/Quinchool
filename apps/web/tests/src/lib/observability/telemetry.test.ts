@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test, vi } from "vite-plus/test";
 import {
+  exportLog,
+  exportTransaction,
   mirrorError,
-  mirrorLog,
-  mirrorTransaction,
 } from "../../../../src/lib/observability/telemetry.ts";
 
 test("server summaries export OTLP logs to the shared collector, without raw Sentry content", () => {
@@ -27,7 +27,7 @@ test("server summaries export OTLP logs to the shared collector, without raw Sen
       JSON.parse(body).resourceLogs[0].scopeLogs[0].logRecords[0].traceId,
       "1".repeat(32),
     );
-    mirrorLog({ level: "warn", message: "chatbot.get.rejected" });
+    exportLog("WARNING", "chatbot.get.rejected");
     assert.equal(
       JSON.parse(String(sent.mock.calls[1][1]?.body)).resourceLogs[0]
         .scopeLogs[0].logRecords[0].severityNumber,
@@ -114,7 +114,7 @@ test("browser errors retain Sentry details while the relay receives only a summa
   }
 });
 
-test("browser transaction export preserves parents and drops request content", () => {
+test("browser traces go only to the relay, preserving parents and dropping request content", () => {
   const windowDescriptor = Object.getOwnPropertyDescriptor(
     globalThis,
     "window",
@@ -151,7 +151,7 @@ test("browser transaction export preserves parents and drops request content", (
     ],
   };
   try {
-    assert.equal(mirrorTransaction(event), event);
+    assert.equal(exportTransaction(event), null);
     const payload = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     assert.equal(payload.length, 2);
     assert.equal(payload[1].parentSpanId, "2".repeat(16));
