@@ -155,7 +155,10 @@ export class ObservabilityService {
       window.count >= limit ||
       (this.windows.size >= 1000 && !this.windows.has(userId))
     ) {
-      throw new HttpException("Telemetry rate limit", 429);
+      throw new HttpException(
+        { code: "TELEMETRY_RATE_LIMITED", message: "Telemetry rate limit" },
+        429,
+      );
     }
     window.count++;
     this.windows.set(userId, window);
@@ -210,7 +213,10 @@ export class ObservabilityService {
         }),
       );
     } catch {
-      throw new ServiceUnavailableException("Telemetry unavailable");
+      throw new ServiceUnavailableException({
+        code: "TELEMETRY_UNAVAILABLE",
+        message: "Telemetry unavailable",
+      });
     }
   }
 }

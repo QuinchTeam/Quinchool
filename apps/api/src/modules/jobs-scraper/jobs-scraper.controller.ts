@@ -1,12 +1,13 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   NotFoundException,
+  Param,
   Patch,
   Post,
   Put,
+  UnprocessableEntityException,
   UseGuards,
 } from "@nestjs/common";
 
@@ -21,6 +22,7 @@ import {
   type JobScraperConfig,
   jobScraperConfigSchema,
   type JobScraperState,
+  jobIdSchema,
 } from "./jobs-scraper.contract";
 
 /**
@@ -40,7 +42,7 @@ export class JobsScraperController {
     return this.repository.getState(userId);
   }
 
-  @Put()
+  @Put("config")
   async saveConfig(
     @UserId() userId: string,
     @Body(new ZodValidationPipe(jobScraperConfigSchema))
@@ -50,20 +52,24 @@ export class JobsScraperController {
     return this.repository.getState(userId);
   }
 
-  @Patch()
+  @Patch("jobs/:id")
   async updateClassification(
     @UserId() userId: string,
+    @Param("id", new ZodValidationPipe(jobIdSchema)) id: string,
     @Body(new ZodValidationPipe(classificationUpdateSchema))
     update: ClassificationUpdate,
   ): Promise<JobScraperState> {
     const updated = await this.repository.updateClassification(
       userId,
-      update.id,
+      id,
       update.classification,
     );
 
     if (!updated) {
-      throw new NotFoundException({ error: "Job not found" });
+      throw new NotFoundException({
+        code: "JOB_NOT_FOUND",
+        message: "Job not found",
+      });
     }
 
     return this.repository.getState(userId);
@@ -72,16 +78,18 @@ export class JobsScraperController {
   /**
    * Scans with the criteria this user has saved, stores the graded listings,
    * and answers with the state the review page renders. A failed scan throws
-   * from the service with the AI service's own status and wording.
+   * from the service with the AI service's own status and wording. A scan
+   * is stored, so this answers 201.
    */
-  @Post()
+  @Post("scans")
   async scan(@UserId() userId: string): Promise<JobScraperState> {
     const config = await this.repository.getConfig(userId);
     const unset = getUnsetScanCriteria(config);
 
     if (unset.length > 0) {
-      throw new BadRequestException({
-        error: `Edit your criteria to add ${unset.join(", ")} before scanning.`,
+      throw new UnprocessableEntityException({
+        code: "SCAN_CRITERIA_MISSING",
+        message: `Edit your criteria to add ${unset.join(", ")} before scanning.`,
       });
     }
 

@@ -1,5 +1,6 @@
 import { BadRequestException, type PipeTransform } from "@nestjs/common";
 import type { ZodType } from "zod";
+import type { ApiErrorPayload } from "../../core/http/api-response";
 
 /**
  * Validates a payload against a zod schema at the route boundary, so a
@@ -13,8 +14,14 @@ export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
 
     if (!parsed.success) {
       throw new BadRequestException({
-        error: parsed.error.issues[0]?.message ?? "Invalid request body",
-      });
+        code: "VALIDATION_FAILED",
+        message: parsed.error.issues[0]?.message ?? "Invalid request",
+        details: parsed.error.issues.map((issue) => ({
+          ...(issue.path.length > 0 && { field: issue.path.join(".") }),
+          code: issue.code.toUpperCase(),
+          message: issue.message,
+        })),
+      } satisfies ApiErrorPayload);
     }
 
     return parsed.data;

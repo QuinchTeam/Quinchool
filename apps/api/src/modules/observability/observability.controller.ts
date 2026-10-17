@@ -26,7 +26,7 @@ export class ObservabilityController {
     @Body(new ZodValidationPipe(webTelemetrySchema)) records: WebTelemetry,
     @Req() request: Request,
   ) {
-    if (request.headers.origin !== new URL(env.WEB_ORIGIN).origin) throw new ForbiddenException();
+    if (request.headers.origin !== new URL(env.WEB_ORIGIN).origin) throw new ForbiddenException({ code: "ORIGIN_NOT_ALLOWED", message: "Origin not allowed" });
     // Origin is not authentication; anonymous telemetry stays explicitly untrusted and tightly bounded.
     await this.service.receive(records, `anonymous:${request.socket.remoteAddress ?? "unknown"}`, 20);
   }

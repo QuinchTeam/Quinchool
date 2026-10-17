@@ -6,16 +6,14 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { cookies } from "next/headers";
-import { FinanceApiError, financeRequest } from "@/features/finance-tracker/lib/api";
+import { financeRequest } from "@/features/finance-tracker/lib/api";
 import {
   financeKeys,
+  requestTransactionPage,
   transactionsOptions,
-  transactionsPath,
 } from "@/features/finance-tracker/lib/queries";
-import type {
-  FinanceOverview,
-  TransactionPage,
-} from "@/features/finance-tracker/lib/types";
+import type { FinanceOverview } from "@/features/finance-tracker/lib/types";
+import { ApiError } from "@/lib/api";
 import { FinanceDashboard } from "./finance-dashboard";
 import { FinanceScope } from "./shared/finance-scope";
 import { FinanceUnavailable } from "./shared/finance-unavailable";
@@ -34,7 +32,7 @@ export async function FinanceServerPage({
   } catch (error) {
     return (
       <FinanceUnavailable
-        status={error instanceof FinanceApiError ? error.status : 503}
+        status={error instanceof ApiError ? error.status : 503}
       />
     );
   }
@@ -43,10 +41,7 @@ export async function FinanceServerPage({
   const limit = history ? 20 : 5;
   await client.prefetchQuery({
     ...transactionsOptions(overview.userId, {}, null, limit),
-    queryFn: () =>
-      financeRequest<TransactionPage>(transactionsPath({}, null, limit), {
-        headers,
-      }),
+    queryFn: () => requestTransactionPage({}, null, limit, { headers }),
   });
 
   return (

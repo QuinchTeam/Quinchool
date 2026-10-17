@@ -6,37 +6,26 @@ import type {
   JobScraperState,
   SavedJob,
 } from "@/features/jobs-scraper/lib/schema";
-import { apiUrl, withCredentials } from "@/lib/api";
+import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const JOBS_SCRAPER_KEY = ["jobs-scraper"] as const;
 
 async function requestJobsScraper(
+  path = "",
   init?: RequestInit,
 ): Promise<JobScraperState> {
   return observeOperation("jobs-scraper.request", async () => {
-    const response = await apiFetch(apiUrl("/jobs-scraper"), {
+    const response = await apiFetch(apiUrl(`/jobs-scraper${path}`), {
       ...withCredentials,
       headers: { "Content-Type": "application/json" },
       ...init,
     });
-    const body = (await response.json().catch(() => null)) as
-      | JobScraperState
-      | { error?: string }
-      | null;
 
-    if (!response.ok) {
-      throw Object.assign(
-        new Error(
-          body && "error" in body && body.error
-            ? body.error
-            : "Jobs scraper request failed.",
-        ),
-        { status: response.status },
-      );
-    }
-
-    return body as JobScraperState;
+    return readApiData<JobScraperState>(
+      response,
+      "Jobs scraper request failed.",
+    );
   });
 }
 
@@ -47,21 +36,30 @@ export function useJobsScraper() {
     queryFn: () => requestJobsScraper(),
   });
   const scan = useMutation({
-    mutationFn: () => requestJobsScraper({ method: "POST" }),
+    mutationFn: () => requestJobsScraper("/scans", { method: "POST" }),
     onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
   });
   const saveConfig = useMutation({
     mutationFn: (config: JobScraperConfig) =>
-      requestJobsScraper({ method: "PUT", body: JSON.stringify(config) }),
+      requestJobsScraper("/config", {
+        method: "PUT",
+        body: JSON.stringify(config),
+      }),
     onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
   });
 
   const updateClassification = useMutation({
-    mutationFn: (variables: {
+    mutationFn: ({
+      classification,
+      id,
+    }: {
       classification: SavedJob["classification"];
       id: string;
     }) =>
-      requestJobsScraper({ method: "PATCH", body: JSON.stringify(variables) }),
+      requestJobsScraper(`/jobs/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ classification }),
+      }),
     onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
   });
 

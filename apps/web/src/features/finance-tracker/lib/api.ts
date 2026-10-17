@@ -1,20 +1,25 @@
-import { apiUrl, withCredentials } from "@/lib/api";
+import {
+  type ApiEnvelope,
+  apiUrl,
+  readApiEnvelope,
+  withCredentials,
+} from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
-export class FinanceApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-    this.name = "FinanceApiError";
-  }
-}
+const FALLBACK_ERROR = "Finance request failed. Please try again.";
 
 export async function financeRequest<T>(
   path = "",
   init: RequestInit = {},
 ): Promise<T> {
+  return (await financeEnvelopeRequest<T>(path, init)).data;
+}
+
+/** For list routes, whose `meta` carries the pagination cursor. */
+export async function financeEnvelopeRequest<T, M = Record<string, unknown>>(
+  path = "",
+  init: RequestInit = {},
+): Promise<ApiEnvelope<T, M>> {
   return observeOperation("finance-tracker.request", async () => {
     const headers = new Headers(init.headers);
     if (init.body) headers.set("Content-Type", "application/json");
@@ -24,16 +29,6 @@ export async function financeRequest<T>(
       headers,
       cache: "no-store",
     });
-    if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as {
-        error?: string;
-      } | null;
-      throw new FinanceApiError(
-        body?.error ?? "Finance request failed. Please try again.",
-        response.status,
-      );
-    }
-    if (response.status === 204) return undefined as T;
-    return response.json() as Promise<T>;
+    return readApiEnvelope<T, M>(response, FALLBACK_ERROR);
   });
 }

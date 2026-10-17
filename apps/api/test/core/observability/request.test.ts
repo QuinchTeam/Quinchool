@@ -24,7 +24,13 @@ test("every API domain, auth, status and cancellation is logged once without raw
         });
         let called = false;
         requestTelemetry(
-          { path: `/${domain}/private-id`, method: "POST" } as Request,
+          {
+            path:
+              domain === "prompt-enhancer"
+                ? "/text-generation/prompt-enhancements"
+                : `/${domain}/private-id`,
+            method: "POST",
+          } as Request,
           response as unknown as Response,
           () => {
             called = true;

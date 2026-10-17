@@ -66,7 +66,10 @@ export class ChatRepository {
       select: { id: true, title: true, summary: true, summarizedUpTo: true },
     });
 
-    if (!chat) throw new NotFoundException({ error: "Chat not found" });
+    if (!chat) throw new NotFoundException({
+        code: "CHAT_NOT_FOUND",
+        message: "Chat not found",
+      });
 
     return chat;
   }

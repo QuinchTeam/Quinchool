@@ -42,8 +42,13 @@ export class JobsScraperService {
     } catch (error) {
       const failure =
         error instanceof AiServiceError
-          ? { message: error.message, status: error.status }
+          ? {
+              code: `AI_${error.code.toUpperCase()}`,
+              message: error.message,
+              status: error.status,
+            }
           : {
+              code: "AI_SERVICE_UNREACHABLE",
               message:
                 "The AI service is unreachable. Start the apps/ai FastAPI service.",
               status: 503,
@@ -56,7 +61,11 @@ export class JobsScraperService {
       });
 
       throw new HttpException(
-        { error: failure.message, scanId },
+        {
+          code: failure.code,
+          message: failure.message,
+          meta: { scanId },
+        },
         failure.status,
       );
     }

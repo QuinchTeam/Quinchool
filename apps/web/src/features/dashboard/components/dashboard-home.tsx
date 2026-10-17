@@ -23,10 +23,10 @@ import {
 } from "@/features/finance-tracker/lib/format";
 import type {
   FinanceOverview,
-  TransactionPage,
+  Transaction,
 } from "@/features/finance-tracker/lib/types";
 import type { JobScraperState } from "@/features/jobs-scraper/lib/schema";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, readApiData } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +39,7 @@ async function load<T>(path: string, cookie: string): Promise<T | null> {
         headers: { cookie },
         cache: "no-store",
       });
-      if (!response.ok) return null;
-      const body = await response.text();
-      return body ? (JSON.parse(body) as T) : null;
+      return readApiData<T | null>(response, "Dashboard tile failed");
     });
   } catch {
     return null;
@@ -63,7 +61,7 @@ export async function DashboardHome() {
         load<FinanceOverview>("/finance-tracker", cookie),
         load<JobScraperState>("/jobs-scraper", cookie),
         load<CareerProfileValues>("/career-profile", cookie),
-        load<TransactionPage>("/finance-tracker/transactions?limit=5", cookie),
+        load<Transaction[]>("/finance-tracker/transactions?limit=5", cookie),
       ]),
   );
 
@@ -156,8 +154,8 @@ export async function DashboardHome() {
               lists packed at the top instead of spread down the card. */}
           <Card className="flex-1">
             <CardContent className="grid content-start gap-3">
-              {transactions?.items.length ? (
-                transactions.items.map((transaction) => (
+              {transactions?.length ? (
+                transactions.map((transaction) => (
                   <div
                     key={transaction.id}
                     className="flex min-w-0 items-center justify-between gap-3"

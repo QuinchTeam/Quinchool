@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpException,
   InternalServerErrorException,
   Post,
@@ -20,11 +21,13 @@ import {
  * The two routes that are a single LLM call and nothing else. The call itself
  * happens in apps/ai; both routes sit behind the session guard because they
  * spend provider quota, so they are not open to anyone who finds the URL.
+ * Nothing is stored, so both answer 200 rather than 201.
  */
-@Controller()
+@Controller("text-generation")
 @UseGuards(SessionGuard)
 export class TextGenerationController {
-  @Post("text-generation")
+  @Post("generations")
+  @HttpCode(200)
   async generate(
     @Body(new ZodValidationPipe(textGenerationSchema))
     body: TextGenerationValues,
@@ -32,11 +35,15 @@ export class TextGenerationController {
     try {
       return await generateText(body);
     } catch (error) {
-      throw toHttpException(error, "Failed to generate text");
+      throw toHttpException(error, {
+        code: "TEXT_GENERATION_FAILED",
+        message: "Failed to generate text",
+      });
     }
   }
 
-  @Post("prompt-enhancer")
+  @Post("prompt-enhancements")
+  @HttpCode(200)
   async enhance(
     @Body(new ZodValidationPipe(textGenerationSchema))
     body: TextGenerationValues,
@@ -44,7 +51,10 @@ export class TextGenerationController {
     try {
       return await enhancePrompt(body);
     } catch (error) {
-      throw toHttpException(error, "Failed to enhance prompt");
+      throw toHttpException(error, {
+        code: "PROMPT_ENHANCEMENT_FAILED",
+        message: "Failed to enhance prompt",
+      });
     }
   }
 }
@@ -54,10 +64,13 @@ export class TextGenerationController {
  * which provider ran out of quota, which model was overloaded — so it is
  * forwarded rather than flattened into a generic 500.
  */
-function toHttpException(error: unknown, fallback: string): HttpException {
+function toHttpException(
+  error: unknown,
+  fallback: { code: string; message: string },
+): HttpException {
   const response = getAiErrorResponse(error);
 
   return response
     ? new HttpException(response.body, response.status)
-    : new InternalServerErrorException({ error: fallback });
+    : new InternalServerErrorException(fallback);
 }

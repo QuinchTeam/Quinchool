@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpException,
   InternalServerErrorException,
   Post,
@@ -24,7 +25,9 @@ import {
 export class BuildResumeController {
   constructor(private readonly buildResume: BuildResumeService) {}
 
-  @Post()
+  /** The tailored resume is returned, not stored, so this answers 200. */
+  @Post("tailored-resumes")
+  @HttpCode(200)
   async tailor(
     @UserId() userId: string,
     @Body(new ZodValidationPipe(buildResumeSchema)) body: BuildResumeValues,
@@ -43,7 +46,8 @@ export class BuildResumeController {
       }
 
       throw new InternalServerErrorException({
-        error: "Failed to build resume",
+        code: "RESUME_BUILD_FAILED",
+        message: "Failed to build resume",
       });
     }
   }

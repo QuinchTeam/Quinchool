@@ -66,7 +66,8 @@ export class ChatbotController {
     return this.chats.remove(userId, id);
   }
 
-  @Post()
+  /** Adds a message. Omitting `chatId` starts a new chat with it. */
+  @Post("messages")
   async respond(
     @UserId() userId: string,
     @Body(new ZodValidationPipe(chatbotRequestSchema)) body: ChatbotRequest,
@@ -74,12 +75,15 @@ export class ChatbotController {
     try {
       return await this.chats.send(userId, body);
     } catch (error) {
-      throw toHttpError(error, "The assistant could not respond. Try again.");
+      throw toHttpError(error, {
+        code: "CHAT_REPLY_FAILED",
+        message: "The assistant could not respond. Try again.",
+      });
     }
   }
 
   /** Runs a write the user confirmed in the chat. */
-  @Post("actions")
+  @Post("action-confirmations")
   async runAction(
     @UserId() userId: string,
     @Body(new ZodValidationPipe(toolActionSchema)) body: ToolAction,
@@ -87,12 +91,15 @@ export class ChatbotController {
     try {
       return await this.chats.confirmAction(userId, body);
     } catch (error) {
-      throw toHttpError(error, "That change could not be saved. Try again.");
+      throw toHttpError(error, {
+        code: "ACTION_FAILED",
+        message: "That change could not be saved. Try again.",
+      });
     }
   }
 
   /** Records that the user declined a proposed write, so it stays declined. */
-  @Post("actions/dismiss")
+  @Post("action-dismissals")
   @HttpCode(204)
   dismissAction(
     @UserId() userId: string,
@@ -102,16 +109,22 @@ export class ChatbotController {
   }
 }
 
-function toHttpError(error: unknown, fallback: string): HttpException {
+function toHttpError(
+  error: unknown,
+  fallback: { code: string; message: string },
+): HttpException {
   if (error instanceof HttpException) return error;
 
   if (error instanceof ToolExecutionError) {
-    return new UnprocessableEntityException({ error: error.message });
+    return new UnprocessableEntityException({
+      code: "TOOL_EXECUTION_FAILED",
+      message: error.message,
+    });
   }
 
   const response = getAiErrorResponse(error);
 
   if (response) return new HttpException(response.body, response.status);
 
-  return new InternalServerErrorException({ error: fallback });
+  return new InternalServerErrorException(fallback);
 }

@@ -5,7 +5,7 @@ import type {
   StoredChat,
 } from "@/features/chatbot/lib/types";
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
-import { apiUrl, withCredentials } from "@/lib/api";
+import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const FALLBACK_ERROR = "The assistant could not respond.";
@@ -43,7 +43,10 @@ export async function sendChatMessage(body: {
   modelId: TextGenerationModelId;
 }): Promise<ChatTurn> {
   return observeOperation("chatbot.send-message", async () => {
-    const turn = await request<ChatTurn>("/chatbot", { method: "POST", body });
+    const turn = await request<ChatTurn>("/chatbot/messages", {
+      method: "POST",
+      body,
+    });
 
     // A tool call can leave the text empty, but a pending form is still a reply.
     if (!turn.text && !turn.pendingAction) {
@@ -71,7 +74,7 @@ export function runToolAction({
   modelId: TextGenerationModelId;
   values: Record<string, unknown>;
 }): Promise<ChatTurn> {
-  return request<ChatTurn>("/chatbot/actions", {
+  return request<ChatTurn>("/chatbot/action-confirmations", {
     method: "POST",
     body: {
       chatId,
@@ -88,7 +91,10 @@ export function dismissToolAction(body: {
   chatId: string;
   messageId: string;
 }): Promise<void> {
-  return request<void>("/chatbot/actions/dismiss", { method: "POST", body });
+  return request<void>("/chatbot/action-dismissals", {
+    method: "POST",
+    body,
+  });
 }
 
 async function request<T>(
@@ -104,18 +110,6 @@ async function request<T>(
       cache: "no-store",
     });
 
-    if (response.status === 204) return undefined as T;
-
-    const parsed = (await response.json().catch(() => null)) as
-      | (T & { error?: string })
-      | null;
-
-    if (!response.ok || !parsed) {
-      throw Object.assign(new Error(parsed?.error || FALLBACK_ERROR), {
-        status: response.status,
-      });
-    }
-
-    return parsed;
+    return readApiData<T>(response, FALLBACK_ERROR);
   });
 }

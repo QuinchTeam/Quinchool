@@ -183,9 +183,10 @@ export function getUnsetScanCriteria(config: JobScraperConfig): string[] {
 
 export const jobClassificationSchema = z.enum(JOB_CLASSIFICATIONS);
 
+export const jobIdSchema = z.string().min(1);
+
 export const classificationUpdateSchema = z.object({
   classification: jobClassificationSchema,
-  id: z.string().min(1),
 });
 
 export type ClassificationUpdate = z.infer<typeof classificationUpdateSchema>;

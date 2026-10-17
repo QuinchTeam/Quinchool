@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FinanceApiError } from "@/features/finance-tracker/lib/api";
+import { ApiError } from "@/lib/api";
 import { FinanceQueryError } from "./query-error";
 
 export function FinanceUnavailable({ status }: { status: number }) {
@@ -11,9 +11,10 @@ export function FinanceUnavailable({ status }: { status: number }) {
       <h1 className="text-2xl font-semibold">Finance Tracker</h1>
       <FinanceQueryError
         error={
-          new FinanceApiError(
+          new ApiError(
             "Finance data is unavailable. Please try again.",
             status,
+            "FINANCE_UNAVAILABLE",
           )
         }
         retry={() => router.refresh()}

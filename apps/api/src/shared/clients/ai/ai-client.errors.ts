@@ -1,3 +1,5 @@
+import type { ApiErrorPayload } from "../../../core/http/api-response";
+
 export const AI_ERROR_CODES = {
   PROVIDER_ERROR: "provider_error",
   RATE_LIMIT: "rate_limit",
@@ -6,12 +8,14 @@ export const AI_ERROR_CODES = {
 
 export type AiErrorCode = (typeof AI_ERROR_CODES)[keyof typeof AI_ERROR_CODES];
 
+/** The error body apps/ai sends back. */
 export interface AiErrorResponse {
   code: AiErrorCode;
   error: string;
   providerId?: string;
   providerModelId?: string;
 }
+
 
 export class AiServiceError extends Error {
   code: AiErrorCode;
@@ -45,17 +49,21 @@ export class AiServiceError extends Error {
 
 export function getAiErrorResponse(
   error: unknown,
-): { body: AiErrorResponse; status: number } | null {
+): { body: ApiErrorPayload; status: number } | null {
   if (!(error instanceof AiServiceError)) {
     return null;
   }
 
   return {
     body: {
-      code: error.code,
-      error: error.message,
-      providerId: error.providerId,
-      providerModelId: error.providerModelId,
+      code: `AI_${error.code.toUpperCase()}`,
+      message: error.message,
+      ...(error.providerId && {
+        meta: {
+          providerId: error.providerId,
+          providerModelId: error.providerModelId,
+        },
+      }),
     },
     status: error.status,
   };

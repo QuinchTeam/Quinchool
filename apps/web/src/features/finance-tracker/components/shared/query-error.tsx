@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
-import { FinanceApiError } from "@/features/finance-tracker/lib/api";
+import { ApiError } from "@/lib/api";
 
 export function FinanceQueryError({
   error,
@@ -20,7 +20,7 @@ export function FinanceQueryError({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [signOutError, setSignOutError] = useState("");
-  const expired = error instanceof FinanceApiError && error.status === 401;
+  const expired = error instanceof ApiError && error.status === 401;
 
   async function loginAgain() {
     setPending(true);

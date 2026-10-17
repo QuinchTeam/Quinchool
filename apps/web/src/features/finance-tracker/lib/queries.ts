@@ -1,7 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
-import { financeRequest } from "./api";
+import { financeEnvelopeRequest, financeRequest } from "./api";
 import type {
   FinanceOverview,
+  Transaction,
   TransactionFilters,
   TransactionPage,
 } from "./types";
@@ -56,10 +57,21 @@ export function transactionsOptions(
   return queryOptions({
     queryKey: financeKeys.transactions(userId, filters, cursor, limit),
     queryFn: ({ signal }) =>
-      financeRequest<TransactionPage>(
-        transactionsPath(filters, cursor, limit),
-        { signal },
-      ),
+      requestTransactionPage(filters, cursor, limit, { signal }),
     staleTime: 30_000,
   });
+}
+
+/** Transactions come back as `{ data, meta: { nextCursor } }`. */
+export async function requestTransactionPage(
+  filters: TransactionFilters = {},
+  cursor: string | null = null,
+  limit = 20,
+  init: RequestInit = {},
+): Promise<TransactionPage> {
+  const { data, meta } = await financeEnvelopeRequest<
+    Transaction[],
+    { nextCursor: string | null }
+  >(transactionsPath(filters, cursor, limit), init);
+  return { items: data, nextCursor: meta?.nextCursor ?? null };
 }

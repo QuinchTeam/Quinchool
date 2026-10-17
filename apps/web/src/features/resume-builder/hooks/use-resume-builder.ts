@@ -7,7 +7,7 @@ import {
   type TailoredResume,
 } from "@/features/resume-builder/lib/resume";
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
-import { apiUrl, withCredentials } from "@/lib/api";
+import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 export interface BuildResumeInput {
@@ -26,22 +26,7 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
     ...init,
   });
 
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-
-    throw Object.assign(
-      new Error(body?.error ?? "Resume tailoring request failed"),
-      { status: response.status },
-    );
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json() as Promise<T>;
+  return readApiData<T>(response, "Resume tailoring request failed");
 }
 
 export function useResumeBuilder(careerProfile?: CareerProfileValues | null) {
@@ -60,7 +45,7 @@ export function useResumeBuilder(careerProfile?: CareerProfileValues | null) {
 
         for (let attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt += 1) {
           const tailored = await fetchJson<TailoredResume>(
-            apiUrl("/build-resume"),
+            apiUrl("/build-resume/tailored-resumes"),
             {
               method: "POST",
               body: JSON.stringify({

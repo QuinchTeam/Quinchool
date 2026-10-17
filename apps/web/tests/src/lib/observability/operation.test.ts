@@ -17,13 +17,16 @@ test("every API domain has a bounded operation name without IDs, queries or secr
     "finance-tracker",
     "jobs-scraper",
     "text-generation",
-    "prompt-enhancer",
   ]) {
     assert.equal(
       apiDomain(`http://localhost:3001/${domain}/private-id?token=secret`),
       domain === "build-resume" ? "resume-builder" : domain,
     );
   }
+  assert.equal(
+    apiDomain("http://localhost:3001/text-generation/prompt-enhancements"),
+    "prompt-enhancer",
+  );
   assert.equal(
     apiDomain("http://localhost:3001/api/auth/sign-in/email"),
     "auth",

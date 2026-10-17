@@ -54,6 +54,11 @@ export function apiDomain(input: string): string {
   const segments = new URL(input).pathname.split("/");
   if (segments[1] === "build-resume") return "resume-builder";
   if (
+    segments[1] === "text-generation" &&
+    segments[2] === "prompt-enhancements"
+  )
+    return "prompt-enhancer";
+  if (
     segments[1] === "api" &&
     segments[2] === "auth" &&
     segments[3] === "update-user"
@@ -68,7 +73,6 @@ export function apiDomain(input: string): string {
           "finance-tracker",
           "jobs-scraper",
           "text-generation",
-          "prompt-enhancer",
         ].includes(segments[1])
       ? segments[1]
       : "application";

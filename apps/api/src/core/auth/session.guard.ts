@@ -38,7 +38,10 @@ export class SessionGuard implements CanActivate {
     const token = readSessionToken(request.headers.cookie);
 
     if (!token) {
-      throw new UnauthorizedException({ error: "Unauthorized" });
+      throw new UnauthorizedException({
+        code: "UNAUTHENTICATED",
+        message: "Sign in to continue.",
+      });
     }
 
     const session = await this.prisma.session.findUnique({
@@ -47,7 +50,10 @@ export class SessionGuard implements CanActivate {
     });
 
     if (!session || session.expiresAt <= new Date()) {
-      throw new UnauthorizedException({ error: "Unauthorized" });
+      throw new UnauthorizedException({
+        code: "SESSION_EXPIRED",
+        message: "Your session expired. Sign in again.",
+      });
     }
 
     request.userId = session.userId;

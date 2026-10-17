@@ -1,5 +1,7 @@
 import { Module, type OnApplicationShutdown } from "@nestjs/common";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { ApiExceptionFilter } from "./core/http/exception.filter";
+import { ResponseInterceptor } from "./core/http/response.interceptor";
 import { DomainInterceptor } from "./core/observability/domain.interceptor";
 
 import { telemetrySdk } from "./core/observability/instrumentation";
@@ -15,7 +17,11 @@ import { TextGenerationModule } from "./modules/text-generation/text-generation.
 import { ObservabilityModule } from "./modules/observability/observability.module";
 
 @Module({
-  providers: [{ provide: APP_INTERCEPTOR, useClass: DomainInterceptor }],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: DomainInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_FILTER, useClass: ApiExceptionFilter },
+  ],
   controllers: [AppController],
   imports: [
     PrismaModule,

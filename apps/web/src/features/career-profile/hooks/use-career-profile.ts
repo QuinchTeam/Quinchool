@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
-import { apiUrl, withCredentials } from "@/lib/api";
+import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const CAREER_PROFILE_KEY = ["career-profile"] as const;
@@ -18,19 +18,10 @@ async function fetchCareerProfile(
       ...init,
     });
 
-    if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as {
-        error?: string;
-      } | null;
-
-      throw Object.assign(
-        new Error(body?.error ?? "Career profile request failed"),
-        { status: response.status },
-      );
-    }
-
-    const body = await response.text();
-    return body ? (JSON.parse(body) as CareerProfileValues | null) : null;
+    return readApiData<CareerProfileValues | null>(
+      response,
+      "Career profile request failed",
+    );
   });
 }
 

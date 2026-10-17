@@ -1,10 +1,10 @@
 /** Reads resume source data and delegates the stateless tailoring workflow. */
 
 import {
-  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from "@nestjs/common";
 
 import { callAiService } from "../../shared/clients/ai/ai-client";
@@ -36,7 +36,10 @@ export class BuildResumeService {
     ]);
 
     if (values.jobId && !savedJob) {
-      throw new NotFoundException({ error: "Saved job not found" });
+      throw new NotFoundException({
+        code: "SAVED_JOB_NOT_FOUND",
+        message: "Saved job not found",
+      });
     }
 
     const experiences =
@@ -59,8 +62,9 @@ export class BuildResumeService {
       })) ?? [];
 
     if (!experiences.some((experience) => experience.bullets.length)) {
-      throw new BadRequestException({
-        error: "Add at least one experience before building a resume",
+      throw new UnprocessableEntityException({
+        code: "EXPERIENCE_REQUIRED",
+        message: "Add at least one experience before building a resume",
       });
     }
 

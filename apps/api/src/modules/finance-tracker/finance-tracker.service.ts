@@ -3,7 +3,9 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from "@nestjs/common";
+import { ApiResponse } from "../../core/http/api-response";
 import { Prisma } from "../../generated/prisma/client";
 import {
   type LabelQuery,
@@ -79,7 +81,8 @@ export class FinanceTrackerService {
     );
     if (!reordered) {
       throw new ConflictException({
-        error: "Wallets changed. Refresh and reorder again.",
+        code: "WALLET_ORDER_STALE",
+        message: "Wallets changed. Refresh and reorder again.",
       });
     }
   }
@@ -94,14 +97,17 @@ export class FinanceTrackerService {
           JSON.parse(Buffer.from(query.cursor, "base64url").toString("utf8")),
         );
       } catch {
-        throw new BadRequestException({ error: "Invalid transaction cursor." });
+        throw new BadRequestException({
+          code: "INVALID_CURSOR",
+          message: "Invalid transaction cursor.",
+        });
       }
     }
     const rows = await this.repository.listTransactions(userId, query, cursor);
     const items = rows.slice(0, query.limit);
     const last = items.at(-1);
-    return {
-      items: items.map((item) => ({
+    return new ApiResponse(
+      items.map((item) => ({
         id: item.id,
         type: item.type,
         amount: item.amount.toFixed(2),
@@ -110,16 +116,18 @@ export class FinanceTrackerService {
         wallet: item.wallet,
         label: item.label,
       })),
-      nextCursor:
-        rows.length > query.limit && last
-          ? Buffer.from(
-              JSON.stringify({
-                id: last.id,
-                occurredAt: last.occurredAt.toISOString(),
-              }),
-            ).toString("base64url")
-          : null,
-    };
+      {
+        nextCursor:
+          rows.length > query.limit && last
+            ? Buffer.from(
+                JSON.stringify({
+                  id: last.id,
+                  occurredAt: last.occurredAt.toISOString(),
+                }),
+              ).toString("base64url")
+            : null,
+      },
+    );
   }
 
   listLabels(userId: string, query: LabelQuery) {
@@ -132,7 +140,8 @@ export class FinanceTrackerService {
     );
     if (!transaction)
       throw new NotFoundException({
-        error: "Wallet or transaction not found.",
+        code: "TRANSACTION_NOT_FOUND",
+        message: "Wallet or transaction not found.",
       });
     return { id: transaction.id };
   }
@@ -143,12 +152,14 @@ export class FinanceTrackerService {
     );
     if (result.status === "WALLET_NOT_FOUND") {
       throw new NotFoundException({
-        error: "Source or destination wallet not found.",
+        code: "WALLET_NOT_FOUND",
+        message: "Source or destination wallet not found.",
       });
     }
     if (result.status === "INSUFFICIENT_FUNDS") {
-      throw new BadRequestException({
-        error: "Source wallet does not have enough money.",
+      throw new UnprocessableEntityException({
+        code: "INSUFFICIENT_FUNDS",
+        message: "Source wallet does not have enough money.",
       });
     }
     return { transactionIds: result.transactionIds };
@@ -168,13 +179,18 @@ export class FinanceTrackerService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025")
           throw new NotFoundException({
-            error: "Wallet or transaction not found.",
+            code: "TRANSACTION_NOT_FOUND",
+            message: "Wallet or transaction not found.",
           });
         if (error.code === "P2003")
-          throw new ConflictException({ error: relationError });
+          throw new ConflictException({
+            code: "RELATION_CONFLICT",
+            message: relationError,
+          });
         if (error.code === "P2034" || error.code === "P2002") {
           throw new ConflictException({
-            error: "Finance data changed at the same time. Please try again.",
+            code: "CONCURRENT_UPDATE",
+            message: "Finance data changed at the same time. Please try again.",
           });
         }
       }

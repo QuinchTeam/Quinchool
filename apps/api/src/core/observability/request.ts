@@ -7,10 +7,12 @@ export function requestTelemetry(
   response: Response,
   next: NextFunction,
 ) {
-  const segment = request.path.split("/")[1];
+  const [, segment, subresource] = request.path.split("/");
   const domain =
     segment === "build-resume"
       ? "resume-builder"
+      : segment === "text-generation" && subresource === "prompt-enhancements"
+        ? "prompt-enhancer"
       : segment === "api"
         ? request.path.split("/")[3] === "update-user"
           ? "profile"
@@ -22,7 +24,6 @@ export function requestTelemetry(
               "finance-tracker",
               "jobs-scraper",
               "text-generation",
-              "prompt-enhancer",
             ].includes(segment)
           ? segment
           : "application";
