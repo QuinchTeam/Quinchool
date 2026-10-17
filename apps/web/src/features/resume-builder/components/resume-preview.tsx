@@ -12,7 +12,10 @@ import {
 } from "@/features/resume-builder/components/sortable-checkbox-list";
 import { Button } from "@/components/ui/button";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
-import { filterResumeContent, getResumeItemOrder } from "@/features/resume-builder/lib/resume";
+import {
+  filterResumeContent,
+  getResumeItemOrder,
+} from "@/features/resume-builder/lib/resume";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 
 function updateExcluded(current: Set<string>, key: string, included: boolean) {

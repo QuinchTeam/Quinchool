@@ -2,7 +2,10 @@
 
 import type { RefObject } from "react";
 
-import { ChatAvatar, ChatMessage } from "@/features/chatbot/components/chat-message";
+import {
+  ChatAvatar,
+  ChatMessage,
+} from "@/features/chatbot/components/chat-message";
 import type { ChatbotActions } from "@/features/chatbot/hooks/use-chatbot";
 import type { DisplayMessage } from "@/features/chatbot/lib/types";
 

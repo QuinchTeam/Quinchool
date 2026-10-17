@@ -62,9 +62,8 @@ export function JobsScraper() {
         jobId: job.id,
         modelId: DEFAULT_TEXT_GENERATION_MODEL_ID,
       });
-      const { downloadResumePdf } = await import(
-        "@/features/resume-builder/components/resume-pdf-preview"
-      );
+      const { downloadResumePdf } =
+        await import("@/features/resume-builder/components/resume-pdf-preview");
       await downloadResumePdf(applyTailoredResume(careerProfile, tailored));
       toast.success(`Resume tailored for ${job.title} downloaded.`);
     } catch (error) {

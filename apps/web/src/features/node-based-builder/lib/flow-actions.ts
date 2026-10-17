@@ -20,12 +20,15 @@ export async function enhancePrompt(
   input: PromptEnhancerInput,
 ): Promise<PromptEnhancerResult> {
   return observeOperation("prompt-enhancer.request", async () => {
-    const response = await apiFetch(apiUrl("/text-generation/prompt-enhancements"), {
-      ...withCredentials,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
+    const response = await apiFetch(
+      apiUrl("/text-generation/prompt-enhancements"),
+      {
+        ...withCredentials,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      },
+    );
     return readApiData<PromptEnhancerResult>(
       response,
       "Failed to enhance prompt",

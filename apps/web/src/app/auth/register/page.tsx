@@ -24,7 +24,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
-import { type RegisterValues, registerSchema } from "@/features/auth/validations/auth";
+import {
+  type RegisterValues,
+  registerSchema,
+} from "@/features/auth/validations/auth";
 
 export default function RegisterPage() {
   const router = useRouter();

@@ -7,7 +7,10 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import { displayUrl, formatDateRange } from "@/features/resume-builder/lib/resume";
+import {
+  displayUrl,
+  formatDateRange,
+} from "@/features/resume-builder/lib/resume";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 
 const styles = StyleSheet.create({

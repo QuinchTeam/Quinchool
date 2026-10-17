@@ -25,7 +25,10 @@ import {
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
-import { JOB_CLASSIFICATIONS, type SavedJob } from "@/features/jobs-scraper/lib/schema";
+import {
+  JOB_CLASSIFICATIONS,
+  type SavedJob,
+} from "@/features/jobs-scraper/lib/schema";
 
 type Filter = SavedJob["classification"] | "ALL";
 

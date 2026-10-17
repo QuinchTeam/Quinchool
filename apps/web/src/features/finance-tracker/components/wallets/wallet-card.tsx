@@ -12,7 +12,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { useDeleteWallet } from "@/features/finance-tracker/hooks/use-wallets";
 import { formatMoney } from "@/features/finance-tracker/lib/format";
-import { WALLET_TYPES, type Wallet } from "@/features/finance-tracker/lib/types";
+import {
+  WALLET_TYPES,
+  type Wallet,
+} from "@/features/finance-tracker/lib/types";
 import { cn } from "@/lib/utils";
 import { FinanceDeleteDialog } from "../shared/delete-dialog";
 import { TransactionDialog } from "../transactions/transaction-dialog";

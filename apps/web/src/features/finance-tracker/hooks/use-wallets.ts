@@ -3,8 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFinanceUserId } from "@/features/finance-tracker/components/shared/finance-scope";
 import { financeRequest } from "@/features/finance-tracker/lib/api";
-import { financeKeys, overviewOptions } from "@/features/finance-tracker/lib/queries";
-import type { FinanceOverview, WalletInput } from "@/features/finance-tracker/lib/types";
+import {
+  financeKeys,
+  overviewOptions,
+} from "@/features/finance-tracker/lib/queries";
+import type {
+  FinanceOverview,
+  WalletInput,
+} from "@/features/finance-tracker/lib/types";
 
 export function useFinanceOverview() {
   return useQuery(overviewOptions(useFinanceUserId()));

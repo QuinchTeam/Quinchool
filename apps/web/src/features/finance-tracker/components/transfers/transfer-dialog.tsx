@@ -26,7 +26,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateTransfer } from "@/features/finance-tracker/hooks/use-transactions";
 import { useFinanceOverview } from "@/features/finance-tracker/hooks/use-wallets";
-import { formatMoney, toLocalDateTime } from "@/features/finance-tracker/lib/format";
+import {
+  formatMoney,
+  toLocalDateTime,
+} from "@/features/finance-tracker/lib/format";
 import {
   type TransferFormValues,
   transferFormSchema,
