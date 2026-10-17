@@ -1,7 +1,7 @@
 "use client";
 
-import { SentIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react/dist/ssr/PaperPlaneTilt";
+import { AppIcon } from "@/components/ui/icon";
 import type { FormEvent, KeyboardEvent } from "react";
 
 import {
@@ -64,7 +64,7 @@ export function ChatComposer({
               type="submit"
               variant="default"
             >
-              <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
+              <AppIcon icon={PaperPlaneTiltIcon} />
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>

@@ -2,13 +2,11 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  BankIcon,
-  DragDropVerticalIcon,
-  Money01Icon,
-  Wallet01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { BankIcon } from "@phosphor-icons/react/dist/ssr/Bank";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVertical";
+import { MoneyIcon } from "@phosphor-icons/react/dist/ssr/Money";
+import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
+import { AppIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { useDeleteWallet } from "@/features/finance-tracker/hooks/use-wallets";
 import { formatMoney } from "@/features/finance-tracker/lib/format";
@@ -40,9 +38,9 @@ export function WalletCard({
   } = useSortable({ id: wallet.id, disabled });
   const icon =
     wallet.type === "CASH"
-      ? Money01Icon
+      ? MoneyIcon
       : wallet.type === "EWALLET"
-        ? Wallet01Icon
+        ? WalletIcon
         : BankIcon;
 
   return (
@@ -60,11 +58,7 @@ export function WalletCard({
       }}
     >
       <div className="flex min-w-0 items-start gap-3">
-        <HugeiconsIcon
-          icon={icon}
-          strokeWidth={2}
-          className="mt-0.5 size-5 shrink-0"
-        />
+        <AppIcon icon={icon} className="mt-0.5 size-5 shrink-0" />
         <div className="min-w-0 flex-1">
           <h3 className="break-words font-semibold">{wallet.name}</h3>
           <p className="text-xs text-muted-foreground">
@@ -82,7 +76,7 @@ export function WalletCard({
           title={`Reorder ${wallet.name}`}
           aria-label={`Reorder ${wallet.name}`}
         >
-          <HugeiconsIcon icon={DragDropVerticalIcon} strokeWidth={2} />
+          <AppIcon icon={DotsSixVerticalIcon} />
         </Button>
       </div>
       <p className="break-all text-xl font-semibold tabular-nums">

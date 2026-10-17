@@ -1,8 +1,6 @@
-import {
-  AiGenerativeIcon,
-  WorkflowSquareIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { FlowArrowIcon } from "@phosphor-icons/react/dist/ssr/FlowArrow";
+import { SparkleIcon } from "@phosphor-icons/react/dist/ssr/Sparkle";
+import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import Link from "next/link";
 
 import {
@@ -15,19 +13,19 @@ import {
 const tools: {
   description: string;
   href: string;
-  icon: HugeiconsIconProps["icon"];
+  icon: AppIconProps["icon"];
   title: string;
 }[] = [
   {
     description: "Generate text from a prompt with a chosen model.",
     href: "/text-generation",
-    icon: AiGenerativeIcon,
+    icon: SparkleIcon,
     title: "Text Generation",
   },
   {
     description: "Build and run flows on a node canvas.",
     href: "/node-based-flow",
-    icon: WorkflowSquareIcon,
+    icon: FlowArrowIcon,
     title: "Node Base Flow",
   },
 ];
@@ -42,7 +40,7 @@ export function ToolsHub() {
             <Card className="h-full transition-colors group-hover:bg-muted/40">
               <CardContent className="flex items-start gap-4">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                  <HugeiconsIcon icon={tool.icon} strokeWidth={2} />
+                  <AppIcon icon={tool.icon} />
                 </div>
                 <div className="grid min-w-0 gap-1">
                   <CardTitle>{tool.title}</CardTitle>

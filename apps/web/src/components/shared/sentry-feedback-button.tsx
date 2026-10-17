@@ -1,7 +1,7 @@
 "use client";
 
-import { MegaphoneIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { MegaphoneIcon } from "@phosphor-icons/react/dist/ssr/Megaphone";
+import { AppIcon } from "@/components/ui/icon";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -59,7 +59,7 @@ export function SentryFeedbackButton() {
       disabled={isOpening}
       onClick={handleClick}
     >
-      <HugeiconsIcon icon={MegaphoneIcon} strokeWidth={2} />
+      <AppIcon icon={MegaphoneIcon} />
       Report a bug
     </Button>
   );

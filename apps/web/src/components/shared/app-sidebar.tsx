@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  Briefcase01Icon,
-  ChatBotIcon,
-  FilePenIcon,
-  Home01Icon,
-  UserAccountIcon,
-  Wallet01Icon,
-  Wrench01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { NotepadIcon } from "@phosphor-icons/react/dist/ssr/Notepad";
+import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
+import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
+import { RobotIcon } from "@phosphor-icons/react/dist/ssr/Robot";
+import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
+import { WrenchIcon } from "@phosphor-icons/react/dist/ssr/Wrench";
+import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -43,7 +41,7 @@ import { signOut, useSession } from "@/lib/auth-client";
  */
 type NavItem = {
   href: string;
-  icon: HugeiconsIconProps["icon"];
+  icon: AppIconProps["icon"];
   label: string;
   match?: string[];
 };
@@ -51,8 +49,8 @@ type NavItem = {
 const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   {
     items: [
-      { href: "/", icon: Home01Icon, label: "Home", match: [] },
-      { href: "/chatbot", icon: ChatBotIcon, label: "Quinchbot" },
+      { href: "/", icon: HouseIcon, label: "Home", match: [] },
+      { href: "/chatbot", icon: RobotIcon, label: "Quinchbot" },
     ],
   },
   {
@@ -60,16 +58,16 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
     items: [
       {
         href: "/resume/resume-tailor",
-        icon: FilePenIcon,
+        icon: NotepadIcon,
         label: "Resume",
         match: ["/resume"],
       },
       {
         href: "/career-profile",
-        icon: UserAccountIcon,
+        icon: IdentificationCardIcon,
         label: "Career Profile",
       },
-      { href: "/jobs-scraper", icon: Briefcase01Icon, label: "Jobs Scraper" },
+      { href: "/jobs-scraper", icon: BriefcaseIcon, label: "Jobs Scraper" },
     ],
   },
   {
@@ -77,12 +75,12 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
     items: [
       {
         href: "/finance-tracker",
-        icon: Wallet01Icon,
+        icon: WalletIcon,
         label: "Finance Tracker",
       },
       {
         href: "/tools",
-        icon: Wrench01Icon,
+        icon: WrenchIcon,
         label: "All-Random Tools",
         match: ["/tools", "/text-generation", "/node-based-flow"],
       },
@@ -169,7 +167,7 @@ export function AppSidebar() {
                     className="text-muted-foreground data-active:bg-secondary data-active:text-secondary-foreground data-active:hover:bg-secondary/80"
                     render={<Link href={item.href} />}
                   >
-                    <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                    <AppIcon icon={item.icon} />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

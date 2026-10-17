@@ -1,11 +1,9 @@
 "use client";
 
-import {
-  AiBeautifyIcon,
-  Location01Icon,
-  SquareArrowUpRightIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
+import { MapPinIcon } from "@phosphor-icons/react/dist/ssr/MapPin";
+import { SparkleIcon } from "@phosphor-icons/react/dist/ssr/Sparkle";
+import { AppIcon } from "@/components/ui/icon";
 import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -61,10 +59,7 @@ export function JobCard({
             <p className="text-sm text-muted-foreground">{job.company}</p>
           </div>
           <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
-            <HugeiconsIcon
-              icon={Location01Icon}
-              className="mt-0.5 size-4 shrink-0"
-            />
+            <AppIcon icon={MapPinIcon} className="mt-0.5 size-4 shrink-0" />
             {job.location}
           </p>
           <p className="text-sm leading-relaxed">{job.summary}</p>
@@ -104,7 +99,7 @@ export function JobCard({
               onClick={onGenerateResume}
               className="w-full md:w-auto"
             >
-              <HugeiconsIcon icon={AiBeautifyIcon} strokeWidth={2} />
+              <AppIcon icon={SparkleIcon} />
               {isGeneratingResume ? "Generating..." : "Generate Resume"}
             </Button>
           ) : null}
@@ -118,7 +113,7 @@ export function JobCard({
             )}
           >
             View job
-            <HugeiconsIcon icon={SquareArrowUpRightIcon} strokeWidth={2} />
+            <AppIcon icon={ArrowSquareOutIcon} />
           </a>
         </div>
       </CardContent>

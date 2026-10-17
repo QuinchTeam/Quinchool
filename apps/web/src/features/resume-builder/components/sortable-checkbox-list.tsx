@@ -17,8 +17,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { DragDropVerticalIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVertical";
+import { AppIcon } from "@/components/ui/icon";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -71,7 +71,7 @@ function SortableCheckboxRow({
         {...attributes}
         {...listeners}
       >
-        <HugeiconsIcon icon={DragDropVerticalIcon} strokeWidth={2} />
+        <AppIcon icon={DotsSixVerticalIcon} />
         <span className="sr-only">Reorder {item.label}</span>
       </Button>
       <Checkbox

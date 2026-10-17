@@ -1,7 +1,7 @@
 "use client";
 
-import { Calendar03Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CalendarIcon } from "@phosphor-icons/react/dist/ssr/Calendar";
+import { AppIcon } from "@/components/ui/icon";
 import { format } from "date-fns";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ function DatePicker() {
           />
         }
       >
-        <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} />
+        <AppIcon icon={CalendarIcon} />
         {date ? format(date, "PPP") : <span>Pick a date</span>}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

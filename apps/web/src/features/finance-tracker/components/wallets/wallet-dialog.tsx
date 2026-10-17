@@ -1,7 +1,8 @@
 "use client";
 
-import { Add01Icon, Edit02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { AppIcon } from "@/components/ui/icon";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,7 @@ export function WalletDialog({ wallet }: { wallet?: Wallet }) {
           />
         }
       >
-        <HugeiconsIcon icon={wallet ? Edit02Icon : Add01Icon} strokeWidth={2} />
+        <AppIcon icon={wallet ? PencilSimpleIcon : PlusIcon} />
         {!wallet && "Add wallet"}
       </DialogTrigger>
       <DialogContent

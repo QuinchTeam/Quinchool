@@ -1,7 +1,8 @@
 "use client";
 
-import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import { useId } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -160,7 +161,7 @@ function ToolListField({
               )
             }
           >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+            <AppIcon icon={TrashIcon} />
           </Button>
         </div>
       ))}
@@ -171,7 +172,7 @@ function ToolListField({
         className="w-fit"
         onClick={() => onChange(field.name, [...rows, ""])}
       >
-        <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+        <AppIcon icon={PlusIcon} />
         Add {field.itemLabel ?? field.label}
       </Button>
     </div>

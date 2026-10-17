@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDataTransferHorizontalIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowsLeftRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowsLeftRight";
+import { AppIcon } from "@/components/ui/icon";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -62,7 +62,7 @@ export function TransferDialog() {
           />
         }
       >
-        <HugeiconsIcon icon={ArrowDataTransferHorizontalIcon} strokeWidth={2} />
+        <AppIcon icon={ArrowsLeftRightIcon} />
         Transfer
       </DialogTrigger>
       <DialogContent

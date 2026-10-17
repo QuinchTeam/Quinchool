@@ -1,17 +1,14 @@
 "use client";
 
-import {
-  AiSearch02Icon,
-  AiSettingIcon,
-  Briefcase01Icon,
-  Calendar03Icon,
-  Clock01Icon,
-  FilterHorizontalIcon,
-  RefreshIcon,
-  Search01Icon,
-  Task01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { CalendarIcon } from "@phosphor-icons/react/dist/ssr/Calendar";
+import { ClockIcon } from "@phosphor-icons/react/dist/ssr/Clock";
+import { FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
+import { ListChecksIcon } from "@phosphor-icons/react/dist/ssr/ListChecks";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react/dist/ssr/SlidersHorizontal";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -81,15 +78,11 @@ export function JobsScraper() {
         <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid gap-2">
             <div className="flex items-center gap-2">
-              <HugeiconsIcon
-                icon={Briefcase01Icon}
-                strokeWidth={2}
-                className="size-6 text-primary"
-              />
+              <AppIcon icon={BriefcaseIcon} className="size-6 text-primary" />
               <h1 className="text-2xl font-semibold">Jobs Scraper</h1>
             </div>
             <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+              <AppIcon icon={CalendarIcon} className="size-4" />
               {state ? formatTimeRange(state.config) : "Loading criteria"}
               {state && formatLocationModes(state.config) ? (
                 <>
@@ -105,7 +98,7 @@ export function JobsScraper() {
               nativeButton={false}
               render={<Link href="/jobs-scraper/review" />}
             >
-              <HugeiconsIcon icon={Task01Icon} strokeWidth={2} />
+              <AppIcon icon={ListChecksIcon} />
               Review scan
               {state ? ` (${state.classificationCounts.REJECTED})` : ""}
             </Button>
@@ -114,16 +107,19 @@ export function JobsScraper() {
               nativeButton={false}
               render={<Link href="/jobs-scraper/settings" />}
             >
-              <HugeiconsIcon icon={AiSettingIcon} strokeWidth={2} />
+              <AppIcon icon={SlidersHorizontalIcon} />
               Edit criteria
             </Button>
             <Button
               onClick={() => scan.mutate()}
               disabled={scan.isPending || !state || unsetCriteria.length > 0}
             >
-              <HugeiconsIcon
-                icon={state?.lastScannedAt ? RefreshIcon : Search01Icon}
-                strokeWidth={2}
+              <AppIcon
+                icon={
+                  state?.lastScannedAt
+                    ? ArrowClockwiseIcon
+                    : MagnifyingGlassIcon
+                }
               />
               {scan.isPending
                 ? "Scanning job boards"
@@ -138,9 +134,8 @@ export function JobsScraper() {
       <div className="grid w-full gap-8 px-6 py-6 lg:grid-cols-4">
         <aside className="grid content-start gap-6 lg:col-span-1">
           <div className="flex items-center gap-2">
-            <HugeiconsIcon
-              icon={FilterHorizontalIcon}
-              strokeWidth={2}
+            <AppIcon
+              icon={FunnelIcon}
               className="size-4 text-muted-foreground"
             />
             <h2 className="text-sm font-semibold">Search criteria</h2>
@@ -180,11 +175,12 @@ export function JobsScraper() {
             <Empty className="min-h-96 border">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <HugeiconsIcon
+                  <AppIcon
                     icon={
-                      unsetCriteria.length > 0 ? AiSettingIcon : AiSearch02Icon
+                      unsetCriteria.length > 0
+                        ? SlidersHorizontalIcon
+                        : MagnifyingGlassIcon
                     }
-                    strokeWidth={2}
                   />
                 </EmptyMedia>
                 <EmptyTitle>
@@ -309,7 +305,7 @@ function JobResults({
         <Empty className="min-h-96 border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <HugeiconsIcon icon={Briefcase01Icon} strokeWidth={2} />
+              <AppIcon icon={BriefcaseIcon} />
             </EmptyMedia>
             <EmptyTitle>No saved jobs</EmptyTitle>
             <EmptyDescription>
@@ -348,7 +344,7 @@ function JobResults({
           </p>
         </div>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <HugeiconsIcon icon={Clock01Icon} className="size-3.5" />
+          <AppIcon icon={ClockIcon} className="size-3.5" />
           Last scanned {scanTime}
         </p>
       </div>
@@ -490,14 +486,14 @@ function ErrorResults({
     <Empty className="min-h-96 border border-destructive/30">
       <EmptyHeader>
         <EmptyMedia variant="icon" className="text-destructive">
-          <HugeiconsIcon icon={AiSearch02Icon} strokeWidth={2} />
+          <AppIcon icon={MagnifyingGlassIcon} />
         </EmptyMedia>
         <EmptyTitle>Jobs unavailable</EmptyTitle>
         <EmptyDescription>{message}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" onClick={onRetry}>
-          <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} />
+          <AppIcon icon={ArrowClockwiseIcon} />
           Try again
         </Button>
       </EmptyContent>

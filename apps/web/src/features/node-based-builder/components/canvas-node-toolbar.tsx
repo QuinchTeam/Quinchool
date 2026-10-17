@@ -1,5 +1,5 @@
-import { DashboardSquareAddIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { SquaresFourIcon } from "@phosphor-icons/react/dist/ssr/SquaresFour";
+import { AppIcon } from "@/components/ui/icon";
 import {
   NODE_CARDS,
   NODE_DRAG_MIME,
@@ -17,11 +17,7 @@ export function CanvasNodeToolbar({
   return (
     <div className="flex flex-col gap-2 rounded-xl border bg-card p-2 shadow-sm">
       <header className="flex items-center gap-2 px-1 text-xs font-medium text-muted-foreground">
-        <HugeiconsIcon
-          icon={DashboardSquareAddIcon}
-          size={14}
-          strokeWidth={2}
-        />
+        <AppIcon icon={SquaresFourIcon} size={14} />
         Nodes
       </header>
       {NODE_CARDS.map((card) => (
@@ -38,7 +34,7 @@ export function CanvasNodeToolbar({
             event.dataTransfer.effectAllowed = "move";
           }}
         >
-          <HugeiconsIcon icon={card.icon} strokeWidth={2} />
+          <AppIcon icon={card.icon} />
           {card.label}
         </Button>
       ))}

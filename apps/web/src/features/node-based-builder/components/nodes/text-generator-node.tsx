@@ -1,6 +1,6 @@
 "use client";
 
-import { AiBrain01Icon } from "@hugeicons/core-free-icons";
+import { BrainIcon } from "@phosphor-icons/react/dist/ssr/Brain";
 import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 
 import { TextModelSelector } from "@/components/shared/text-model-selector";
@@ -47,7 +47,7 @@ export function TextGeneratorNode({
     <NodeShell
       active={data.executionState === "running"}
       id={id}
-      icon={AiBrain01Icon}
+      icon={BrainIcon}
       label="Text Generator"
     >
       <div className="grid gap-3">

@@ -1,7 +1,8 @@
 "use client";
 
-import { Download01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { DownloadSimpleIcon } from "@phosphor-icons/react/dist/ssr/DownloadSimple";
+import { PrinterIcon } from "@phosphor-icons/react/dist/ssr/Printer";
+import { AppIcon } from "@/components/ui/icon";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -193,7 +194,7 @@ export function ResumePdfPreview({
             disabled={!pdfUrl}
             onClick={downloadPdf}
           >
-            <HugeiconsIcon icon={Download01Icon} strokeWidth={2} />
+            <AppIcon icon={DownloadSimpleIcon} />
             {pdfUrl ? "Download PDF" : "Generating PDF..."}
           </Button>
           <Button
@@ -202,7 +203,7 @@ export function ResumePdfPreview({
             disabled={!pdfUrl}
             onClick={openPdf}
           >
-            <HugeiconsIcon icon={PrinterIcon} strokeWidth={2} />
+            <AppIcon icon={PrinterIcon} />
             Open / Print
           </Button>
         </div>

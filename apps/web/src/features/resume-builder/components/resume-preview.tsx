@@ -1,7 +1,7 @@
 "use client";
 
-import { Refresh01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { AppIcon } from "@/components/ui/icon";
 import { useMemo, useState } from "react";
 
 import { CareerProfileFallback } from "@/features/career-profile/components/career-profile-fallback";
@@ -72,7 +72,7 @@ function ResumeContentToolbar({
             setSkillOrder({});
           }}
         >
-          <HugeiconsIcon icon={Refresh01Icon} strokeWidth={2} />
+          <AppIcon icon={ArrowClockwiseIcon} />
           Reset
         </Button>
       </div>

@@ -1,12 +1,10 @@
 "use client";
 
-import {
-  Add01Icon,
-  ArrowDown01Icon,
-  ArrowRight01Icon,
-  Delete02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import { type ReactNode, useId, useState } from "react";
 import {
   type FieldArray,
@@ -94,16 +92,13 @@ function EntryCard({
           disabled={invalid}
           onClick={() => setCollapsed(!collapsed)}
         >
-          <HugeiconsIcon
-            icon={open ? ArrowDown01Icon : ArrowRight01Icon}
-            strokeWidth={2}
-          />
+          <AppIcon icon={open ? CaretDownIcon : CaretRightIcon} />
           <span className="sr-only">
             {open ? "Collapse" : "Expand"} {label.toLowerCase()}
           </span>
         </Button>
         <Button type="button" variant="ghost" size="icon-sm" onClick={onRemove}>
-          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+          <AppIcon icon={TrashIcon} />
           <span className="sr-only">Remove {label.toLowerCase()}</span>
         </Button>
       </div>
@@ -145,7 +140,7 @@ export function EntryList({
           size="sm"
           onClick={() => append(empty())}
         >
-          <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+          <AppIcon icon={PlusIcon} />
           {addLabel}
         </Button>
       </div>

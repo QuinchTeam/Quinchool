@@ -1,6 +1,6 @@
 "use client";
 
-import { ParagraphIcon } from "@hugeicons/core-free-icons";
+import { ParagraphIcon } from "@phosphor-icons/react/dist/ssr/Paragraph";
 import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 
 import { NodeShell } from "./index";

@@ -1,7 +1,7 @@
 "use client";
 
-import { Wallet01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
+import { AppIcon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceOverview } from "@/features/finance-tracker/hooks/use-wallets";
 import { formatMoney } from "@/features/finance-tracker/lib/format";
@@ -41,11 +41,7 @@ export function FinanceDashboard() {
             className="flex min-w-0 flex-col gap-3 rounded-md border bg-card p-5"
           >
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <HugeiconsIcon
-                icon={Wallet01Icon}
-                strokeWidth={2}
-                className="size-4"
-              />
+              <AppIcon icon={WalletIcon} className="size-4" />
               Total balance
             </div>
             <p className="break-all text-3xl font-semibold tabular-nums">

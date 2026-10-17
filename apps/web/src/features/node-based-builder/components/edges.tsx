@@ -1,5 +1,5 @@
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { AppIcon } from "@/components/ui/icon";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -72,7 +72,7 @@ function RemovableEdge({
             onMouseLeave={() => setHovered(false)}
             onClick={() => deleteElements({ edges: [{ id }] })}
           >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+            <AppIcon icon={XIcon} />
             <span className="sr-only">Remove connection</span>
           </Button>
         </EdgeLabelRenderer>

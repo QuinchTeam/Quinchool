@@ -63,7 +63,7 @@ On macOS or Linux, change `dev:ai` to use `.venv/bin/python`.
 | ------------- | ------------------------------------------------------------- |
 | Runtime       | **Node 22**                                                   |
 | Framework     | **Next.js 16** + **React 19**, React Compiler                 |
-| UI            | **shadcn/ui** + **Base UI**, **Tailwind CSS v4**, Hugeicons    |
+| UI            | **shadcn/ui** + **Base UI**, **Tailwind CSS v4**, Phosphor (duotone only) |
 | Data fetching | **TanStack Query**                                            |
 | Forms         | **React Hook Form** + **Zod**                                 |
 | Auth          | **Better Auth** client                                        |

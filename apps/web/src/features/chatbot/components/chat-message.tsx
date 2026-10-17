@@ -1,7 +1,7 @@
 "use client";
 
-import { UserAiIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { RobotIcon } from "@phosphor-icons/react/dist/ssr/Robot";
+import { AppIcon } from "@/components/ui/icon";
 import Image from "next/image";
 import ReactMarkdown, { type Components } from "react-markdown";
 import { Badge } from "@/components/ui/badge";
@@ -53,7 +53,7 @@ export function ChatMessage({
       <div className="grid min-w-0 flex-1 gap-2 pt-1">
         {message.toolUsed ? (
           <Badge variant="outline" className="w-fit">
-            <HugeiconsIcon icon={UserAiIcon} strokeWidth={2} />
+            <AppIcon icon={RobotIcon} />
             Career profile used
           </Badge>
         ) : null}

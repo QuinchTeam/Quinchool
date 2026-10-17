@@ -1,7 +1,7 @@
 "use client";
 
-import { RefreshIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { AppIcon } from "@/components/ui/icon";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -51,7 +51,7 @@ export function FinanceQueryError({
         disabled={pending}
         onClick={expired ? loginAgain : retry}
       >
-        <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} />
+        <AppIcon icon={ArrowClockwiseIcon} />
         {expired ? "Sign in again" : "Retry"}
       </Button>
       {signOutError && (

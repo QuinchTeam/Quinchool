@@ -1,5 +1,6 @@
-import { Delete02Icon, PlayIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PlayIcon } from "@phosphor-icons/react/dist/ssr/Play";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +16,7 @@ export function CanvasMainToolbar({
   return (
     <div className="flex items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
       <Button disabled={isRunning} onClick={onRun} size="sm" type="button">
-        <HugeiconsIcon icon={PlayIcon} strokeWidth={2} />
+        <AppIcon icon={PlayIcon} />
         {isRunning ? "Running..." : "Run Flow"}
       </Button>
       <Button
@@ -25,7 +26,7 @@ export function CanvasMainToolbar({
         type="button"
         variant="outline"
       >
-        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        <AppIcon icon={TrashIcon} />
         <span className="sr-only">Clear canvas</span>
       </Button>
     </div>

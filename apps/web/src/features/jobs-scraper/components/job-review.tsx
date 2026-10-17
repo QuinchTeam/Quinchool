@@ -1,11 +1,9 @@
 "use client";
 
-import {
-  ArrowLeft01Icon,
-  Briefcase01Icon,
-  RefreshIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -52,7 +50,7 @@ export function JobReview() {
               href="/jobs-scraper"
               className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              <AppIcon icon={CaretLeftIcon} className="size-4" />
               Back to jobs
             </Link>
             <h1 className="text-2xl font-semibold">Review scan results</h1>
@@ -102,7 +100,7 @@ export function JobReview() {
             </EmptyHeader>
             <EmptyContent>
               <Button variant="outline" onClick={() => refetch()}>
-                <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} />
+                <AppIcon icon={ArrowClockwiseIcon} />
                 Try again
               </Button>
             </EmptyContent>
@@ -111,7 +109,7 @@ export function JobReview() {
           <Empty className="min-h-96 border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <HugeiconsIcon icon={Briefcase01Icon} strokeWidth={2} />
+                <AppIcon icon={BriefcaseIcon} />
               </EmptyMedia>
               <EmptyTitle>Nothing here</EmptyTitle>
               <EmptyDescription>

@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  Alert02Icon,
-  CheckmarkCircle02Icon,
-  InformationCircleIcon,
-  Loading03Icon,
-  MultiplicationSignCircleIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
+import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr/CircleNotch";
+import { InfoIcon } from "@phosphor-icons/react/dist/ssr/Info";
+import { WarningIcon } from "@phosphor-icons/react/dist/ssr/Warning";
+import { XCircleIcon } from "@phosphor-icons/react/dist/ssr/XCircle";
+import { AppIcon } from "@/components/ui/icon";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
@@ -19,40 +17,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: (
-          <HugeiconsIcon
-            icon={CheckmarkCircle02Icon}
-            strokeWidth={2}
-            className="size-5"
-          />
-        ),
-        info: (
-          <HugeiconsIcon
-            icon={InformationCircleIcon}
-            strokeWidth={2}
-            className="size-5"
-          />
-        ),
-        warning: (
-          <HugeiconsIcon
-            icon={Alert02Icon}
-            strokeWidth={2}
-            className="size-5"
-          />
-        ),
-        error: (
-          <HugeiconsIcon
-            icon={MultiplicationSignCircleIcon}
-            strokeWidth={2}
-            className="size-5"
-          />
-        ),
+        success: <AppIcon icon={CheckCircleIcon} className="size-5" />,
+        info: <AppIcon icon={InfoIcon} className="size-5" />,
+        warning: <AppIcon icon={WarningIcon} className="size-5" />,
+        error: <AppIcon icon={XCircleIcon} className="size-5" />,
         loading: (
-          <HugeiconsIcon
-            icon={Loading03Icon}
-            strokeWidth={2}
-            className="size-5 animate-spin"
-          />
+          <AppIcon icon={CircleNotchIcon} className="size-5 animate-spin" />
         ),
       }}
       style={

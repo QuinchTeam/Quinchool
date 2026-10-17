@@ -1,7 +1,7 @@
 "use client";
 
-import { Delete02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ export function FinanceDeleteDialog({
           />
         }
       >
-        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        <AppIcon icon={TrashIcon} />
       </DialogTrigger>
       <DialogContent className="rounded-md" showCloseButton={!pending}>
         <DialogHeader>
@@ -85,7 +85,7 @@ export function FinanceDeleteDialog({
             Cancel
           </Button>
           <Button variant="destructive" disabled={pending} onClick={remove}>
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+            <AppIcon icon={TrashIcon} />
             {pending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>

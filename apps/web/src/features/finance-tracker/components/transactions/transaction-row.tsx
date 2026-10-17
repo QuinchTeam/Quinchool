@@ -1,10 +1,8 @@
 "use client";
 
-import {
-  ArrowDownLeft01Icon,
-  ArrowUpRight01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDownLeftIcon } from "@phosphor-icons/react/dist/ssr/ArrowDownLeft";
+import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
+import { AppIcon } from "@/components/ui/icon";
 import { useDeleteTransaction } from "@/features/finance-tracker/hooks/use-transactions";
 import {
   amountClassName,
@@ -29,9 +27,8 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
             : "bg-rose-500/10 text-rose-700 dark:text-rose-400",
         )}
       >
-        <HugeiconsIcon
-          icon={income ? ArrowDownLeft01Icon : ArrowUpRight01Icon}
-          strokeWidth={2}
+        <AppIcon
+          icon={income ? ArrowDownLeftIcon : ArrowUpRightIcon}
           className="size-4"
         />
         <span className="sr-only">{income ? "Income" : "Expense"}</span>

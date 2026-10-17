@@ -1,16 +1,14 @@
 "use client";
 
-import {
-  Add01Icon,
-  CreditCardIcon,
-  Home09Icon,
-  Logout03Icon,
-  Notification03Icon,
-  Search01Icon,
-  Settings02Icon,
-  UserIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
+import { CreditCardIcon } from "@phosphor-icons/react/dist/ssr/CreditCard";
+import { GearIcon } from "@phosphor-icons/react/dist/ssr/Gear";
+import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
+import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
+import { AppIcon } from "@/components/ui/icon";
 import type * as React from "react";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/shared/date-picker";
@@ -239,7 +237,7 @@ export default function DesignSystem() {
         <Button size="sm">Small</Button>
         <Button size="lg">Large</Button>
         <Button size="icon" aria-label="Add item">
-          <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+          <AppIcon icon={PlusIcon} />
         </Button>
         <Button disabled>
           <Spinner />
@@ -557,21 +555,21 @@ export default function DesignSystem() {
             <DropdownMenuGroup>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuItem>
-                <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
+                <AppIcon icon={UserIcon} />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} />
+                <AppIcon icon={CreditCardIcon} />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <HugeiconsIcon icon={Settings02Icon} strokeWidth={2} />
+                <AppIcon icon={GearIcon} />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
-              <HugeiconsIcon icon={Logout03Icon} strokeWidth={2} />
+              <AppIcon icon={SignOutIcon} />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -635,7 +633,7 @@ export default function DesignSystem() {
         <Empty className="w-full border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
+              <AppIcon icon={MagnifyingGlassIcon} />
             </EmptyMedia>
             <EmptyTitle>No results found</EmptyTitle>
             <EmptyDescription>
@@ -656,7 +654,7 @@ export default function DesignSystem() {
           <Sidebar collapsible="none" className="border-r">
             <SidebarHeader>
               <div className="flex items-center gap-2 px-2 py-1">
-                <HugeiconsIcon icon={Home09Icon} strokeWidth={2} />
+                <AppIcon icon={HouseIcon} />
                 <span className="font-heading text-sm font-medium">
                   Quinchool
                 </span>
@@ -669,22 +667,19 @@ export default function DesignSystem() {
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <SidebarMenuButton isActive>
-                        <HugeiconsIcon icon={Home09Icon} strokeWidth={2} />
+                        <AppIcon icon={HouseIcon} />
                         <span>Dashboard</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                       <SidebarMenuButton>
-                        <HugeiconsIcon
-                          icon={Notification03Icon}
-                          strokeWidth={2}
-                        />
+                        <AppIcon icon={BellIcon} />
                         <span>Notifications</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                       <SidebarMenuButton>
-                        <HugeiconsIcon icon={Settings02Icon} strokeWidth={2} />
+                        <AppIcon icon={GearIcon} />
                         <span>Settings</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -696,7 +691,7 @@ export default function DesignSystem() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
-                    <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
+                    <AppIcon icon={UserIcon} />
                     <span>Account</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

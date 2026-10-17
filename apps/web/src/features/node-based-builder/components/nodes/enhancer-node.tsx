@@ -1,6 +1,6 @@
 "use client";
 
-import { MagicWand01Icon } from "@hugeicons/core-free-icons";
+import { MagicWandIcon } from "@phosphor-icons/react/dist/ssr/MagicWand";
 import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 
 import { TextModelSelector } from "@/components/shared/text-model-selector";
@@ -42,7 +42,7 @@ export function EnhancerNode({ id, data }: NodeProps<EnhancerFlowNode>) {
     <NodeShell
       active={data.executionState === "running"}
       id={id}
-      icon={MagicWand01Icon}
+      icon={MagicWandIcon}
       label="Enhancer"
     >
       <div className="grid gap-3">

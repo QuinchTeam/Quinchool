@@ -1,7 +1,8 @@
 "use client";
 
-import { Add01Icon, SidebarRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { SidebarIcon } from "@phosphor-icons/react/dist/ssr/Sidebar";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 
 import { TextModelSelector } from "@/components/shared/text-model-selector";
@@ -47,7 +48,7 @@ export function ChatHeader({
             nativeButton={false}
             render={<Link href="/chatbot" />}
           >
-            <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+            <AppIcon icon={PlusIcon} />
             New chat
           </Button>
           <Button
@@ -58,7 +59,7 @@ export function ChatHeader({
             aria-expanded={isListOpen}
             onClick={onToggleList}
           >
-            <HugeiconsIcon icon={SidebarRight01Icon} strokeWidth={2} />
+            <AppIcon icon={SidebarIcon} />
           </Button>
         </div>
       </div>

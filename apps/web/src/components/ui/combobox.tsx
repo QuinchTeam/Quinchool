@@ -1,12 +1,10 @@
 "use client";
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
-import {
-  ArrowDown01Icon,
-  Cancel01Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
+import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { AppIcon } from "@/components/ui/icon";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,9 +33,8 @@ function ComboboxTrigger({
       {...props}
     >
       {children}
-      <HugeiconsIcon
-        icon={ArrowDown01Icon}
-        strokeWidth={2}
+      <AppIcon
+        icon={CaretDownIcon}
         className="pointer-events-none size-4 text-muted-foreground"
       />
     </ComboboxPrimitive.Trigger>
@@ -52,11 +49,7 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
       className={cn(className)}
       {...props}
     >
-      <HugeiconsIcon
-        icon={Cancel01Icon}
-        strokeWidth={2}
-        className="pointer-events-none"
-      />
+      <AppIcon icon={XIcon} className="pointer-events-none" />
     </ComboboxPrimitive.Clear>
   );
 }
@@ -166,11 +159,7 @@ function ComboboxItem({
           <span className="pointer-events-none absolute right-3 flex size-5 items-center justify-center" />
         }
       >
-        <HugeiconsIcon
-          icon={Tick02Icon}
-          strokeWidth={2}
-          className="pointer-events-none"
-        />
+        <AppIcon icon={CheckIcon} className="pointer-events-none" />
       </ComboboxPrimitive.ItemIndicator>
     </ComboboxPrimitive.Item>
   );
@@ -272,11 +261,7 @@ function ComboboxChip({
           className="-ml-1 size-6 opacity-50 hover:opacity-100"
           data-slot="combobox-chip-remove"
         >
-          <HugeiconsIcon
-            icon={Cancel01Icon}
-            strokeWidth={2}
-            className="pointer-events-none"
-          />
+          <AppIcon icon={XIcon} className="pointer-events-none" />
         </ComboboxPrimitive.ChipRemove>
       )}
     </ComboboxPrimitive.Chip>

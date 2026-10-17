@@ -1,7 +1,8 @@
 "use client";
 
-import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import { type ComponentProps, useId } from "react";
 import {
   type FieldPathByValue,
@@ -154,7 +155,7 @@ export function BulletsField({
           size="sm"
           onClick={() => append({ text: "" })}
         >
-          <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+          <AppIcon icon={PlusIcon} />
           Add bullet
         </Button>
       </div>
@@ -217,7 +218,7 @@ function BulletRow({
         disabled={!removable}
         onClick={onRemove}
       >
-        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        <AppIcon icon={TrashIcon} />
         <span className="sr-only">Remove bullet</span>
       </Button>
     </div>

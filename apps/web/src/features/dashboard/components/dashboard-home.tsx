@@ -1,14 +1,12 @@
 import "server-only";
 
-import {
-  ArrowRight01Icon,
-  Briefcase01Icon,
-  FilePenIcon,
-  UserAccountIcon,
-  UserCircleIcon,
-  Wallet01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { FileTextIcon } from "@phosphor-icons/react/dist/ssr/FileText";
+import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
+import { UserCircleIcon } from "@phosphor-icons/react/dist/ssr/UserCircle";
+import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
+import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -89,14 +87,14 @@ export async function DashboardHome() {
           nativeButton={false}
           render={<Link href="/profile" />}
         >
-          <HugeiconsIcon icon={UserCircleIcon} strokeWidth={2} />
+          <AppIcon icon={UserCircleIcon} />
         </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           href="/finance-tracker"
-          icon={Wallet01Icon}
+          icon={WalletIcon}
           label="Total balance"
           value={finance ? formatMoney(finance.totalBalance) : "Unavailable"}
           hint={
@@ -107,7 +105,7 @@ export async function DashboardHome() {
         />
         <Stat
           href="/jobs-scraper"
-          icon={Briefcase01Icon}
+          icon={BriefcaseIcon}
           label="Saved jobs"
           value={jobs ? String(jobs.savedJobCount) : "Unavailable"}
           hint={
@@ -121,7 +119,7 @@ export async function DashboardHome() {
         />
         <Stat
           href="/jobs-scraper"
-          icon={Briefcase01Icon}
+          icon={BriefcaseIcon}
           label="Last job scan"
           value={
             jobs?.lastScannedAt
@@ -136,7 +134,7 @@ export async function DashboardHome() {
         />
         <Stat
           href="/career-profile"
-          icon={UserAccountIcon}
+          icon={IdentificationCardIcon}
           label="Career profile"
           value={career ? `${career.experiences.length} roles` : "Empty"}
           hint={
@@ -202,7 +200,7 @@ export async function DashboardHome() {
                 render={<Link href="/finance-tracker/transactions" />}
               >
                 View more transactions
-                <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+                <AppIcon icon={CaretRightIcon} />
               </Button>
             </CardFooter>
           </Card>
@@ -246,7 +244,7 @@ export async function DashboardHome() {
                 render={<Link href="/jobs-scraper/review" />}
               >
                 View more jobs
-                <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+                <AppIcon icon={CaretRightIcon} />
               </Button>
             </CardFooter>
           </Card>
@@ -258,19 +256,19 @@ export async function DashboardHome() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Shortcut
             href="/resume/resume-tailor"
-            icon={FilePenIcon}
+            icon={FileTextIcon}
             title="Tailor a resume"
             description="Match your profile against a job description."
           />
           <Shortcut
             href="/career-profile"
-            icon={UserAccountIcon}
+            icon={IdentificationCardIcon}
             title="Career profile"
             description="Keep your roles, projects, and skills current."
           />
           <Shortcut
             href="/finance-tracker"
-            icon={Wallet01Icon}
+            icon={WalletIcon}
             title="Log a transaction"
             description="Record income and expenses across wallets."
           />
@@ -291,7 +289,7 @@ function Stat({
   badge?: string | null;
   hint: string;
   href: string;
-  icon: HugeiconsIconProps["icon"];
+  icon: AppIconProps["icon"];
   label: string;
   value: string;
 }) {
@@ -303,7 +301,7 @@ function Stat({
       >
         <CardContent className="grid min-w-0 gap-2">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <HugeiconsIcon icon={icon} strokeWidth={2} className="size-4" />
+            <AppIcon icon={icon} className="size-4" />
             <span className="truncate text-xs">{label}</span>
             {badge && (
               <Badge variant="secondary" className="ml-auto">
@@ -327,7 +325,7 @@ function Shortcut({
 }: {
   description: string;
   href: string;
-  icon: HugeiconsIconProps["icon"];
+  icon: AppIconProps["icon"];
   title: string;
 }) {
   return (
@@ -335,7 +333,7 @@ function Shortcut({
       <Card className="h-full transition-colors group-hover:bg-muted/40">
         <CardContent className="flex items-start gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-            <HugeiconsIcon icon={icon} strokeWidth={2} />
+            <AppIcon icon={icon} />
           </div>
           <div className="grid min-w-0 gap-1">
             <CardTitle>{title}</CardTitle>

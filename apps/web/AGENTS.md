@@ -6,6 +6,8 @@
 - Use Tailwind theme tokens. Do not add arbitrary values or properties. Arbitrary variants are allowed. Add missing tokens in `apps/web/src/app/globals.css`.
 - Run `pnpm lint:tailwind` after Tailwind changes. Use `tailwind-allow-arbitrary` only for a justified same-line exception.
 
+Use Phosphor icons with individual imports from `@phosphor-icons/react/dist/ssr/<IconName>` and the shared `AppIcon` component in `src/components/ui/icon.tsx`. Icons must always use duotone; do not use regular, outline, filled, or other weights. Apply this rule to newly generated shadcn components too.
+
 ## Tests
 
 Tests live in a dedicated `tests/` folder at the same level as `src/`. The `tests/src/` tree mirrors `src/` exactly (`tests/src/features/<feature>/...`), containing only test files.

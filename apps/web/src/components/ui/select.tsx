@@ -2,12 +2,10 @@
 
 import * as React from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
-import {
-  ArrowDown01Icon,
-  ArrowUp01Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import { CaretUpIcon } from "@phosphor-icons/react/dist/ssr/CaretUp";
+import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
+import { AppIcon } from "@/components/ui/icon";
 
 import { cn } from "@/lib/utils";
 
@@ -54,9 +52,8 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <HugeiconsIcon
-            icon={ArrowDown01Icon}
-            strokeWidth={2}
+          <AppIcon
+            icon={CaretDownIcon}
             className="pointer-events-none size-4 text-muted-foreground"
           />
         }
@@ -142,11 +139,7 @@ function SelectItem({
       <SelectPrimitive.ItemIndicator
         render={
           <span className="pointer-events-none absolute right-3 flex size-5 items-center justify-center">
-            <HugeiconsIcon
-              icon={Tick02Icon}
-              strokeWidth={2}
-              className="pointer-events-none"
-            />
+            <AppIcon icon={CheckIcon} className="pointer-events-none" />
           </span>
         }
       />
@@ -180,7 +173,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+      <AppIcon icon={CaretUpIcon} />
     </SelectPrimitive.ScrollUpArrow>
   );
 }
@@ -198,7 +191,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+      <AppIcon icon={CaretDownIcon} />
     </SelectPrimitive.ScrollDownArrow>
   );
 }

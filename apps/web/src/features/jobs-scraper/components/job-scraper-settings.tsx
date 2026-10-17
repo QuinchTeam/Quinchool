@@ -1,12 +1,10 @@
 "use client";
 
-import {
-  Add01Icon,
-  ArrowLeft01Icon,
-  Delete02Icon,
-  SaveIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
+import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr/FloppyDisk";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 
@@ -127,7 +125,7 @@ export function JobScraperSettings() {
               href="/jobs-scraper"
               className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              <AppIcon icon={CaretLeftIcon} className="size-4" />
               Jobs scraper
             </Link>
             <div>
@@ -142,7 +140,7 @@ export function JobScraperSettings() {
             form="job-scraper-settings"
             disabled={saveConfig.isPending}
           >
-            <HugeiconsIcon icon={SaveIcon} strokeWidth={2} />
+            <AppIcon icon={FloppyDiskIcon} />
             {saveConfig.isPending ? "Saving" : "Save settings"}
           </Button>
         </div>
@@ -305,7 +303,7 @@ export function JobScraperSettings() {
             {message}
           </p>
           <Button type="submit" disabled={saveConfig.isPending}>
-            <HugeiconsIcon icon={SaveIcon} strokeWidth={2} />
+            <AppIcon icon={FloppyDiskIcon} />
             Save settings
           </Button>
         </div>
@@ -417,7 +415,7 @@ function EditableCriteria({
                 onChange(items.filter((_, itemIndex) => itemIndex !== index))
               }
             >
-              <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+              <AppIcon icon={TrashIcon} />
             </Button>
           </div>
         ))}
@@ -436,7 +434,7 @@ function EditableCriteria({
           }}
         />
         <Button type="button" variant="outline" onClick={addItem}>
-          <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+          <AppIcon icon={PlusIcon} />
           Add
         </Button>
       </div>

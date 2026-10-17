@@ -1,7 +1,7 @@
 "use client";
 
-import { FloppyDiskIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr/FloppyDisk";
+import { AppIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
@@ -156,7 +156,7 @@ export function CareerProfileForm() {
 
         <div className="sticky bottom-0 flex justify-end border-t bg-background/95 py-4 supports-[backdrop-filter]:backdrop-blur">
           <Button type="submit" disabled={isSaving}>
-            <HugeiconsIcon icon={FloppyDiskIcon} strokeWidth={2} />
+            <AppIcon icon={FloppyDiskIcon} />
             {isSaving ? "Saving..." : "Save career profile"}
           </Button>
         </div>

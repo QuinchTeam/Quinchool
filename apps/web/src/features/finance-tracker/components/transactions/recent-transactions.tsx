@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTransactions } from "@/features/finance-tracker/hooks/use-transactions";
@@ -26,7 +26,7 @@ export function RecentTransactions() {
           render={<Link href="/finance-tracker/transactions" />}
         >
           View history
-          <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+          <AppIcon icon={CaretRightIcon} />
         </Button>
       </div>
       {query.error && (

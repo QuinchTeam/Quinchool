@@ -1,5 +1,6 @@
-import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
+import { AppIcon } from "@/components/ui/icon";
 import { useEffect, useRef, useState } from "react";
 
 import { ModelIcon } from "@/components/shared/model-icon";
@@ -161,10 +162,9 @@ function CanvasTextModelSelector({
               {selectedModel?.name ?? "Select a model"}
             </span>
           </span>
-          <HugeiconsIcon
+          <AppIcon
             className="size-4 shrink-0 opacity-50"
-            icon={ArrowDown01Icon}
-            strokeWidth={2}
+            icon={CaretDownIcon}
           />
         </button>
         {open ? (
@@ -191,11 +191,7 @@ function CanvasTextModelSelector({
                   <ModelIcon className="size-4 shrink-0" modelId={model.id} />
                   <span className="min-w-0 flex-1 truncate">{model.name}</span>
                   {selected ? (
-                    <HugeiconsIcon
-                      className="size-4 shrink-0"
-                      icon={Tick02Icon}
-                      strokeWidth={2}
-                    />
+                    <AppIcon className="size-4 shrink-0" icon={CheckIcon} />
                   ) : null}
                 </button>
               );

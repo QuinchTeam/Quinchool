@@ -1,11 +1,9 @@
 "use client";
 
-import {
-  Delete02Icon,
-  PencilEdit02Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -125,7 +123,7 @@ function ChatRow({
             // Blur fires before click, so commit on pointer down instead.
             onMouseDown={(event) => event.preventDefault()}
           >
-            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
+            <AppIcon icon={CheckIcon} />
           </Button>
         </form>
       </li>
@@ -151,7 +149,7 @@ function ChatRow({
         className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
         onClick={() => setDraft(chat.title ?? "")}
       >
-        <HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={2} />
+        <AppIcon icon={PencilSimpleIcon} />
       </Button>
       <Button
         aria-label={`Delete ${label}`}
@@ -160,7 +158,7 @@ function ChatRow({
         className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
         onClick={onDelete}
       >
-        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        <AppIcon icon={TrashIcon} />
       </Button>
     </li>
   );

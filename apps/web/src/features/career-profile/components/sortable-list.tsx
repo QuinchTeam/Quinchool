@@ -14,8 +14,8 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { DragDropVerticalIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVertical";
+import { AppIcon } from "@/components/ui/icon";
 import { type ComponentProps, type ReactNode, useId } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -72,7 +72,7 @@ export function DragHandle({
       title="Drag to reorder"
       {...props}
     >
-      <HugeiconsIcon icon={DragDropVerticalIcon} strokeWidth={2} />
+      <AppIcon icon={DotsSixVerticalIcon} />
       <span className="sr-only">Reorder {label}</span>
     </Button>
   );

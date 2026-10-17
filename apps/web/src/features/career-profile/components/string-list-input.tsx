@@ -1,8 +1,8 @@
 "use client";
 
 import { arrayMove } from "@dnd-kit/sortable";
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { AppIcon } from "@/components/ui/icon";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { SortableList } from "@/features/career-profile/components/sortable-list";
@@ -32,7 +32,7 @@ function Chip({ onRemove, value }: { onRemove: () => void; value: string }) {
         className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
         onClick={onRemove}
       >
-        <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3" />
+        <AppIcon icon={XIcon} className="size-3" />
         <span className="sr-only">Remove {value}</span>
       </button>
     </span>

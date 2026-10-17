@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  Cancel01Icon,
-  AiBrain01Icon,
-  InformationCircleIcon,
-  MagicWand01Icon,
-  ParagraphIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { BrainIcon } from "@phosphor-icons/react/dist/ssr/Brain";
+import { InfoIcon } from "@phosphor-icons/react/dist/ssr/Info";
+import { MagicWandIcon } from "@phosphor-icons/react/dist/ssr/MagicWand";
+import { ParagraphIcon } from "@phosphor-icons/react/dist/ssr/Paragraph";
+import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import {
   Handle,
   type NodeTypes,
@@ -40,8 +38,8 @@ export const NODE_DRAG_MIME = "application/reactflow-type";
 // canvas and the nodeTypes map all stay in sync. Add a new card = add a row.
 export const NODE_CARDS = [
   { type: "prompt", label: "Prompt", icon: ParagraphIcon },
-  { type: "enhancer", label: "Enhancer", icon: MagicWand01Icon },
-  { type: "textGenerator", label: "Text Generator", icon: AiBrain01Icon },
+  { type: "enhancer", label: "Enhancer", icon: MagicWandIcon },
+  { type: "textGenerator", label: "Text Generator", icon: BrainIcon },
 ] as const;
 
 export type NodeCardType = (typeof NODE_CARDS)[number]["type"];
@@ -142,7 +140,7 @@ function NodeInfoPopover({ id }: { id: string }) {
           />
         }
       >
-        <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} />
+        <AppIcon icon={InfoIcon} />
         <span className="sr-only">Node debug info</span>
       </PopoverTrigger>
       <PopoverContent align="end" className="nowheel grid w-64 gap-2 text-xs">
@@ -169,7 +167,7 @@ export function NodeShell({
 }: {
   active?: boolean;
   id: string;
-  icon: HugeiconsIconProps["icon"];
+  icon: AppIconProps["icon"];
   label: string;
   children: ReactNode;
 }) {
@@ -183,7 +181,7 @@ export function NodeShell({
     >
       <Handle type="target" position={Position.Left} />
       <div className="flex items-center gap-2 border-b px-3 py-2">
-        <HugeiconsIcon icon={icon} size={16} strokeWidth={2} />
+        <AppIcon icon={icon} size={16} />
         <span className="text-sm font-medium">{label}</span>
         <div className="ml-auto flex items-center">
           <NodeInfoPopover id={id} />
@@ -195,7 +193,7 @@ export function NodeShell({
             size="icon-sm"
             onClick={() => deleteElements({ nodes: [{ id }] })}
           >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+            <AppIcon icon={XIcon} />
             <span className="sr-only">Remove {label} node</span>
           </Button>
         </div>

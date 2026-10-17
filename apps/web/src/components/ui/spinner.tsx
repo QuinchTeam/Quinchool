@@ -1,12 +1,11 @@
-import { Loading03Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr/CircleNotch";
+import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
-function Spinner({ className, ...props }: Omit<HugeiconsIconProps, "icon">) {
+function Spinner({ className, ...props }: Omit<AppIconProps, "icon">) {
   return (
-    <HugeiconsIcon
-      icon={Loading03Icon}
-      strokeWidth={2}
+    <AppIcon
+      icon={CircleNotchIcon}
       role="status"
       aria-label="Loading"
       className={cn("size-5 animate-spin", className)}
