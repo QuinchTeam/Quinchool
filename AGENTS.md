@@ -21,7 +21,8 @@ Each app has its own `AGENTS.md` with its file/folder conventions — check `app
 ## Tooling
 
 - Use pnpm only. Install from the repo root; add app dependencies with `pnpm --filter @quinchool/<app> add <package>`.
-- Never run `pnpm format` or `biome format --write` without explicit file paths.
+- `apps/web` uses Vite+ (`vp`) for lint, fmt, check, and test; Next.js still owns dev and build. Config lives in `apps/web/vite.config.ts`.
+- Never run `vp fmt` or `vp check --fix` without explicit file paths.
 
 ## Deployment
 

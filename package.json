@@ -15,8 +15,9 @@
     "infra:down": "docker compose down",
     "lint": "pnpm --filter @quinchool/web lint",
     "lint:tailwind": "pnpm --filter @quinchool/web lint:tailwind",
-    "test:tailwind": "pnpm --filter @quinchool/web test:tailwind",
-    "prepare": "husky"
+    "prepare": "husky",
+    "check": "pnpm --filter @quinchool/web check",
+    "test": "pnpm --filter @quinchool/web test"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

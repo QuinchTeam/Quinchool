@@ -21,8 +21,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Test Tailwind arbitrary-value guard
-        run: pnpm test:tailwind
       - name: Check for Tailwind arbitrary values
         run: pnpm lint:tailwind
 
@@ -51,12 +49,8 @@ jobs:
       - run: python -m pytest tests -q
         working-directory: apps/ai
       - run: pnpm --filter @quinchool/web exec next typegen
-      - run: pnpm --filter @quinchool/web exec tsc --noEmit
-      - name: Compile and test web telemetry
-        working-directory: apps/web
-        run: |
-          pnpm exec tsc --module commonjs --moduleResolution node --target es2020 --esModuleInterop --skipLibCheck --rewriteRelativeImportExtensions --outDir .next/observability-tests tests/src/lib/observability/logger.test.ts tests/src/lib/observability/trace-propagation.test.ts tests/src/lib/observability/telemetry.test.ts tests/src/lib/observability/operation.test.ts tests/src/lib/observability/trace-exporter.test.ts
-          pnpm exec node --test ".next/observability-tests/tests/src/lib/observability/*.test.js"
+      - run: pnpm --filter @quinchool/web check
+      - run: pnpm --filter @quinchool/web test
       - name: Validate production collector
         run: |
           docker build --file infra/otel-collector/Dockerfile --tag quinchool-otel-validation .
