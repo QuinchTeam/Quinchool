@@ -98,3 +98,12 @@ development instrumentation uses a no-network transport while exporting to
 the local shared collector. Anonymous delivery uses the bounded public relay
 and is marked untrusted. Full domain coverage, privacy rules and delivery
 limits are listed in [observability setup](observability.md#featuredomain-coverage).
+
+## OpenTelemetry-first logging
+
+OpenTelemetry is now the only destination for web logs and traces. The shared
+logger exports OTLP records directly instead of going through `Sentry.logger`,
+and `enableLogs` is off in every runtime. Sentry still samples spans, but
+transactions are dropped before sending; browser transactions go only to the
+API relay, and edge records no traces. Sentry receives captured errors, error
+replays and feedback only; session replays without an error are no longer recorded.

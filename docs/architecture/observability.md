@@ -2,7 +2,7 @@
 
 ## Existing coverage
 
-- Web: domain requests and local workflows produce logs, spans and error summaries; Sentry retains production diagnostics and replay.
+- Web: domain requests and local workflows export logs, spans and error summaries to the shared OpenTelemetry collector; Sentry receives errors only, with error replays and feedback.
 - API/AI: domain operations and request outcomes export correlated OTLP logs and traces when the collector endpoint is configured.
 - AI: Langfuse records LLM observations when its credentials are configured.
 - Cloud Run captures service stdout/stderr in Cloud Logging.
@@ -63,22 +63,26 @@ Production browser and Node Sentry tracing now sends W3C `traceparent` to
 extracts this context and propagates it to AI. The API's existing CORS
 configuration reflects requested headers, including tracing headers.
 
-When `OTEL_EXPORTER_OTLP_ENDPOINT` is configured, production web Node spans
-also export through an additional processor on Sentry's existing OpenTelemetry
-provider. Browser errors, replay, feedback, and browser traces retain their
-production Sentry transport. Development uses Sentry instrumentation with a
+When `OTEL_EXPORTER_OTLP_ENDPOINT` is configured, web Node spans export through
+an OTLP processor on Sentry's OpenTelemetry provider. Sentry samples the spans
+but drops every transaction before sending, so traces reach only the collector;
+browser traces likewise go only to the relay below. Browser errors, error
+replays and feedback keep their production Sentry transport; session replays
+without an error are not recorded. Development uses Sentry instrumentation with a
 local no-network transport: relay hooks still run, but nothing goes to Sentry.
 Development traces are sampled at 100%; production remains at 10%.
 The existing 10% web trace sampling remains in place, so this does not promise
 every request will appear in a trace.
 
-The existing PDF failure log now uses structured Sentry logging in production
-and console output in development. Build-tool CLI diagnostics remain terminal
+The shared web logger (`logInfo`, `logWarn`, `logError`) writes OTLP log records
+directly, and prints to the console in development. Sentry logging is disabled
+in every runtime. Build-tool CLI diagnostics remain terminal
 output. See [the web logging audit](web-logging-audit.md) for existing coverage
 and handled-error behavior.
 
-Sentry's error and log hooks mirror small summaries to the shared collector.
-Node/Edge summaries use OTLP logs when the endpoint is configured, with
+Sentry's error hook mirrors a small summary of each error to the shared
+collector, next to the logger's records.
+Node/Edge records use OTLP logs when the endpoint is configured, with
 structured stdout when it is absent.
 Browsers send summaries and sampled transaction spans to the session-protected
 `POST /observability/web` API endpoint. It validates IDs, lengths, times and
