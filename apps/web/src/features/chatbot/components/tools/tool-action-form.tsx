@@ -34,7 +34,7 @@ export function ToolActionForm({
 
   return (
     <Card>
-      <form onSubmit={handleSubmit}>
+      <form className="contents" onSubmit={handleSubmit}>
         <CardHeader>
           <h3 className="font-medium">{action.title}</h3>
           {action.description ? (

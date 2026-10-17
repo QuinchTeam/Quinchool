@@ -37,7 +37,7 @@ export function ToolsHub() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href} className="group block">
-            <Card className="h-full transition-colors group-hover:bg-muted/40">
+            <Card className="h-full transition-colors group-hover:bg-secondary">
               <CardContent className="flex items-start gap-4">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
                   <AppIcon icon={tool.icon} />

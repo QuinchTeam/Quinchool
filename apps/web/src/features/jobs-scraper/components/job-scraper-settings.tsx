@@ -118,7 +118,7 @@ export function JobScraperSettings() {
 
   return (
     <main className="min-h-full">
-      <header className="border-b bg-background">
+      <header className="border-b">
         <div className="flex w-full flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="grid gap-2">
             <Link

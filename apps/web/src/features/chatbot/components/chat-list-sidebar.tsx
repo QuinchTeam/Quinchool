@@ -38,7 +38,7 @@ export function ChatListSidebar({
       aria-label="Chats"
       aria-hidden={!isOpen}
       className={cn(
-        "shrink-0 overflow-hidden border-l bg-background transition-all duration-200",
+        "shrink-0 overflow-hidden border-l transition-all duration-200",
         isOpen ? "w-72" : "w-0",
       )}
     >

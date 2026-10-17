@@ -154,7 +154,7 @@ export function CareerProfileForm() {
           renderItem={(index) => <ProjectEditor index={index} />}
         />
 
-        <div className="sticky bottom-0 flex justify-end border-t bg-background/95 py-4 supports-[backdrop-filter]:backdrop-blur">
+        <div className="sticky bottom-0 flex justify-end border-t bg-card/95 py-4 supports-[backdrop-filter]:backdrop-blur">
           <Button type="submit" disabled={isSaving}>
             <AppIcon icon={FloppyDiskIcon} />
             {isSaving ? "Saving..." : "Save career profile"}

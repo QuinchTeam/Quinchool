@@ -90,7 +90,6 @@ export function AuthLink({
       variant="link"
       size="sm"
       nativeButton={false}
-      className="px-0"
       render={<Link href={href} />}
     >
       {children}

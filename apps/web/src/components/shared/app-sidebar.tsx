@@ -120,8 +120,8 @@ export function AppSidebar() {
     : "?";
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="flex-row items-center justify-between border-b border-sidebar-border group-data-[collapsible=icon]:justify-center">
+    <Sidebar collapsible="icon" className="px-4 py-8">
+      <SidebarHeader className="flex-row items-center justify-between group-data-[collapsible=icon]:justify-center">
         <div className="relative hidden size-12 shrink-0 items-center justify-center group-data-[collapsible=icon]:flex">
           <Image
             src="/quinchool-icon-v2.webp"
@@ -140,20 +140,15 @@ export function AppSidebar() {
             height={32}
             className="size-8 shrink-0"
           />
-          <span className="truncate font-display text-2xl font-bold">
+          <span className="truncate font-display text-lg font-bold uppercase">
             Quinchool
           </span>
         </div>
         <SidebarTrigger className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
-        {NAV_GROUPS.map((group, groupIndex) => (
-          <SidebarGroup
-            key={group.label ?? "main"}
-            className={
-              groupIndex === 0 ? undefined : "border-t border-sidebar-border"
-            }
-          >
+        {NAV_GROUPS.map((group) => (
+          <SidebarGroup key={group.label ?? "main"}>
             {group.label && (
               <SidebarGroupLabel className="h-6 uppercase tracking-wider text-muted-foreground">
                 {group.label}
@@ -176,7 +171,7 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter>
         {isPending ? (
           <div className="flex h-16 items-center gap-2 px-3">
             <Skeleton className="size-8 shrink-0 rounded-full" />

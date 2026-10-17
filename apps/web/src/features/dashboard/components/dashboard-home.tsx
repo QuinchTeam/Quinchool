@@ -181,18 +181,13 @@ export async function DashboardHome() {
               ) : (
                 <p className="text-sm text-muted-foreground">
                   No transactions yet.{" "}
-                  <Link
-                    className="text-primary underline underline-offset-4"
-                    href="/finance-tracker"
-                  >
+                  <Link className="link-underline" href="/finance-tracker">
                     Add one
                   </Link>
                 </p>
               )}
             </CardContent>
-            {/* mt-auto pins the action to the bottom, so both cards' buttons
-                line up however long their lists are. */}
-            <CardFooter className="mt-auto border-t">
+            <CardFooter>
               <Button
                 variant="ghost"
                 size="sm"
@@ -227,16 +222,13 @@ export async function DashboardHome() {
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Nothing new.{" "}
-                  <Link
-                    className="text-primary underline underline-offset-4"
-                    href="/jobs-scraper"
-                  >
+                  <Link className="link-underline" href="/jobs-scraper">
                     Run a scan
                   </Link>
                 </p>
               )}
             </CardContent>
-            <CardFooter className="mt-auto border-t">
+            <CardFooter>
               <Button
                 variant="ghost"
                 size="sm"
@@ -297,7 +289,7 @@ function Stat({
     <Link href={href} className="group block">
       <Card
         size="sm"
-        className="h-full transition-colors group-hover:bg-muted/40"
+        className="h-full transition-colors group-hover:bg-secondary"
       >
         <CardContent className="grid min-w-0 gap-2">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -330,7 +322,7 @@ function Shortcut({
 }) {
   return (
     <Link href={href} className="group block">
-      <Card className="h-full transition-colors group-hover:bg-muted/40">
+      <Card className="h-full transition-colors group-hover:bg-secondary">
         <CardContent className="flex items-start gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
             <AppIcon icon={icon} />

@@ -43,7 +43,7 @@ export function JobReview() {
 
   return (
     <main className="min-h-full">
-      <header className="border-b bg-background">
+      <header className="border-b">
         <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid gap-2">
             <Link

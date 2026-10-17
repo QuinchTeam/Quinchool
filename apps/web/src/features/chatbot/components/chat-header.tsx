@@ -23,7 +23,7 @@ export function ChatHeader({
   title: string | null;
 }) {
   return (
-    <header className="border-b bg-background px-6 py-3">
+    <header className="border-b px-6 py-3">
       <div className="flex w-full items-end justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-end gap-3">
           <div className="w-full max-w-xs">

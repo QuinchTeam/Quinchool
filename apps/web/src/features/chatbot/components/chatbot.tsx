@@ -14,8 +14,8 @@ export function Chatbot({ chatId }: { chatId?: string }) {
   const [isListOpen, setIsListOpen] = useState(false);
 
   return (
-    <div className="flex h-svh min-h-0">
-      <div className="flex min-w-0 flex-1 flex-col bg-background">
+    <div className="flex h-full min-h-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <ChatHeader
           isListOpen={isListOpen}
           modelId={chat.modelId}
