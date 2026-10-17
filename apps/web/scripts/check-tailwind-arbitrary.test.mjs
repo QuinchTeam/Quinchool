@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import test from "node:test";
+import { test } from "vite-plus/test";
 import { fileURLToPath } from "node:url";
 
 const CHECKER = resolve(

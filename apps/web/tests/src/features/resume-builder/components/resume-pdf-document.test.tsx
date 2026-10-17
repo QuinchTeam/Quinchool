@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vite-plus/test";
 import { renderToBuffer } from "@react-pdf/renderer";
 
 import { ResumePdfDocument } from "@/features/resume-builder/components/resume-pdf-document";

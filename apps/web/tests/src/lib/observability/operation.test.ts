@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mock, test } from "node:test";
+import { test, vi } from "vite-plus/test";
 import * as Sentry from "@sentry/nextjs";
 import { localTransport } from "../../../../src/lib/observability/local-transport.ts";
 import {
@@ -61,8 +61,8 @@ test("local instrumentation exports real spans and safe errors without a Sentry 
       return event;
     },
   });
-  mock.method(console, "info", () => {});
-  mock.method(console, "error", () => {});
+  vi.spyOn(console, "info").mockImplementation(() => {});
+  vi.spyOn(console, "error").mockImplementation(() => {});
   try {
     assert.equal(
       await observeOperation("resume-builder.pdf-render", async () => 42),
@@ -94,17 +94,19 @@ test("local instrumentation exports real spans and safe errors without a Sentry 
     );
     assert.ok(errors[0].exception?.values?.[0].stacktrace?.frames?.length);
   } finally {
-    mock.restoreAll();
+    vi.restoreAllMocks();
     await Sentry.close();
   }
 });
 
 test("API failure responses and request options remain unchanged; aborts are warnings", async () => {
-  const logs = mock.method(Sentry.logger, "warn", () => {});
-  mock.method(console, "warn", () => {});
-  mock.method(console, "info", () => {});
+  const logs = vi.spyOn(Sentry.logger, "warn").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  vi.spyOn(console, "info").mockImplementation(() => {});
   const response = new Response("private response", { status: 422 });
-  const fetchMock = mock.method(globalThis, "fetch", async () => response);
+  const fetchMock = vi
+    .spyOn(globalThis, "fetch")
+    .mockImplementation(async () => response);
   try {
     const init = {
       method: "POST",
@@ -118,21 +120,18 @@ test("API failure responses and request options remain unchanged; aborts are war
       ),
       response,
     );
-    assert.equal(fetchMock.mock.calls[0].arguments[1], init);
-    assert.equal(
-      logs.mock.calls[0].arguments[0],
-      "finance-tracker.post.rejected",
-    );
+    assert.equal(fetchMock.mock.calls[0][1], init);
+    assert.equal(logs.mock.calls[0][0], "finance-tracker.post.rejected");
     const abort = new DOMException("cancelled", "AbortError");
-    fetchMock.mock.mockImplementation(async () => {
+    fetchMock.mockImplementation(async () => {
       throw abort;
     });
     await assert.rejects(
       apiFetch("http://localhost:3001/chatbot"),
       (error) => error === abort,
     );
-    assert.equal(logs.mock.calls[1].arguments[0], "chatbot.get.cancelled");
+    assert.equal(logs.mock.calls[1][0], "chatbot.get.cancelled");
   } finally {
-    mock.restoreAll();
+    vi.restoreAllMocks();
   }
 });

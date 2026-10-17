@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vite-plus/test";
 import { apiTracePropagationTargets } from "../../../../src/lib/observability/trace-propagation.ts";
 
 test("trace headers reach only the configured API base and its paths", () => {
