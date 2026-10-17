@@ -15,21 +15,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
-  --color-destructive-edge: var(--destructive-edge);
-  --color-edge: var(--edge);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -38,11 +29,11 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-primary-light: var(--primary-light);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --radius-xs: calc(var(--radius) * 0.3);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -50,7 +41,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  /* ponytail: 3px base (default 4px) compacts every p/m/gap/h/w/size utility at once */
   --spacing: 0.1875rem;
   --spacing-a4-width: 210mm;
   --spacing-a4-height: 297mm;
@@ -58,106 +48,52 @@
   --spacing-finance-dialog: 85dvh;
 }
 
-/* Neutrals per mode: page, surface, fill, line, ring. Page is the body;
-   surface is the raised sheet (card, popover, sidebar) and must stay a visible
-   step away from it. Controls read as raised via --card, recessed via
-   bg-input/30. --primary is reserved for brand fills, never for focus. */
 :root {
-  --neutral-page: #eef1f2;
-  --neutral-surface: #ffffff;
-  --neutral-fill: #e4eaeb;
-  --neutral-solid: #d5dedf;
-  --neutral-line: #c3cdcf;
-  --neutral-ring: #9ca8ab;
-  --neutral-soft: #5c6e72;
-  --neutral-strong: #161b1d;
-  --neutral-ink: #090b0c;
+  --background: #eef1f2;
+  --foreground: #090b0c;
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
 
-  --background: var(--neutral-page);
-  --foreground: var(--neutral-ink);
-  --card: var(--neutral-surface);
-  --card-foreground: var(--neutral-ink);
-  --popover: var(--neutral-surface);
-  --popover-foreground: var(--neutral-ink);
-  --sidebar: var(--neutral-surface);
-  --sidebar-foreground: var(--neutral-ink);
-
-  --primary: #00986a;
-  /* --primary mixed with 20% white */
-  --primary-light: #33ad88;
+  --primary: #0a7d75;
   --primary-foreground: #f0fdfa;
-  --secondary: var(--neutral-solid);
-  --secondary-foreground: var(--neutral-strong);
-  --muted: var(--neutral-fill);
-  --muted-foreground: var(--neutral-soft);
-  --accent: var(--neutral-fill);
-  --accent-foreground: var(--neutral-strong);
-  --destructive: #e7000b;
-  /* Outer rings on raised buttons: gray-black for neutrals, dark red for destructive */
-  --edge: var(--neutral-strong);
-  --destructive-edge: #82181a;
+  --secondary: #d5dedf;
+  --secondary-foreground: #161b1d;
+  --muted: #e4eaeb;
+  --muted-foreground: #5c6e72;
+  --accent: var(--muted);
+  --accent-foreground: var(--secondary-foreground);
+  --destructive: #cc2936;
 
-  --border: color-mix(in srgb, var(--neutral-line) 20%, transparent);
-  --input: var(--border);
-  --ring: var(--neutral-ring);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
+  --border: #090b0c1a;
+  --input: #090b0c26;
+  --ring: #9ca8ab;
   --sidebar-accent: var(--accent);
   --sidebar-accent-foreground: var(--accent-foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
-
-  --chart-1: #46ecd5;
-  --chart-2: #00bba7;
-  --chart-3: #009689;
-  --chart-4: #019662;
-  --chart-5: #005f5a;
   --radius: 0.875rem;
 }
 
 .dark {
-  --black: #000000;
-  --neutral-page: #171717;
-  --neutral-surface: #151515;
-  --neutral-fill: #202020;
-  --neutral-solid: #292929;
-  --neutral-line: #2d3436;
-  --neutral-ring: #67787c;
-  --neutral-soft: #9ca8ab;
-  --neutral-strong: #f9fbfb;
+  --background: #151a1b;
+  --foreground: #f9fbfb;
+  --card: #131718;
 
-  --background: var(--neutral-page);
-  --foreground: var(--neutral-strong);
-  --card: var(--neutral-surface);
-  --card-foreground: var(--neutral-strong);
-  --popover: var(--neutral-surface);
-  --popover-foreground: var(--neutral-strong);
-  --sidebar: var(--neutral-surface);
-  --sidebar-foreground: var(--neutral-strong);
+  --primary: #2ec4b6;
+  --primary-foreground: #042f2e;
+  --secondary: #262d2e;
+  --secondary-foreground: var(--foreground);
+  --muted: #1d2324;
+  --muted-foreground: #9ca8ab;
+  --destructive: #fb6a74;
 
-  --primary: #00a674;
-  /* --primary mixed with 20% white */
-  --primary-light: #33b890;
-  --primary-foreground: #f0fdfa;
-  --secondary: var(--neutral-solid);
-  --secondary-foreground: var(--neutral-strong);
-  --muted: var(--neutral-fill);
-  --muted-foreground: var(--neutral-soft);
-  --accent: var(--neutral-fill);
-  --accent-foreground: var(--neutral-strong);
-  --destructive: #ff6467;
-  --edge: #0f1213;
-  --destructive-edge: #330a0c;
-
-  --border: color-mix(in srgb, var(--neutral-line) 20%, transparent);
-  --input: var(--border);
-  --ring: var(--neutral-ring);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  --border: #f9fbfb1a;
+  --input: #f9fbfb26;
+  --ring: #67787c;
 }
 
 @layer base {
