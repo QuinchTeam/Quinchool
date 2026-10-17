@@ -124,7 +124,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="flex-row items-center justify-between border-b border-sidebar-border group-data-[collapsible=icon]:justify-center">
-        <div className="relative hidden size-8 shrink-0 items-center justify-center group-data-[collapsible=icon]:flex">
+        <div className="relative hidden size-12 shrink-0 items-center justify-center group-data-[collapsible=icon]:flex">
           <Image
             src="/quinchool-icon-v2.webp"
             alt=""
@@ -166,7 +166,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     isActive={isRouteActive(pathname, item.href, item.match)}
-                    className="text-muted-foreground data-active:border data-active:border-border data-active:bg-secondary data-active:bg-clip-border data-active:text-secondary-foreground data-active:outline-2 data-active:outline-solid data-active:outline-edge data-active:hover:bg-secondary/80"
+                    className="text-muted-foreground data-active:bg-secondary data-active:text-secondary-foreground data-active:hover:bg-secondary/80"
                     render={<Link href={item.href} />}
                   >
                     <HugeiconsIcon icon={item.icon} strokeWidth={2} />
@@ -180,8 +180,8 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         {isPending ? (
-          <div className="flex h-12 items-center gap-2 p-2">
-            <Skeleton className="size-6 shrink-0 rounded-full" />
+          <div className="flex h-16 items-center gap-2 px-3">
+            <Skeleton className="size-8 shrink-0 rounded-full" />
             <div className="flex flex-1 flex-col gap-1.5 group-data-[collapsible=icon]:hidden">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-3 w-28" />

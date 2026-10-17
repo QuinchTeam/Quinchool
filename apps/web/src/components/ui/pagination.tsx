@@ -75,7 +75,7 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("pl-2!", className)}
+      className={className}
       {...props}
     >
       <HugeiconsIcon
@@ -97,7 +97,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("pr-2!", className)}
+      className={className}
       {...props}
     >
       <span className="hidden sm:block">{text}</span>
@@ -119,7 +119,7 @@ function PaginationEllipsis({
       aria-hidden
       data-slot="pagination-ellipsis"
       className={cn(
-        "flex size-9 items-center justify-center [&_svg:not([class*='size-'])]:size-4",
+        "flex size-14 items-center justify-center [&_svg:not([class*='size-'])]:size-5",
         className,
       )}
       {...props}
