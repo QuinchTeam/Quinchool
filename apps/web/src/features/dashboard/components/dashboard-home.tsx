@@ -14,7 +14,12 @@ import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyContent, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyContent,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
