@@ -47,6 +47,7 @@ export function WalletGrid({ wallets }: { wallets: Wallet[] }) {
   return (
     <DndContext
       id={id}
+      autoScroll={false}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={dragEnd}

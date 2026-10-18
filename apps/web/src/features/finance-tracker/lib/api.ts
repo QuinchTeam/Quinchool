@@ -15,7 +15,7 @@ export async function financeRequest<T>(
   return (await financeEnvelopeRequest<T>(path, init)).data;
 }
 
-/** For list routes, whose `meta` carries the pagination cursor. */
+/** For list routes, whose `meta` carries pagination details. */
 export async function financeEnvelopeRequest<T, M = Record<string, unknown>>(
   path = "",
   init: RequestInit = {},

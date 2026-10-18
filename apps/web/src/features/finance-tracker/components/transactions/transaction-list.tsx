@@ -1,5 +1,16 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { AppIcon } from "@/components/ui/icon";
 import type { Transaction } from "@/features/finance-tracker/lib/types";
+import { TransactionsLoading } from "../shared/finance-loading";
+import { TransactionDialog } from "./transaction-dialog";
 import { TransactionRow } from "./transaction-row";
 
 export function TransactionList({
@@ -9,9 +20,27 @@ export function TransactionList({
 }) {
   if (!transactions.length) {
     return (
-      <p className="py-10 text-center text-sm text-muted-foreground">
-        No transactions yet.
-      </p>
+      // Laid over an invisible skeleton so empty, loading and five-row states share one height.
+      <div className="relative">
+        <div aria-hidden className="invisible">
+          <TransactionsLoading />
+        </div>
+        <Empty className="absolute inset-0 border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <AppIcon icon={ReceiptIcon} />
+            </EmptyMedia>
+            <EmptyTitle>No Transactions Yet</EmptyTitle>
+            <EmptyDescription>
+              Record income or an expense to start tracking where your money
+              goes.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <TransactionDialog />
+          </EmptyContent>
+        </Empty>
+      </div>
     );
   }
   return (
@@ -20,15 +49,5 @@ export function TransactionList({
         <TransactionRow key={transaction.id} transaction={transaction} />
       ))}
     </ul>
-  );
-}
-
-export function TransactionsLoading() {
-  return (
-    <output className="grid gap-3 py-4" aria-label="Loading transactions">
-      {[1, 2, 3].map((row) => (
-        <Skeleton key={row} className="h-16 w-full rounded-sm" />
-      ))}
-    </output>
   );
 }

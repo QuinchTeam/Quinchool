@@ -1,6 +1,18 @@
 "use client";
 
 import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { LockKeyIcon } from "@phosphor-icons/react/dist/ssr/LockKey";
+import { SignInIcon } from "@phosphor-icons/react/dist/ssr/SignIn";
+import { WarningCircleIcon } from "@phosphor-icons/react/dist/ssr/WarningCircle";
+import { WifiSlashIcon } from "@phosphor-icons/react/dist/ssr/WifiSlash";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { AppIcon } from "@/components/ui/icon";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -40,23 +52,51 @@ export function FinanceQueryError({
     }
   }
 
+  // Anything that isn't an API response never reached the server.
+  const offline = !(error instanceof ApiError);
+  const title = expired
+    ? "Session Expired"
+    : offline
+      ? "Can't Reach the Server"
+      : "Something Went Wrong";
+  const description = expired
+    ? "Sign in again to keep tracking your finances."
+    : error.message;
+
   return (
-    <div className="flex flex-wrap items-center gap-3 py-4" role="alert">
-      <p className="text-sm text-destructive">
-        {expired ? "Your session expired." : error.message}
-      </p>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={pending}
-        onClick={expired ? loginAgain : retry}
-      >
-        <AppIcon icon={ArrowClockwiseIcon} />
-        {expired ? "Sign in again" : "Retry"}
-      </Button>
-      {signOutError && (
-        <p className="text-sm text-destructive">{signOutError}</p>
-      )}
-    </div>
+    <Empty
+      role="alert"
+      className="border border-dashed border-destructive/30 bg-destructive/5"
+    >
+      <EmptyHeader>
+        <EmptyMedia
+          variant="icon"
+          className="bg-destructive/10 text-destructive"
+        >
+          <AppIcon
+            icon={
+              expired
+                ? LockKeyIcon
+                : offline
+                  ? WifiSlashIcon
+                  : WarningCircleIcon
+            }
+          />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{signOutError || description}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={expired ? loginAgain : retry}
+        >
+          <AppIcon icon={expired ? SignInIcon : ArrowClockwiseIcon} />
+          {expired ? "Sign in again" : "Retry"}
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }

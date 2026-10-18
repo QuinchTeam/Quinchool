@@ -150,7 +150,7 @@ export function WalletForm({
                   <button
                     key={color}
                     type="button"
-                    className="size-8 rounded-sm border-2 border-transparent outline-offset-2 aria-pressed:border-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                    className="size-12 rounded-sm border-2 border-transparent outline-offset-2 aria-pressed:border-foreground focus-visible:outline-2 focus-visible:outline-ring"
                     style={{ backgroundColor: color }}
                     aria-label={`Color ${color}`}
                     title={color}
@@ -158,14 +158,21 @@ export function WalletForm({
                     onClick={() => field.onChange(color)}
                   />
                 ))}
-                <Input
-                  id={`${prefix}-color`}
-                  type="color"
-                  className="h-8 w-12 cursor-pointer p-1"
-                  {...field}
-                  title="Custom color"
-                  aria-label="Custom color"
-                />
+                {/* Native swatch padding differs per browser, so draw our own and lay the picker over it. */}
+                <span className="relative flex size-12 shrink-0 items-center justify-center rounded-sm border p-1 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/25">
+                  <span
+                    className="size-full rounded-xs"
+                    style={{ backgroundColor: field.value }}
+                  />
+                  <input
+                    id={`${prefix}-color`}
+                    type="color"
+                    className="absolute inset-0 size-full cursor-pointer opacity-0"
+                    {...field}
+                    title="Custom color"
+                    aria-label="Custom color"
+                  />
+                </span>
               </div>
             )}
           />

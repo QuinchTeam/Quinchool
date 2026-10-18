@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFinanceUserId } from "@/features/finance-tracker/components/shared/finance-scope";
+import { useFinanceScope } from "@/features/finance-tracker/components/shared/finance-scope";
 import { financeRequest } from "@/features/finance-tracker/lib/api";
 import {
   financeKeys,
@@ -13,11 +13,11 @@ import type {
 } from "@/features/finance-tracker/lib/types";
 
 export function useFinanceOverview() {
-  return useQuery(overviewOptions(useFinanceUserId()));
+  return useQuery(overviewOptions(useFinanceScope()));
 }
 
 export function useSaveWallet() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ id, values }: { id?: string; values: WalletInput }) =>
@@ -31,7 +31,7 @@ export function useSaveWallet() {
 }
 
 export function useDeleteWallet() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
@@ -42,7 +42,7 @@ export function useDeleteWallet() {
 }
 
 export function useReorderWallets() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   const queryKey = financeKeys.overview(userId);
   return useMutation({

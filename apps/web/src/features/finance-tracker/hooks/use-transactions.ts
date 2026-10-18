@@ -1,13 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFinanceUserId } from "@/features/finance-tracker/components/shared/finance-scope";
+import { useFinanceScope } from "@/features/finance-tracker/components/shared/finance-scope";
 import { financeRequest } from "@/features/finance-tracker/lib/api";
 import {
   financeKeys,
+  summaryOptions,
   transactionsOptions,
 } from "@/features/finance-tracker/lib/queries";
 import type {
+  SummaryPeriod,
   TransactionFilters,
   TransactionInput,
   TransferInput,
@@ -15,16 +17,20 @@ import type {
 
 export function useTransactions(
   filters: TransactionFilters = {},
-  cursor: string | null = null,
+  page = 1,
   limit = 20,
 ) {
   return useQuery(
-    transactionsOptions(useFinanceUserId(), filters, cursor, limit),
+    transactionsOptions(useFinanceScope(), filters, page, limit),
   );
 }
 
+export function useSummary(period: SummaryPeriod) {
+  return useQuery(summaryOptions(useFinanceScope(), period));
+}
+
 export function useSaveTransaction() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ id, values }: { id?: string; values: TransactionInput }) =>
@@ -41,7 +47,7 @@ export function useSaveTransaction() {
 }
 
 export function useDeleteTransaction() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
@@ -52,7 +58,7 @@ export function useDeleteTransaction() {
 }
 
 export function useCreateTransfer() {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (values: TransferInput) =>

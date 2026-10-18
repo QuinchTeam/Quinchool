@@ -1,7 +1,7 @@
 "use client";
 
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { AppIcon } from "@/components/ui/icon";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -49,16 +49,16 @@ export function TransactionDialog({
           />
         }
       >
-        <AppIcon icon={transaction ? PencilSimpleIcon : PlusIcon} />
+        <AppIcon icon={transaction ? PencilSimpleIcon : PlusCircleIcon} />
         {!compact && "Add transaction"}
       </DialogTrigger>
       <DialogContent
-        className="max-h-finance-dialog overflow-y-auto rounded-md"
+        className="max-h-finance-dialog overflow-y-auto"
         showCloseButton={!pending}
       >
         <DialogHeader>
           <DialogTitle>
-            {transaction ? "Edit transaction" : "Add transaction"}
+            {transaction ? "Edit Transaction" : "Add Transaction"}
           </DialogTitle>
         </DialogHeader>
         {open && (

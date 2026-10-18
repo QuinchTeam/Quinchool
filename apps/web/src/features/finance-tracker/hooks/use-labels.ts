@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useFinanceUserId } from "@/features/finance-tracker/components/shared/finance-scope";
+import { useFinanceScope } from "@/features/finance-tracker/components/shared/finance-scope";
 import { financeRequest } from "@/features/finance-tracker/lib/api";
 import { financeKeys } from "@/features/finance-tracker/lib/queries";
 import type {
@@ -11,7 +11,7 @@ import type {
 } from "@/features/finance-tracker/lib/types";
 
 export function useFinanceLabels(type: TransactionType, search: string) {
-  const userId = useFinanceUserId();
+  const userId = useFinanceScope();
   const [debounced, setDebounced] = useState(search);
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(search), 250);

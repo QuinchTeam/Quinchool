@@ -35,6 +35,7 @@ export function WalletCard({
     transform,
     transition,
     isDragging,
+    active,
   } = useSortable({ id: wallet.id, disabled });
   const icon =
     wallet.type === "CASH"
@@ -43,22 +44,47 @@ export function WalletCard({
         ? WalletIcon
         : BankIcon;
 
+  const side = isDragging
+    ? wallet.color
+    : `color-mix(in srgb, ${wallet.color} 25%, transparent)`;
+
   return (
     <article
       ref={setNodeRef}
+      data-wallet-dragging={isDragging || undefined}
       className={cn(
-        "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4",
-        isDragging && "relative z-10 shadow-lg",
+        "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4 transition-opacity",
+        // Lift the picked-up card; `scale`/`rotate` compose with dnd-kit's inline transform.
+        isDragging &&
+          "relative z-10 -rotate-1 scale-105 cursor-grabbing shadow-2xl",
+        // Fade the rest so the moving card and its landing spot stand out.
+        active && !isDragging && "opacity-60",
       )}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        borderTopColor: wallet.color,
-        backgroundColor: `color-mix(in srgb, ${wallet.color} 8%, var(--card))`,
-      }}
+      style={
+        {
+          transform: CSS.Transform.toString(transform),
+          transition,
+          "--wallet-color": wallet.color,
+          borderTopColor: wallet.color,
+          // Sides use the wallet color at 25%, full strength while lifted. Longhands
+          // only: React warns when a `borderColor` shorthand mixes with `borderTopColor`.
+          borderRightColor: side,
+          borderBottomColor: side,
+          borderLeftColor: side,
+          backgroundColor: `color-mix(in srgb, ${wallet.color} 8%, var(--card))`,
+        } as React.CSSProperties
+      }
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <AppIcon icon={icon} className="mt-0.5 size-5 shrink-0" />
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-md"
+          style={{
+            color: wallet.color,
+            backgroundColor: `color-mix(in srgb, ${wallet.color} 15%, transparent)`,
+          }}
+        >
+          <AppIcon icon={icon} className="size-6" />
+        </span>
         <div className="min-w-0 flex-1">
           <h3 className="break-words font-semibold">{wallet.name}</h3>
           <p className="text-xs text-muted-foreground">
@@ -70,13 +96,16 @@ export function WalletCard({
           variant="ghost"
           size="icon-sm"
           disabled={disabled}
-          className="shrink-0 cursor-grab touch-none active:cursor-grabbing"
+          className="shrink-0 cursor-grab touch-none hover:bg-wallet-tint! active:bg-wallet-tint! active:cursor-grabbing"
+          style={{
+            color: `color-mix(in srgb, ${wallet.color} 60%, var(--foreground))`,
+          }}
           {...attributes}
           {...listeners}
           title={`Reorder ${wallet.name}`}
           aria-label={`Reorder ${wallet.name}`}
         >
-          <AppIcon icon={DotsSixVerticalIcon} />
+          <AppIcon icon={DotsSixVerticalIcon} className="size-5" />
         </Button>
       </div>
       <p className="break-all text-xl font-semibold tabular-nums">
@@ -87,7 +116,7 @@ export function WalletCard({
           {wallet.transactionCount}{" "}
           {wallet.transactionCount === 1 ? "transaction" : "transactions"}
         </span>
-        <div className="flex items-center">
+        <div className="flex items-center [&_button]:hover:bg-wallet-tint! [&_button]:active:bg-wallet-tint! [&_button]:aria-expanded:bg-wallet-tint! [&_button]:data-popup-open:bg-wallet-tint!">
           <TransactionDialog walletId={wallet.id} />
           <WalletDialog wallet={wallet} />
           <FinanceDeleteDialog

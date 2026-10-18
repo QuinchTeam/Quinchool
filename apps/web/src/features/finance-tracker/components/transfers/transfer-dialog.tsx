@@ -66,11 +66,11 @@ export function TransferDialog() {
         Transfer
       </DialogTrigger>
       <DialogContent
-        className="max-h-finance-dialog overflow-y-auto rounded-md"
+        className="max-h-finance-dialog overflow-y-auto"
         showCloseButton={!pending}
       >
         <DialogHeader>
-          <DialogTitle>Transfer money</DialogTitle>
+          <DialogTitle>Transfer Money</DialogTitle>
         </DialogHeader>
         {open && (
           <TransferForm

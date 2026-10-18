@@ -64,7 +64,7 @@ export function FinanceDeleteDialog({
       >
         <AppIcon icon={TrashIcon} />
       </DialogTrigger>
-      <DialogContent className="rounded-md" showCloseButton={!pending}>
+      <DialogContent showCloseButton={!pending}>
         <DialogHeader>
           <DialogTitle className="break-words pr-6">{title}</DialogTitle>
           <DialogDescription className="break-words">

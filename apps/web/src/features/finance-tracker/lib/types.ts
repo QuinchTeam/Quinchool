@@ -57,16 +57,41 @@ export interface Transaction {
 
 export interface TransactionPage {
   items: Transaction[];
-  nextCursor: string | null;
+  page: number;
+  pageSize: number;
+  total: number;
+  pageCount: number;
 }
+
+export type HistoryPeriod =
+  | "today"
+  | "last7"
+  | "thisMonth"
+  | "lastMonth"
+  | "thisYear";
+export type TransactionSort = "newest" | "oldest" | "highest" | "lowest";
 
 export interface TransactionFilters {
   walletId?: string;
   type?: TransactionType;
+  search?: string;
+  period?: HistoryPeriod;
+  sort?: TransactionSort;
+  excludeTransfers?: boolean;
 }
 
 export interface TransactionLabel {
   id: string;
   name: string;
   type: TransactionType;
+}
+
+export type SummaryPeriod = "day" | "week" | "month" | "year";
+
+export interface FinanceSummary {
+  period: SummaryPeriod;
+  income: string;
+  expense: string;
+  /** `bucket` is Manila local time, `YYYY-MM-DDTHH:mm`. */
+  buckets: { bucket: string; income: string; expense: string }[];
 }

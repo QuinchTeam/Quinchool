@@ -2,24 +2,25 @@
 
 import { createContext, type ReactNode, useContext } from "react";
 
-const FinanceUserContext = createContext<string | null>(null);
+const FinanceScopeContext = createContext<string | null>(null);
 
+/** `scope` is an opaque per-login key that partitions the finance query cache. */
 export function FinanceScope({
-  userId,
+  scope,
   children,
 }: {
-  userId: string;
+  scope: string;
   children: ReactNode;
 }) {
   return (
-    <FinanceUserContext.Provider value={userId}>
+    <FinanceScopeContext.Provider value={scope}>
       {children}
-    </FinanceUserContext.Provider>
+    </FinanceScopeContext.Provider>
   );
 }
 
-export function useFinanceUserId() {
-  const userId = useContext(FinanceUserContext);
-  if (!userId) throw new Error("Finance components require FinanceScope.");
-  return userId;
+export function useFinanceScope() {
+  const scope = useContext(FinanceScopeContext);
+  if (!scope) throw new Error("Finance components require FinanceScope.");
+  return scope;
 }

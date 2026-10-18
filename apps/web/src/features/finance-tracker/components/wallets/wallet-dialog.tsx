@@ -1,7 +1,7 @@
 "use client";
 
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { AppIcon } from "@/components/ui/icon";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -37,15 +37,15 @@ export function WalletDialog({ wallet }: { wallet?: Wallet }) {
           />
         }
       >
-        <AppIcon icon={wallet ? PencilSimpleIcon : PlusIcon} />
+        <AppIcon icon={wallet ? PencilSimpleIcon : PlusCircleIcon} />
         {!wallet && "Add wallet"}
       </DialogTrigger>
       <DialogContent
-        className="max-h-finance-dialog overflow-y-auto rounded-md"
+        className="max-h-finance-dialog overflow-y-auto"
         showCloseButton={!pending}
       >
         <DialogHeader>
-          <DialogTitle>{wallet ? "Edit wallet" : "Add wallet"}</DialogTitle>
+          <DialogTitle>{wallet ? "Edit Wallet" : "Add Wallet"}</DialogTitle>
         </DialogHeader>
         {open && (
           <WalletForm

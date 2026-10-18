@@ -30,11 +30,14 @@ export function amountClassName(type: "INCOME" | "EXPENSE") {
     : "text-destructive";
 }
 
+/** First is the app primary (dark theme); the rest are popular Tailwind 500 hues. */
 export const WALLET_COLORS = [
-  "#0f766e",
-  "#2563eb",
-  "#be123c",
-  "#7c3aed",
-  "#15803d",
-  "#a16207",
+  "#2ec4b6", // primary
+  "#3b82f6", // blue
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#f43f5e", // rose
+  "#f97316", // orange
+  "#f59e0b", // amber
+  "#22c55e", // green
 ];
