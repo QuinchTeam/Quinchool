@@ -1,8 +1,12 @@
 import { z } from "zod";
 
+// Every rule carries its own message: Zod's defaults ("Too small: expected
+// array to have >=1 items") surface verbatim in the form.
+const tooLong = (max: number) => `Keep this under ${max} characters`;
+const tooMany = (max: number, noun: string) => `Add at most ${max} ${noun}`;
 const requiredText = (label: string, max = 500) =>
-  z.string().trim().min(1, `${label} is required`).max(max);
-const optionalText = (max = 500) => z.string().trim().max(max);
+  z.string().trim().min(1, `${label} is required`).max(max, tooLong(max));
+const optionalText = (max = 500) => z.string().trim().max(max, tooLong(max));
 const month = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Select a valid month");
@@ -10,7 +14,7 @@ const optionalMonth = z.union([z.literal(""), month]);
 const optionalUrl = z
   .string()
   .trim()
-  .max(500)
+  .max(500, tooLong(500))
   .transform((value) =>
     value && !URL.canParse(value) ? `https://${value}` : value,
   )
@@ -26,8 +30,13 @@ const experienceSchema = z
     companyName: requiredText("Company name"),
     location: requiredText("Location"),
     employmentType: optionalText(),
-    skills: z.array(requiredText("Skill", 100)).max(500),
-    bullets: z.array(bulletSchema).min(1).max(200),
+    skills: z
+      .array(requiredText("Skill", 100))
+      .max(500, tooMany(500, "skills")),
+    bullets: z
+      .array(bulletSchema)
+      .min(1, "Add at least one bullet")
+      .max(200, tooMany(200, "bullets")),
     isCurrent: z.boolean(),
     startDate: month,
     endDate: optionalMonth,
@@ -53,8 +62,13 @@ const experienceSchema = z
 const projectSchema = z
   .object({
     projectName: requiredText("Project name"),
-    skills: z.array(requiredText("Skill", 100)).max(500),
-    bullets: z.array(bulletSchema).min(1).max(200),
+    skills: z
+      .array(requiredText("Skill", 100))
+      .max(500, tooMany(500, "skills")),
+    bullets: z
+      .array(bulletSchema)
+      .min(1, "Add at least one bullet")
+      .max(200, tooMany(200, "bullets")),
     isCurrent: z.boolean(),
     startDate: month,
     endDate: optionalMonth,
@@ -102,17 +116,20 @@ export const careerProfileSchema = z
             path: ["endDate"],
           }),
       )
-      .max(20),
+      .max(20, tooMany(20, "education entries")),
     skillGroups: z
       .array(
         z.object({
           label: requiredText("Skill group"),
-          skills: z.array(requiredText("Skill", 100)).min(1).max(500),
+          skills: z
+            .array(requiredText("Skill", 100))
+            .min(1, "Add at least one skill to this group")
+            .max(500, tooMany(500, "skills")),
         }),
       )
-      .max(50),
-    experiences: z.array(experienceSchema).max(50),
-    projects: z.array(projectSchema).max(100),
+      .max(50, tooMany(50, "skill groups")),
+    experiences: z.array(experienceSchema).max(50, tooMany(50, "experiences")),
+    projects: z.array(projectSchema).max(100, tooMany(100, "projects")),
   })
   .superRefine((profile, context) => {
     const knownSkills = new Set<string>();

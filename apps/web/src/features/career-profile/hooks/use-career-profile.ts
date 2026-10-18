@@ -46,6 +46,7 @@ export function useCareerProfile() {
     careerProfile: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
+    error: query.error,
     refetch: query.refetch,
     saveCareerProfile,
   };

@@ -77,3 +77,16 @@ test("allows the same skill in different groups", () => {
     false,
   );
 });
+
+test("empty lists report readable messages, not Zod defaults", () => {
+  const result = careerProfileSchema.safeParse({
+    ...validProfile,
+    skillGroups: [{ label: "Frontend", skills: [] }],
+    experiences: [{ ...validProfile.experiences[0], skills: [], bullets: [] }],
+  });
+  assert.equal(result.success, false);
+  const messages = result.error?.issues.map((issue) => issue.message) ?? [];
+  assert.ok(messages.includes("Add at least one skill to this group"));
+  assert.ok(messages.includes("Add at least one bullet"));
+  assert.ok(messages.every((message) => !message.startsWith("Too small")));
+});

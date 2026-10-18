@@ -18,14 +18,19 @@ import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVerti
 import { AppIcon } from "@/components/ui/icon";
 import { type ComponentProps, type ReactNode, useId } from "react";
 import { Button } from "@/components/ui/button";
+import { dropZoneClassName } from "@/lib/drop-zone";
+import { cn } from "@/lib/utils";
 
 export function SortableList({
   children,
+  className,
   ids,
   onMove,
   wrap = false,
 }: {
   children: ReactNode;
+  /** Layout for the item container, e.g. "grid gap-5". */
+  className: string;
   ids: string[];
   onMove: (from: number, to: number) => void;
   wrap?: boolean;
@@ -53,7 +58,7 @@ export function SortableList({
         items={ids}
         strategy={wrap ? rectSortingStrategy : verticalListSortingStrategy}
       >
-        {children}
+        <div className={cn(dropZoneClassName, className)}>{children}</div>
       </SortableContext>
     </DndContext>
   );

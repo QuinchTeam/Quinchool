@@ -3,14 +3,25 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { AppIcon } from "@/components/ui/icon";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { SortableList } from "@/features/career-profile/components/sortable-list";
+import { chipBackspace } from "@/features/career-profile/lib/chip-backspace";
 import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import { cn } from "@/lib/utils";
 
-function Chip({ onRemove, value }: { onRemove: () => void; value: string }) {
-  const { handleProps, isDragging, itemProps } = useSortableItem(value);
+function Chip({
+  onRemove,
+  selected,
+  value,
+}: {
+  onRemove: () => void;
+  selected: boolean;
+  value: string;
+}) {
+  const { dragClassName, handleProps, isDragging, itemProps } =
+    useSortableItem(value);
 
   return (
     <span
@@ -22,8 +33,10 @@ function Chip({ onRemove, value }: { onRemove: () => void; value: string }) {
         handleProps.ref(node);
       }}
       className={cn(
-        "inline-flex cursor-grab touch-none items-center gap-1 rounded-sm bg-muted px-2 py-1 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/20 active:cursor-grabbing",
-        isDragging && "relative z-10 shadow-sm",
+        "inline-flex cursor-grab touch-none items-center gap-1 rounded-sm border border-border px-2 py-1 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/20 active:cursor-grabbing",
+        dragClassName,
+        isDragging && "bg-card",
+        selected && "border-primary bg-primary/15",
       )}
     >
       {value}
@@ -55,6 +68,8 @@ export function StringListInput({
   value: string[];
 }) {
   const [draft, setDraft] = useState("");
+  // Ctrl/Cmd+A in an empty input selects every chip; Backspace then clears them.
+  const [allSelected, setAllSelected] = useState(false);
   const suggestionsId = useId();
 
   function addValues(input: string) {
@@ -98,11 +113,10 @@ export function StringListInput({
 
   return (
     <>
-      <div
-        className="flex min-h-10 flex-wrap items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 shadow-xs has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20"
-        aria-invalid={invalid || undefined}
-      >
+      {/* Shares the input's border, fill, focus and invalid rings; grows to fit chips. */}
+      <InputGroup className="h-auto min-h-14 flex-wrap gap-2 px-4 py-2">
         <SortableList
+          className="flex flex-wrap gap-2 empty:hidden"
           ids={value}
           wrap
           onMove={(from, to) => onChange(arrayMove(value, from, to))}
@@ -111,28 +125,55 @@ export function StringListInput({
             <Chip
               key={entry}
               value={entry}
+              selected={allSelected}
               onRemove={() =>
                 onChange(value.filter((candidate) => candidate !== entry))
               }
             />
           ))}
         </SortableList>
-        <input
-          className="min-w-32 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        <InputGroupInput
+          className="h-10 min-w-32 px-0"
           aria-label={ariaLabel}
+          aria-invalid={invalid || undefined}
           list={allowedValues ? suggestionsId : undefined}
           placeholder={value.length ? "" : placeholder}
           value={draft}
-          onBlur={() => addValues(draft)}
+          onBlur={() => {
+            setAllSelected(false);
+            addValues(draft);
+          }}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === ",") {
+            const erase = event.key === "Backspace" || event.key === "Delete";
+            if (allSelected) {
+              setAllSelected(false);
+              if (erase) {
+                event.preventDefault();
+                onChange([]);
+                return;
+              }
+            }
+            if (
+              (event.ctrlKey || event.metaKey) &&
+              event.key.toLowerCase() === "a" &&
+              !draft &&
+              value.length
+            ) {
+              event.preventDefault();
+              setAllSelected(true);
+            } else if (event.key === "Backspace" && !draft && value.length) {
+              event.preventDefault();
+              const next = chipBackspace(value, Boolean(allowedValues));
+              onChange(next.chips);
+              setDraft(next.draft);
+            } else if (event.key === "Enter" || event.key === ",") {
               event.preventDefault();
               addValues(draft);
             }
           }}
         />
-      </div>
+      </InputGroup>
       {allowedValues && (
         <datalist id={suggestionsId}>
           {allowedValues.map((option) => (

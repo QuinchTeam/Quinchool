@@ -18,7 +18,7 @@ import {
 import { logInfo, logWarn } from "@/lib/observability/logger";
 
 export function useCareerProfileForm() {
-  const { careerProfile, isError, isLoading, refetch, saveCareerProfile } =
+  const { careerProfile, error, isLoading, refetch, saveCareerProfile } =
     useCareerProfile();
   const form = useForm<CareerProfileValues>({
     resolver: zodResolver(careerProfileSchema),
@@ -64,7 +64,7 @@ export function useCareerProfileForm() {
 
   return {
     form,
-    isError,
+    error,
     isLoading,
     isSaving: saveCareerProfile.isPending,
     onSubmit,

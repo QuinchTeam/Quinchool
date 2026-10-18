@@ -1,9 +1,15 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
-import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { GraduationCapIcon } from "@phosphor-icons/react/dist/ssr/GraduationCap";
+import { WrenchIcon } from "@phosphor-icons/react/dist/ssr/Wrench";
+import { FolderSimpleIcon } from "@phosphor-icons/react/dist/ssr/FolderSimple";
+import { EmptyState } from "@/components/shared/empty-state";
 import { AppIcon } from "@/components/ui/icon";
 import { type ReactNode, useId, useState } from "react";
 import {
@@ -38,6 +44,25 @@ const titleFields = {
   projects: "projectName",
 } as const;
 
+const emptyStates = {
+  educations: {
+    icon: GraduationCapIcon,
+    description: "Add the schools and degrees you want on your resume.",
+  },
+  skillGroups: {
+    icon: WrenchIcon,
+    description: "Group your skills, like languages or frameworks.",
+  },
+  experiences: {
+    icon: BriefcaseIcon,
+    description: "Add the roles you have held, newest first.",
+  },
+  projects: {
+    icon: FolderSimpleIcon,
+    description: "Add side projects or work you want to show off.",
+  },
+};
+
 function EntryCard({
   children,
   id,
@@ -55,7 +80,7 @@ function EntryCard({
 }) {
   const bodyId = useId();
   const [collapsed, setCollapsed] = useState(false);
-  const { handleProps, isDragging, itemProps } = useSortableItem(id);
+  const { dragClassName, handleProps, itemProps } = useSortableItem(id);
   const { getFieldState } = useFormContext<CareerProfileValues>();
   const { invalid } = getFieldState(path, useFormState({ name: path }));
   const title = useWatch<CareerProfileValues>({
@@ -65,12 +90,10 @@ function EntryCard({
   const open = !collapsed || invalid;
 
   return (
-    <div
+    <Card
       {...itemProps}
-      className={cn(
-        "grid gap-5 rounded-md border p-5",
-        isDragging && "relative z-10 bg-background shadow-sm",
-      )}
+      variant="minimal"
+      className={cn("gap-5", dragClassName)}
     >
       <div className="flex items-center gap-2">
         <DragHandle label={label.toLowerCase()} {...handleProps} />
@@ -106,7 +129,7 @@ function EntryCard({
       <div id={bodyId} className={open ? "grid gap-5" : "hidden"}>
         {children}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -140,11 +163,15 @@ export function EntryList({
           size="sm"
           onClick={() => append(empty())}
         >
-          <AppIcon icon={PlusIcon} />
+          <AppIcon icon={PlusCircleIcon} />
           {addLabel}
         </Button>
       </div>
-      <SortableList ids={fields.map((entry) => entry.id)} onMove={move}>
+      <SortableList
+        className="grid gap-5"
+        ids={fields.map((entry) => entry.id)}
+        onMove={move}
+      >
         {fields.map((entry, index) => (
           <EntryCard
             key={entry.id}
@@ -159,9 +186,11 @@ export function EntryList({
         ))}
       </SortableList>
       {!fields.length && (
-        <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-          No {title.toLowerCase()} added.
-        </p>
+        <EmptyState
+          icon={emptyStates[name].icon}
+          title={`No ${title} Yet`}
+          description={emptyStates[name].description}
+        />
       )}
     </section>
   );
@@ -171,30 +200,54 @@ export function EducationEditor({ index }: { index: number }) {
   const name = `educations.${index}` as const;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Field
-        label="Institution name"
-        name={`${name}.institutionName`}
-        required
-      />
-      <Field label="Location" name={`${name}.location`} required />
-      <Field label="Degree" name={`${name}.degree`} required />
-      <Field label="Field of study" name={`${name}.fieldOfStudy`} required />
-      <Field label="Specialization" name={`${name}.specialization`} optional />
-      <div className="grid grid-cols-2 gap-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="md:col-span-2">
         <Field
-          label="Start date"
-          name={`${name}.startDate`}
-          type="month"
-          required
-        />
-        <Field
-          label="End date"
-          name={`${name}.endDate`}
-          type="month"
+          label="Institution name"
+          name={`${name}.institutionName`}
+          placeholder="University of the Philippines"
           required
         />
       </div>
+      <Field
+        label="Location"
+        name={`${name}.location`}
+        variant="location"
+        placeholder="Quezon City, Philippines"
+        required
+      />
+      <Field
+        label="Degree"
+        name={`${name}.degree`}
+        placeholder="Bachelor of Science"
+        required
+      />
+      <Field
+        label="Field of study"
+        name={`${name}.fieldOfStudy`}
+        placeholder="Computer Science"
+        required
+      />
+      <Field
+        label="Specialization"
+        name={`${name}.specialization`}
+        placeholder="Software Engineering"
+        optional
+      />
+      <Field
+        label="Start date"
+        name={`${name}.startDate`}
+        variant="date"
+        type="month"
+        required
+      />
+      <Field
+        label="End date"
+        name={`${name}.endDate`}
+        variant="date"
+        type="month"
+        required
+      />
     </div>
   );
 }
@@ -212,7 +265,7 @@ export function SkillGroupEditor({ index }: { index: number }) {
         <SkillsField
           ariaLabel={`Skills for group ${index + 1}`}
           name={`skillGroups.${index}.skills`}
-          placeholder="Type a skill and press Enter"
+          placeholder="Add a skill, then press Enter"
         />
       </div>
     </div>
@@ -227,10 +280,19 @@ export function ExperienceEditor({ index }: { index: number }) {
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Job title" name={`${name}.jobTitle`} required />
-        <Field label="Company name" name={`${name}.companyName`} required />
-        <Field label="Location" name={`${name}.location`} required />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Field
+          label="Job title"
+          name={`${name}.jobTitle`}
+          placeholder="Software Engineer"
+          required
+        />
+        <Field
+          label="Company name"
+          name={`${name}.companyName`}
+          placeholder="Acme Inc."
+          required
+        />
         <Field
           label="Employment type"
           name={`${name}.employmentType`}
@@ -238,14 +300,23 @@ export function ExperienceEditor({ index }: { index: number }) {
           optional
         />
         <Field
+          label="Location"
+          name={`${name}.location`}
+          variant="location"
+          placeholder="Makati, Philippines"
+          required
+        />
+        <Field
           label="Start date"
           name={`${name}.startDate`}
+          variant="date"
           type="month"
           required
         />
         <Field
           label="End date"
           name={`${name}.endDate`}
+          variant="date"
           type="month"
           disabled={Boolean(isCurrent)}
           required={!isCurrent}
@@ -256,7 +327,7 @@ export function ExperienceEditor({ index }: { index: number }) {
       <SkillsField
         ariaLabel={`Skills for experience ${index + 1}`}
         name={`${name}.skills`}
-        placeholder="Select a profile skill"
+        placeholder="Pick from your skill groups"
         restricted
       />
       <BulletsField
@@ -276,16 +347,23 @@ export function ProjectEditor({ index }: { index: number }) {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Project name" name={`${name}.projectName`} required />
+        <Field
+          label="Project name"
+          name={`${name}.projectName`}
+          placeholder="Personal finance tracker"
+          required
+        />
         <Field
           label="Start date"
           name={`${name}.startDate`}
+          variant="date"
           type="month"
           required
         />
         <Field
           label="End date"
           name={`${name}.endDate`}
+          variant="date"
           type="month"
           disabled={Boolean(isCurrent)}
           required={!isCurrent}
@@ -299,7 +377,7 @@ export function ProjectEditor({ index }: { index: number }) {
       <SkillsField
         ariaLabel={`Skills for project ${index + 1}`}
         name={`${name}.skills`}
-        placeholder="Select a profile skill"
+        placeholder="Pick from your skill groups"
         restricted
       />
       <BulletsField

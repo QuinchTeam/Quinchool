@@ -51,7 +51,8 @@ export function WalletCard({
   return (
     <article
       ref={setNodeRef}
-      data-wallet-dragging={isDragging || undefined}
+      // "lock" also freezes vertical scroll: the lifted card scales past the grid.
+      data-dragging={isDragging ? "lock" : undefined}
       className={cn(
         "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4 transition-opacity",
         // Lift the picked-up card; `scale`/`rotate` compose with dnd-kit's inline transform.

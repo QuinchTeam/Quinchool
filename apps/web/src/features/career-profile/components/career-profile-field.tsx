@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { AppIcon } from "@/components/ui/icon";
 import { type ComponentProps, useId } from "react";
@@ -8,6 +8,7 @@ import {
   type FieldPathByValue,
   useController,
   useFieldArray,
+  useFormContext,
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +23,8 @@ import { StringListInput } from "@/features/career-profile/components/string-lis
 import { useAvailableSkills } from "@/features/career-profile/hooks/use-available-skills";
 import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
+import { ImportBulletsDialog } from "@/features/career-profile/components/import-bullets-dialog";
+import { normalizePastedText } from "@/features/career-profile/lib/normalize-pasted-text";
 import { cn } from "@/lib/utils";
 
 type Values = CareerProfileValues;
@@ -42,7 +45,7 @@ export function CareerProfileField({
   optional = false,
   ...props
 }: Pick<
-  ComponentProps<"input">,
+  ComponentProps<typeof Input>,
   | "aria-label"
   | "autoComplete"
   | "disabled"
@@ -50,6 +53,7 @@ export function CareerProfileField({
   | "placeholder"
   | "required"
   | "type"
+  | "variant"
 > & {
   label: string;
   multiline?: boolean;
@@ -69,14 +73,32 @@ export function CareerProfileField({
   };
 
   return (
-    <div className="grid gap-2">
+    <div className="grid content-start gap-2">
       <Label htmlFor={id}>
         {label}
         {optional && (
           <span className="font-normal text-muted-foreground"> (optional)</span>
         )}
       </Label>
-      {multiline ? <Textarea {...control} /> : <Input {...control} />}
+      {multiline ? (
+        <Textarea
+          {...control}
+          onPaste={(event) => {
+            event.preventDefault();
+            const target = event.currentTarget;
+            // setRangeText keeps the caret where the paste ends.
+            target.setRangeText(
+              normalizePastedText(event.clipboardData.getData("text")),
+              target.selectionStart,
+              target.selectionEnd,
+              "end",
+            );
+            field.onChange(target.value);
+          }}
+        />
+      ) : (
+        <Input {...control} />
+      )}
       <FieldError id={errorId} message={fieldState.error?.message} />
     </div>
   );
@@ -97,7 +119,7 @@ export function SkillsField({
   const availableSkills = useAvailableSkills();
 
   return (
-    <div className="grid gap-2">
+    <div className="grid content-start gap-2">
       <Label>Skills</Label>
       <StringListInput
         allowedValues={restricted ? availableSkills : undefined}
@@ -144,22 +166,37 @@ export function BulletsField({
   const { append, fields, move, remove } = useFieldArray<Values, BulletsPath>({
     name,
   });
+  const { getValues } = useFormContext<Values>();
 
   return (
     <div className="grid gap-3">
       <div className="flex items-center justify-between gap-3">
         <Label>Bullets</Label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => append({ text: "" })}
-        >
-          <AppIcon icon={PlusIcon} />
-          Add bullet
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <ImportBulletsDialog
+            onImport={(bullets) => {
+              // A lone blank bullet is the new-entry placeholder; replace it.
+              if (fields.length === 1 && !getValues(`${name}.0.text`).trim())
+                remove(0);
+              append(bullets.map((text) => ({ text })));
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => append({ text: "" })}
+          >
+            <AppIcon icon={PlusCircleIcon} />
+            Add bullet
+          </Button>
+        </div>
       </div>
-      <SortableList ids={fields.map((bullet) => bullet.id)} onMove={move}>
+      <SortableList
+        className="grid gap-3"
+        ids={fields.map((bullet) => bullet.id)}
+        onMove={move}
+      >
         {fields.map((bullet, index) => (
           <BulletRow
             key={bullet.id}
@@ -191,23 +228,31 @@ function BulletRow({
   removable: boolean;
   title: string;
 }) {
-  const { handleProps, isDragging, itemProps } = useSortableItem(id);
+  const { dragClassName, handleProps, isDragging, itemProps } =
+    useSortableItem(id);
 
   return (
     <div
       {...itemProps}
       className={cn(
-        "flex items-start gap-2",
-        isDragging && "relative z-10 bg-background shadow-sm",
+        // Padding is always there (bled out with -mx-2) so lifting a row does not shift it.
+        "-mx-2 flex items-start gap-2 rounded-lg p-2",
+        dragClassName,
+        // Give the lifted row a surface; at rest it sits flat on the entry card.
+        isDragging && "bg-card ring-1 ring-border",
       )}
     >
-      <DragHandle label={label.toLowerCase()} {...handleProps} />
+      {/* mt-7 drops the handle and trash past the label onto the textarea. */}
+      <div className="mt-7">
+        <DragHandle label={label.toLowerCase()} {...handleProps} />
+      </div>
       <div className="flex-1">
         <CareerProfileField
           aria-label={label}
           label={title}
           multiline
           name={name}
+          placeholder="Shipped a feature that cut checkout time by 30%."
           required
         />
       </div>
@@ -215,6 +260,7 @@ function BulletRow({
         type="button"
         variant="ghost"
         size="icon-sm"
+        className="mt-7"
         disabled={!removable}
         onClick={onRemove}
       >

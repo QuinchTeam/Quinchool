@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vite-plus/test";
 import {
+  validationFieldLabel,
   validationFieldNames,
   validationMessages,
 } from "../../../../../src/features/career-profile/lib/validation-errors.ts";
@@ -35,4 +36,18 @@ test("validation telemetry contains field paths, never values, messages or DOM r
     }),
     ["name", "experiences.0.endDate"],
   );
+});
+
+test("validation labels read as words, with 1-based entry numbers", () => {
+  assert.equal(validationFieldLabel("contactNumber"), "Contact number");
+  assert.equal(validationFieldLabel("linkedin"), "LinkedIn");
+  assert.equal(
+    validationFieldLabel("experiences.0.endDate"),
+    "Experience 1 › End date",
+  );
+  assert.equal(
+    validationFieldLabel("projects.2.bullets.0"),
+    "Project 3 › Bullet 1",
+  );
+  assert.equal(validationFieldLabel("skillGroups.root"), "Skill groups");
 });

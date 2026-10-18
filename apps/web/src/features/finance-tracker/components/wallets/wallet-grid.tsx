@@ -1,5 +1,7 @@
 "use client";
 
+import { dropZoneClassName } from "@/lib/drop-zone";
+import { cn } from "@/lib/utils";
 import {
   closestCenter,
   DndContext,
@@ -53,7 +55,12 @@ export function WalletGrid({ wallets }: { wallets: Wallet[] }) {
       onDragEnd={dragEnd}
     >
       <SortableContext items={wallets} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          className={cn(
+            dropZoneClassName,
+            "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3",
+          )}
+        >
           {wallets.map((wallet) => (
             <WalletCard
               key={wallet.id}

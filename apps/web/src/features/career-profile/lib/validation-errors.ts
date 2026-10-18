@@ -21,3 +21,27 @@ export function validationFieldNames(errors: unknown): string[] {
       ),
     );
 }
+
+const LABELS: Record<string, string> = {
+  contactNumber: "Contact number",
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  personalWebsite: "Personal website",
+};
+
+/** "experiences.0.endDate" -> "Experience 1 › End date". */
+export function validationFieldLabel(path: string): string {
+  const parts: string[] = [];
+  for (const segment of path.split(".")) {
+    if (segment === "root") continue;
+    if (/^\d+$/.test(segment) && parts.length) {
+      parts[parts.length - 1] =
+        `${parts[parts.length - 1].replace(/s$/, "")} ${Number(segment) + 1}`;
+      continue;
+    }
+    const words =
+      LABELS[segment] ?? segment.replace(/([A-Z])/g, " $1").toLowerCase();
+    parts.push(words.charAt(0).toUpperCase() + words.slice(1));
+  }
+  return parts.join(" › ");
+}
