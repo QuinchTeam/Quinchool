@@ -6,6 +6,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main",
+    "seed:finance": "nest build && node dist/core/database/seeds/finance.seed.js",
     "test": "tsc -p tsconfig.json --outDir dist-test && node --test \"dist-test/test/**/*.test.js\""
   },
   "engines": {
