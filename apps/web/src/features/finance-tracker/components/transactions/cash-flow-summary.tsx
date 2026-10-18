@@ -1,17 +1,10 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
 import { ArrowDownIcon } from "@phosphor-icons/react/dist/ssr/ArrowDown";
 import { ArrowUpIcon } from "@phosphor-icons/react/dist/ssr/ArrowUp";
 import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { useSyncExternalStore } from "react";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { AppIcon } from "@/components/ui/icon";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -31,7 +24,8 @@ import type {
   SummaryPeriod,
 } from "@/features/finance-tracker/lib/types";
 import { CashFlowSkeleton } from "../shared/finance-loading";
-import { FinanceQueryError } from "../shared/query-error";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { TransactionDialog } from "./transaction-dialog";
 
 const PERIODS: Record<SummaryPeriod, string> = {
@@ -70,7 +64,7 @@ export function CashFlowSummary() {
   return (
     <section
       aria-labelledby="cash-flow"
-      className="flex min-w-0 flex-col gap-4 border-t pt-6"
+      className="flex min-w-0 flex-col gap-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="cash-flow" className="text-lg font-semibold">
@@ -93,7 +87,7 @@ export function CashFlowSummary() {
         </ToggleGroup>
       </div>
       {query.error && (
-        <FinanceQueryError
+        <ErrorState
           error={query.error}
           retry={() => {
             void query.refetch();
@@ -132,7 +126,7 @@ function Total({
   amount: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-md border bg-card p-5">
+    <Card variant="minimal" className="gap-2">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <AppIcon
           icon={type === "INCOME" ? ArrowDownIcon : ArrowUpIcon}
@@ -145,7 +139,7 @@ function Total({
       >
         {formatMoney(amount)}
       </p>
-    </div>
+    </Card>
   );
 }
 
@@ -191,20 +185,14 @@ function CashFlowChart({ summary }: { summary: FinanceSummary }) {
   );
   if (max === 0) {
     return (
-      <Empty className="h-72 border border-dashed">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <AppIcon icon={ChartBarIcon} />
-          </EmptyMedia>
-          <EmptyTitle>Nothing to Chart Yet</EmptyTitle>
-          <EmptyDescription>
-            Income and spending for this period will show up here as bars.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <TransactionDialog />
-        </EmptyContent>
-      </Empty>
+      <div className="h-72">
+        <EmptyState
+          icon={ChartBarIcon}
+          title="Nothing to Chart Yet"
+          description="Income and spending for this period will show up here as bars."
+          action={<TransactionDialog />}
+        />
+      </div>
     );
   }
   const ticks = niceTicks(max);

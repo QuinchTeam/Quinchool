@@ -1,13 +1,5 @@
 import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { AppIcon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { Transaction } from "@/features/finance-tracker/lib/types";
 import { TransactionsLoading } from "../shared/finance-loading";
 import { TransactionDialog } from "./transaction-dialog";
@@ -25,21 +17,14 @@ export function TransactionList({
         <div aria-hidden className="invisible">
           <TransactionsLoading />
         </div>
-        <Empty className="absolute inset-0 border border-dashed">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <AppIcon icon={ReceiptIcon} />
-            </EmptyMedia>
-            <EmptyTitle>No Transactions Yet</EmptyTitle>
-            <EmptyDescription>
-              Record income or an expense to start tracking where your money
-              goes.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <TransactionDialog />
-          </EmptyContent>
-        </Empty>
+        <div className="absolute inset-0">
+          <EmptyState
+            icon={ReceiptIcon}
+            title="No Transactions Yet"
+            description="Record income or an expense to start tracking where your money goes."
+            action={<TransactionDialog />}
+          />
+        </div>
       </div>
     );
   }

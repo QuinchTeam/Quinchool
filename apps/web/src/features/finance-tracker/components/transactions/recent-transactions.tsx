@@ -5,7 +5,7 @@ import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTransactions } from "@/features/finance-tracker/hooks/use-transactions";
-import { FinanceQueryError } from "../shared/query-error";
+import { ErrorState } from "@/components/shared/error-state";
 import { TransactionsLoading } from "../shared/finance-loading";
 import { TransactionList } from "./transaction-list";
 
@@ -14,7 +14,7 @@ export function RecentTransactions() {
   return (
     <section
       aria-labelledby="recent-transactions"
-      className="flex min-w-0 flex-col gap-4 border-t pt-6"
+      className="flex min-w-0 flex-col gap-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="recent-transactions" className="text-lg font-semibold">
@@ -31,7 +31,7 @@ export function RecentTransactions() {
         </Button>
       </div>
       {query.error && (
-        <FinanceQueryError
+        <ErrorState
           error={query.error}
           retry={() => {
             void query.refetch();

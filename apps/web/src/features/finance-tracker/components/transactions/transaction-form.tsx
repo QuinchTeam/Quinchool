@@ -17,7 +17,7 @@ import {
 } from "@/features/finance-tracker/lib/schema";
 import type { Transaction } from "@/features/finance-tracker/lib/types";
 import { FinanceField } from "../shared/finance-field";
-import { FinanceQueryError } from "../shared/query-error";
+import { ErrorState } from "@/components/shared/error-state";
 import { TransactionSourceFields } from "./transaction-source-fields";
 
 export function TransactionForm({
@@ -81,7 +81,7 @@ export function TransactionForm({
     <Form {...form}>
       <form className="grid gap-5" onSubmit={handleSubmit(submit)} noValidate>
         {overview.error && (
-          <FinanceQueryError
+          <ErrorState
             error={overview.error}
             retry={() => {
               void overview.refetch();

@@ -1,5 +1,5 @@
 import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
-import { AppIcon } from "@/components/ui/icon";
+import { AppHeader } from "@/components/shared/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -28,11 +28,11 @@ function TextSkeleton({
 /** Mirrors the total balance card: label, amount, wallet count. */
 export function BalanceSkeleton() {
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-md border bg-card p-5">
+    <Card variant="minimal" className="gap-3">
       <TextSkeleton className="text-sm" text="Total Balance ··" />
       <TextSkeleton className="text-3xl font-semibold" text="PHP 00,000.00" />
       <TextSkeleton className="text-xs" text="2 wallets" />
-    </div>
+    </Card>
   );
 }
 
@@ -76,16 +76,13 @@ export function CashFlowSkeleton() {
     <>
       <div className="grid gap-4 sm:grid-cols-2">
         {[1, 2].map((id) => (
-          <div
-            key={id}
-            className="flex min-w-0 flex-col gap-2 rounded-md border bg-card p-5"
-          >
+          <Card key={id} variant="minimal" className="gap-2">
             <TextSkeleton className="text-sm" text="Earned This Month" />
             <TextSkeleton
               className="text-2xl font-semibold"
               text="PHP 0,000.00"
             />
-          </div>
+          </Card>
         ))}
       </div>
       <div className="flex h-72 min-w-0 flex-col gap-3 rounded-md border bg-card p-5">
@@ -144,28 +141,21 @@ export function TransactionsLoading() {
 export function FinanceLoading() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-8 p-6" aria-busy="true">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="flex items-center gap-3 text-2xl font-semibold">
-            <AppIcon icon={WalletIcon} className="size-7 shrink-0" />
-            Finance Tracker
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Track your wallets, income, and spending in one place.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <TextSkeleton className="h-14 px-6" text="+ Add wallet" />
-          <TextSkeleton className="h-14 px-6" text="⇆ Transfer" />
-          <TextSkeleton className="h-14 px-6" text="+ Add transaction" />
-        </div>
-      </header>
+      <AppHeader
+        icon={WalletIcon}
+        title="Finance Tracker"
+        description="Track your wallets, income, and spending in one place."
+      >
+        <TextSkeleton className="h-14 px-6" text="+ Add wallet" />
+        <TextSkeleton className="h-14 px-6" text="⇆ Transfer" />
+        <TextSkeleton className="h-14 px-6" text="+ Add transaction" />
+      </AppHeader>
       <BalanceSkeleton />
       <section className="grid min-w-0 gap-4">
         <h2 className="text-lg font-semibold">Wallets</h2>
         <WalletsSkeleton />
       </section>
-      <section className="flex min-w-0 flex-col gap-4 border-t pt-6">
+      <section className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Cash Flow</h2>
           <TextSkeleton
@@ -175,7 +165,7 @@ export function FinanceLoading() {
         </div>
         <CashFlowSkeleton />
       </section>
-      <section className="flex min-w-0 flex-col gap-4 border-t pt-6">
+      <section className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Recent Transactions</h2>
           <TextSkeleton className="h-12 px-5" text="View history >" />
@@ -189,16 +179,10 @@ export function FinanceLoading() {
 export function FinanceHistoryLoading() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-6 p-6" aria-busy="true">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Transaction History</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <TextSkeleton
-            className="h-14 px-6"
-            text="< Back to Finance Tracker"
-          />
-          <TextSkeleton className="h-14 px-6" text="+ Add transaction" />
-        </div>
-      </header>
+      <AppHeader title="Transaction History">
+        <TextSkeleton className="h-14 px-6" text="< Back to Finance Tracker" />
+        <TextSkeleton className="h-14 px-6" text="+ Add transaction" />
+      </AppHeader>
       <Card>
         <CardHeader>
           <CardTitle>Filter History</CardTitle>

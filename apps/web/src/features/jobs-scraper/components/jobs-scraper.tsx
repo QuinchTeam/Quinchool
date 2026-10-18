@@ -1,8 +1,8 @@
 "use client";
 
+import { AppHeader } from "@/components/shared/app-header";
 import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
 import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
-import { CalendarIcon } from "@phosphor-icons/react/dist/ssr/Calendar";
 import { ClockIcon } from "@phosphor-icons/react/dist/ssr/Clock";
 import { FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ListChecksIcon } from "@phosphor-icons/react/dist/ssr/ListChecks";
@@ -17,14 +17,8 @@ import { JobCard } from "@/features/jobs-scraper/components/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
@@ -40,7 +34,7 @@ import {
 import { applyTailoredResume } from "@/features/resume-builder/lib/resume";
 
 export function JobsScraper() {
-  const { isError, isLoading, refetch, scan, state } = useJobsScraper();
+  const { error, isLoading, refetch, scan, state } = useJobsScraper();
   const { careerProfile, isLoading: isProfileLoading } = useCareerProfile();
   const { buildResume } = useResumeBuilder(careerProfile);
   const [generatingJobId, setGeneratingJobId] = useState<string | null>(null);
@@ -74,62 +68,46 @@ export function JobsScraper() {
 
   return (
     <main className="min-h-full">
-      <header className="border-b">
-        <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2">
-              <AppIcon icon={BriefcaseIcon} className="size-6 text-primary" />
-              <h1 className="text-2xl font-semibold">Jobs Scraper</h1>
-            </div>
-            <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <AppIcon icon={CalendarIcon} className="size-4" />
-              {state ? formatTimeRange(state.config) : "Loading criteria"}
-              {state && formatLocationModes(state.config) ? (
-                <>
-                  <span aria-hidden="true">/</span>
-                  {formatLocationModes(state.config)}
-                </>
-              ) : null}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/jobs-scraper/review" />}
-            >
-              <AppIcon icon={ListChecksIcon} />
-              Review scan
-              {state ? ` (${state.classificationCounts.REJECTED})` : ""}
-            </Button>
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/jobs-scraper/settings" />}
-            >
-              <AppIcon icon={SlidersHorizontalIcon} />
-              Edit criteria
-            </Button>
-            <Button
-              onClick={() => scan.mutate()}
-              disabled={scan.isPending || !state || unsetCriteria.length > 0}
-            >
-              <AppIcon
-                icon={
-                  state?.lastScannedAt
-                    ? ArrowClockwiseIcon
-                    : MagnifyingGlassIcon
-                }
-              />
-              {scan.isPending
-                ? "Scanning job boards"
-                : state?.lastScannedAt
-                  ? "Scan again"
-                  : "Scan jobs"}
-            </Button>
-          </div>
-        </div>
-      </header>
+      <div className="px-6 pt-6">
+        <AppHeader
+          icon={BriefcaseIcon}
+          title="Jobs Scraper"
+          description="Scan job boards and save the listings that match your criteria."
+        >
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/jobs-scraper/review" />}
+          >
+            <AppIcon icon={ListChecksIcon} />
+            Review scan
+            {state ? ` (${state.classificationCounts.REJECTED})` : ""}
+          </Button>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/jobs-scraper/settings" />}
+          >
+            <AppIcon icon={SlidersHorizontalIcon} />
+            Edit criteria
+          </Button>
+          <Button
+            onClick={() => scan.mutate()}
+            disabled={scan.isPending || !state || unsetCriteria.length > 0}
+          >
+            <AppIcon
+              icon={
+                state?.lastScannedAt ? ArrowClockwiseIcon : MagnifyingGlassIcon
+              }
+            />
+            {scan.isPending
+              ? "Scanning job boards"
+              : state?.lastScannedAt
+                ? "Scan again"
+                : "Scan jobs"}
+          </Button>
+        </AppHeader>
+      </div>
 
       <div className="grid w-full gap-8 px-6 py-6 lg:grid-cols-4">
         <aside className="grid content-start gap-6 lg:col-span-1">
@@ -150,20 +128,10 @@ export function JobsScraper() {
         <section className="min-w-0 lg:col-span-3">
           {isLoading || scan.isPending ? (
             <LoadingResults />
-          ) : isError ? (
-            <ErrorResults
-              message="Saved jobs could not be loaded."
-              onRetry={() => refetch()}
-            />
+          ) : error ? (
+            <ErrorState error={error} retry={() => void refetch()} />
           ) : scan.isError ? (
-            <ErrorResults
-              message={
-                scan.error instanceof Error
-                  ? scan.error.message
-                  : "The job scan failed."
-              }
-              onRetry={() => scan.mutate()}
-            />
+            <ErrorState error={scan.error} retry={() => scan.mutate()} />
           ) : state?.lastScannedAt ? (
             <JobResults
               state={state}
@@ -172,39 +140,36 @@ export function JobsScraper() {
               onGenerateResume={generateResume}
             />
           ) : (
-            <Empty className="min-h-96 border">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <AppIcon
-                    icon={
-                      unsetCriteria.length > 0
-                        ? SlidersHorizontalIcon
-                        : MagnifyingGlassIcon
-                    }
-                  />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {unsetCriteria.length > 0
-                    ? "Set your criteria"
-                    : "No scan yet"}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {unsetCriteria.length > 0
+            <div className="min-h-96">
+              <EmptyState
+                icon={
+                  unsetCriteria.length > 0
+                    ? SlidersHorizontalIcon
+                    : MagnifyingGlassIcon
+                }
+                title={
+                  unsetCriteria.length > 0 ? "Set Your Criteria" : "No Scan Yet"
+                }
+                description={
+                  unsetCriteria.length > 0
                     ? `Add ${unsetCriteria.join(", ")} to scan. Criteria are private to your account.`
-                    : "Run a scan to save matching jobs to your account."}
-                </EmptyDescription>
-              </EmptyHeader>
-              {unsetCriteria.length > 0 ? (
-                <EmptyContent>
-                  <Button
-                    nativeButton={false}
-                    render={<Link href="/jobs-scraper/settings" />}
-                  >
-                    Edit criteria
-                  </Button>
-                </EmptyContent>
-              ) : null}
-            </Empty>
+                    : "Run a scan to save matching jobs to your account."
+                }
+                action={
+                  unsetCriteria.length > 0 ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={<Link href="/jobs-scraper/settings" />}
+                    >
+                      <AppIcon icon={SlidersHorizontalIcon} />
+                      Edit criteria
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </div>
           )}
         </section>
       </div>
@@ -215,6 +180,11 @@ export function JobsScraper() {
 function CriteriaSummary({ config }: { config: JobScraperConfig }) {
   return (
     <>
+      <CriteriaGroup label="Posted" items={[formatTimeRange(config)]} />
+      <CriteriaGroup
+        label="Location"
+        items={formatLocationModes(config) ? [formatLocationModes(config)] : []}
+      />
       <CriteriaGroup label="Roles" items={config.roles} />
       <CriteriaGroup label="Levels" items={config.includedLevels} />
       <CriteriaGroup
@@ -302,29 +272,28 @@ function JobResults({
     return (
       <div className="grid gap-4">
         <SourceIssues issues={state.sourceIssues} />
-        <Empty className="min-h-96 border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <AppIcon icon={BriefcaseIcon} />
-            </EmptyMedia>
-            <EmptyTitle>No saved jobs</EmptyTitle>
-            <EmptyDescription>
-              The latest scan did not find a listing that passed your criteria.
-              {state.classificationCounts.REJECTED > 0
+        <div className="min-h-96">
+          <EmptyState
+            icon={BriefcaseIcon}
+            title="No Saved Jobs"
+            description={`The latest scan did not find a listing that passed your criteria.${
+              state.classificationCounts.REJECTED > 0
                 ? ` ${state.classificationCounts.REJECTED} listings were rejected — review them to check the verdicts.`
-                : ""}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/jobs-scraper/review" />}
-            >
-              Review scanned jobs
-            </Button>
-          </EmptyContent>
-        </Empty>
+                : ""
+            }`}
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={<Link href="/jobs-scraper/review" />}
+              >
+                <AppIcon icon={ListChecksIcon} />
+                Review scanned jobs
+              </Button>
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -472,32 +441,6 @@ function LoadingResults() {
         ))}
       </div>
     </output>
-  );
-}
-
-function ErrorResults({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
-  return (
-    <Empty className="min-h-96 border border-destructive/30">
-      <EmptyHeader>
-        <EmptyMedia variant="icon" className="text-destructive">
-          <AppIcon icon={MagnifyingGlassIcon} />
-        </EmptyMedia>
-        <EmptyTitle>Jobs unavailable</EmptyTitle>
-        <EmptyDescription>{message}</EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent>
-        <Button variant="outline" onClick={onRetry}>
-          <AppIcon icon={ArrowClockwiseIcon} />
-          Try again
-        </Button>
-      </EmptyContent>
-    </Empty>
   );
 }
 

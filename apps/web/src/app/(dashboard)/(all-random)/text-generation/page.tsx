@@ -1,5 +1,6 @@
 "use client";
 
+import { AppHeader } from "@/components/shared/app-header";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -50,7 +51,7 @@ export default function TextGenerationPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Text Generation</h1>
+      <AppHeader title="Text Generation" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
           <FormField

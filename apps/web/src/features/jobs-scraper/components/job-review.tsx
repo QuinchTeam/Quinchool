@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { AppHeader } from "@/components/shared/app-header";
 import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { AppIcon } from "@/components/ui/icon";
@@ -13,14 +13,8 @@ import {
 } from "@/features/jobs-scraper/components/job-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
 import {
@@ -33,7 +27,7 @@ type Filter = SavedJob["classification"] | "ALL";
 const FILTERS: Filter[] = ["REJECTED", "POTENTIAL", "MATCH", "ALL"];
 
 export function JobReview() {
-  const { isError, isLoading, refetch, state, updateClassification } =
+  const { error, isLoading, refetch, state, updateClassification } =
     useJobsScraper();
   const [filter, setFilter] = useState<Filter>("REJECTED");
   const jobs =
@@ -43,25 +37,21 @@ export function JobReview() {
 
   return (
     <main className="min-h-full">
-      <header className="border-b">
-        <div className="flex w-full flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="grid gap-2">
-            <Link
-              href="/jobs-scraper"
-              className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <AppIcon icon={CaretLeftIcon} className="size-4" />
-              Back to jobs
-            </Link>
-            <h1 className="text-2xl font-semibold">Review scan results</h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Every listing the crawler read, with the verdict the scan gave it.
-              Move anything the scan got wrong — your choice sticks and later
-              scans will not overwrite it.
-            </p>
-          </div>
-        </div>
-      </header>
+      <div className="px-6 pt-6">
+        <AppHeader
+          title="Review Scan Results"
+          description="Every listing the crawler read, with the verdict the scan gave it. Move anything the scan got wrong — your choice sticks and later scans will not overwrite it."
+        >
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/jobs-scraper" />}
+          >
+            <AppIcon icon={CaretLeftIcon} />
+            Back to jobs
+          </Button>
+        </AppHeader>
+      </div>
 
       <div className="grid w-full gap-6 px-6 py-6">
         <div className="flex flex-wrap gap-2">
@@ -90,33 +80,16 @@ export function JobReview() {
 
         {isLoading ? (
           <ReviewLoading />
-        ) : isError ? (
-          <Empty className="min-h-96 border border-destructive/30">
-            <EmptyHeader>
-              <EmptyTitle>Jobs unavailable</EmptyTitle>
-              <EmptyDescription>
-                Saved jobs could not be loaded.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button variant="outline" onClick={() => refetch()}>
-                <AppIcon icon={ArrowClockwiseIcon} />
-                Try again
-              </Button>
-            </EmptyContent>
-          </Empty>
+        ) : error ? (
+          <ErrorState error={error} retry={() => void refetch()} />
         ) : jobs.length === 0 ? (
-          <Empty className="min-h-96 border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <AppIcon icon={BriefcaseIcon} />
-              </EmptyMedia>
-              <EmptyTitle>Nothing here</EmptyTitle>
-              <EmptyDescription>
-                No scanned job carries this verdict yet.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          <div className="min-h-96">
+            <EmptyState
+              icon={BriefcaseIcon}
+              title="Nothing Here"
+              description="No scanned job carries this verdict yet."
+            />
+          </div>
         ) : (
           <div className="grid items-start gap-4 lg:grid-cols-2">
             {jobs.map((job) => (

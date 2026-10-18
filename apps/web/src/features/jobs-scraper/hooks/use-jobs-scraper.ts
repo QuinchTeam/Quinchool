@@ -64,7 +64,7 @@ export function useJobsScraper() {
   });
 
   return {
-    isError: query.isError,
+    error: query.error,
     isLoading: query.isLoading,
     refetch: query.refetch,
     saveConfig,

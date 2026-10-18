@@ -1,5 +1,6 @@
 "use client";
 
+import { AppHeader } from "@/components/shared/app-header";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr/FloppyDisk";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -8,6 +9,7 @@ import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 
+import { ErrorState } from "@/components/shared/error-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -46,7 +48,7 @@ const TIME_RANGE_LABELS: Record<JobScraperConfig["timeRange"], string> = {
 };
 
 export function JobScraperSettings() {
-  const { isError, isLoading, refetch, saveConfig, state } = useJobsScraper();
+  const { error, isLoading, refetch, saveConfig, state } = useJobsScraper();
   const [draft, setDraft] = useState<JobScraperConfig | null>(null);
   const [message, setMessage] = useState("");
   const today = getTodayInManila();
@@ -58,13 +60,10 @@ export function JobScraperSettings() {
     }
   }, [draft, state]);
 
-  if (isError) {
+  if (error) {
     return (
-      <main className="grid w-full gap-4 px-6 py-8">
-        <h1 className="text-xl font-semibold">Scraper settings unavailable</h1>
-        <Button variant="outline" onClick={() => refetch()}>
-          Try again
-        </Button>
+      <main className="grid w-full px-6 py-8">
+        <ErrorState error={error} retry={() => void refetch()} />
       </main>
     );
   }
@@ -118,23 +117,19 @@ export function JobScraperSettings() {
 
   return (
     <main className="min-h-full">
-      <header className="border-b">
-        <div className="flex w-full flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="grid gap-2">
-            <Link
-              href="/jobs-scraper"
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <AppIcon icon={CaretLeftIcon} className="size-4" />
-              Jobs scraper
-            </Link>
-            <div>
-              <h1 className="text-2xl font-semibold">Scraper settings</h1>
-              <p className="text-sm text-muted-foreground">
-                Criteria are private to your account and apply to the next scan.
-              </p>
-            </div>
-          </div>
+      <div className="px-6 pt-6">
+        <AppHeader
+          title="Scraper Settings"
+          description="Criteria are private to your account and apply to the next scan."
+        >
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/jobs-scraper" />}
+          >
+            <AppIcon icon={CaretLeftIcon} />
+            Back to jobs
+          </Button>
           <Button
             type="submit"
             form="job-scraper-settings"
@@ -143,8 +138,8 @@ export function JobScraperSettings() {
             <AppIcon icon={FloppyDiskIcon} />
             {saveConfig.isPending ? "Saving" : "Save settings"}
           </Button>
-        </div>
-      </header>
+        </AppHeader>
+      </div>
 
       <form
         id="job-scraper-settings"

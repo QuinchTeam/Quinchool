@@ -1,4 +1,6 @@
 import { FlowArrowIcon } from "@phosphor-icons/react/dist/ssr/FlowArrow";
+import { WrenchIcon } from "@phosphor-icons/react/dist/ssr/Wrench";
+import { AppHeader } from "@/components/shared/app-header";
 import { SparkleIcon } from "@phosphor-icons/react/dist/ssr/Sparkle";
 import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import Link from "next/link";
@@ -33,7 +35,11 @@ const tools: {
 export function ToolsHub() {
   return (
     <div className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">All Random Tools</h1>
+      <AppHeader
+        icon={WrenchIcon}
+        title="All Random Tools"
+        description="Small tools that do not need a section of their own."
+      />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href} className="group block">
