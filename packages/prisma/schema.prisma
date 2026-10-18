@@ -213,6 +213,9 @@ model CareerProfile {
   projects        Project[]
   skillGroups     SkillGroup[]
   educations      Education[]
+  /// Resume builder choices: { excluded: string[], order: Record<string, number[]> }.
+  /// Keys index into the lists above, so a reordered profile can shift them.
+  resumeLayout    Json?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 

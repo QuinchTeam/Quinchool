@@ -5,6 +5,8 @@ import { ZodValidationPipe } from "../../shared/pipes/zod-validation.pipe";
 import {
   type CareerProfileValues,
   careerProfileSchema,
+  type ResumeLayout,
+  resumeLayoutSchema,
 } from "./career-profile.contract";
 import { CareerProfileService } from "./career-profile.service";
 
@@ -16,6 +18,19 @@ export class CareerProfileController {
   @Get()
   get(@UserId() userId: string): Promise<CareerProfileValues | null> {
     return this.careerProfile.get(userId);
+  }
+
+  @Get("resume-layout")
+  getResumeLayout(@UserId() userId: string): Promise<ResumeLayout> {
+    return this.careerProfile.getResumeLayout(userId);
+  }
+
+  @Put("resume-layout")
+  saveResumeLayout(
+    @UserId() userId: string,
+    @Body(new ZodValidationPipe(resumeLayoutSchema)) layout: ResumeLayout,
+  ): Promise<ResumeLayout> {
+    return this.careerProfile.saveResumeLayout(userId, layout);
   }
 
   @Put()

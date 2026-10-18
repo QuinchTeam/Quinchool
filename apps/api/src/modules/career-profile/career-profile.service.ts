@@ -1,6 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 
-import type { CareerProfileValues } from "./career-profile.contract";
+import {
+  type CareerProfileValues,
+  type ResumeLayout,
+  resumeLayoutSchema,
+} from "./career-profile.contract";
 import { CareerProfileRepository } from "./career-profile.repository";
 
 @Injectable()
@@ -55,6 +59,27 @@ export class CareerProfileService {
         endDate: project.endDate ? toMonth(project.endDate) : "",
       })),
     };
+  }
+
+  /** Empty layout until the builder saves one; stored JSON is re-validated. */
+  async getResumeLayout(userId: string): Promise<ResumeLayout> {
+    const stored = await this.repository.findResumeLayout(userId);
+    const parsed = resumeLayoutSchema.safeParse(stored?.resumeLayout);
+    return parsed.success ? parsed.data : { excluded: [], order: {} };
+  }
+
+  async saveResumeLayout(
+    userId: string,
+    layout: ResumeLayout,
+  ): Promise<ResumeLayout> {
+    const { count } = await this.repository.saveResumeLayout(userId, layout);
+    if (count === 0) {
+      throw new NotFoundException({
+        code: "CAREER_PROFILE_NOT_FOUND",
+        message: "Create a career profile before customizing the resume.",
+      });
+    }
+    return layout;
   }
 
   async save(

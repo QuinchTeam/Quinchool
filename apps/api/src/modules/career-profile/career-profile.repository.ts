@@ -1,7 +1,10 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "../../core/database/prisma/prisma.service";
-import type { CareerProfileValues } from "./career-profile.contract";
+import type {
+  CareerProfileValues,
+  ResumeLayout,
+} from "./career-profile.contract";
 
 const orderedCareerProfile = {
   educations: { orderBy: { sortOrder: "asc" as const } },
@@ -28,6 +31,21 @@ const orderedCareerProfile = {
 @Injectable()
 export class CareerProfileRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findResumeLayout(userId: string) {
+    return this.prisma.careerProfile.findUnique({
+      where: { userId },
+      select: { resumeLayout: true },
+    });
+  }
+
+  /** Count is 0 when the user has no profile to attach the layout to. */
+  saveResumeLayout(userId: string, layout: ResumeLayout) {
+    return this.prisma.careerProfile.updateMany({
+      where: { userId },
+      data: { resumeLayout: layout },
+    });
+  }
 
   findByUserId(userId: string) {
     return this.prisma.careerProfile.findUnique({

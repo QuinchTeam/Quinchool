@@ -162,3 +162,14 @@ export const careerProfileSchema = z
   });
 
 export type CareerProfileValues = z.infer<typeof careerProfileSchema>;
+
+/** The resume builder's hide/reorder choices; see the web app's filterResumeContent. */
+export const resumeLayoutSchema = z.object({
+  excluded: z.array(z.string().max(100)).max(5_000),
+  order: z.record(
+    z.string().max(100),
+    z.array(z.number().int().min(0).max(1_000)).max(1_000),
+  ),
+});
+
+export type ResumeLayout = z.infer<typeof resumeLayoutSchema>;
