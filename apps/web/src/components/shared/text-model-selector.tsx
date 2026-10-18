@@ -191,7 +191,7 @@ function CanvasTextModelSelector({
                   <ModelIcon className="size-4 shrink-0" modelId={model.id} />
                   <span className="min-w-0 flex-1 truncate">{model.name}</span>
                   {selected ? (
-                    <AppIcon className="size-4 shrink-0" icon={CheckIcon} />
+                    <CheckIcon className="size-4 shrink-0" />
                   ) : null}
                 </button>
               );

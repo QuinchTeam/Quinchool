@@ -301,7 +301,39 @@ export default function DesignSystem() {
       >
         <div className="grid w-full max-w-sm gap-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="you@example.com" />
+          <Input id="email" variant="email" placeholder="you@example.com" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" variant="password" placeholder="Password" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="phone">Phone</Label>
+          <Input id="phone" variant="phone" placeholder="+63 912 345 6789" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="link">Link</Label>
+          <Input id="link" variant="link" placeholder="github.com/you" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            variant="location"
+            placeholder="Quezon City, Philippines"
+          />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="date">Date</Label>
+          <Input id="date" variant="date" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="month">Month</Label>
+          <Input id="month" variant="date" type="month" />
+        </div>
+        <div className="grid w-full max-w-sm gap-1.5">
+          <Label htmlFor="plain">Plain</Label>
+          <Input id="plain" placeholder="No variant" />
         </div>
         <div className="grid w-full max-w-sm gap-1.5">
           <Label htmlFor="message">Message</Label>

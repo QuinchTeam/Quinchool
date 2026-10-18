@@ -69,7 +69,7 @@ export function AuthField<T extends FieldValues>({
             <FormLabel>{label}</FormLabel>
           )}
           <FormControl>
-            <Input type={type} autoComplete={autoComplete} {...field} />
+            <Input variant={type} autoComplete={autoComplete} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

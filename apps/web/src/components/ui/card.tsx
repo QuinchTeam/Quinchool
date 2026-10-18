@@ -5,14 +5,22 @@ import { cn } from "@/lib/utils";
 function Card({
   className,
   size = "default",
+  variant = "default",
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: React.ComponentProps<"div"> & {
+  size?: "default" | "sm";
+  // minimal: flat bordered panel for stats and form entries; no Card* slots.
+  variant?: "default" | "minimal";
+}) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        "group/card flex flex-col gap-2 overflow-hidden rounded-xl border border-t-2 bg-muted p-2 text-sm text-card-foreground [--card-spacing:--spacing(6)] data-[size=sm]:[--card-spacing:--spacing(4)]",
+        variant === "minimal"
+          ? "flex min-w-0 flex-col rounded-md border bg-card p-5 text-card-foreground"
+          : "group/card flex flex-col gap-2 overflow-hidden rounded-xl border border-t-2 bg-muted p-2 text-sm text-card-foreground [--card-spacing:--spacing(6)] data-[size=sm]:[--card-spacing:--spacing(4)]",
         className,
       )}
       {...props}

@@ -2,7 +2,6 @@
 
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
-import { AppIcon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
@@ -19,7 +18,7 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none [&>svg]:size-4"
       >
-        <AppIcon icon={CheckIcon} />
+        <CheckIcon size={24} />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );
