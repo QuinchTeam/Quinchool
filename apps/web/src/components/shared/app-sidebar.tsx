@@ -173,8 +173,8 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         {isPending ? (
-          <div className="flex h-16 items-center gap-2 px-3">
-            <Skeleton className="size-8 shrink-0 rounded-full" />
+          <div className="flex h-16 items-center gap-3 px-3">
+            <Skeleton className="size-10 shrink-0 rounded-full group-data-[collapsible=icon]:size-8" />
             <div className="flex flex-1 flex-col gap-1.5 group-data-[collapsible=icon]:hidden">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-3 w-28" />
@@ -186,19 +186,19 @@ export function AppSidebar() {
               render={
                 <SidebarMenuButton
                   size="lg"
-                  className="group-data-[collapsible=icon]:justify-center"
+                  className="gap-3 group-data-[collapsible=icon]:justify-center"
                 />
               }
             >
-              <Avatar size="sm">
+              <Avatar className="group-data-[collapsible=icon]:size-8">
                 {user?.image && (
                   <AvatarImage
                     render={
                       <Image
                         src={user.image}
                         alt={user.name ?? ""}
-                        width={24}
-                        height={24}
+                        width={40}
+                        height={40}
                       />
                     }
                   />
