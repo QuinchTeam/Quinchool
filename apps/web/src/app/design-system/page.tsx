@@ -1,5 +1,6 @@
 "use client";
 
+import { DitherScene } from "@/features/dashboard/components/dither-scene";
 import { BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
 import { CreditCardIcon } from "@phosphor-icons/react/dist/ssr/CreditCard";
 import { GearIcon } from "@phosphor-icons/react/dist/ssr/Gear";
@@ -146,6 +147,7 @@ const sections = [
   { id: "overlays", label: "Overlays" },
   { id: "toast", label: "Sonner" },
   { id: "feedback", label: "Feedback" },
+  { id: "dither", label: "Dither" },
   { id: "sidebar", label: "Sidebar" },
 ];
 
@@ -197,549 +199,584 @@ function Section({
 
 export default function DesignSystem() {
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-10 p-6 sm:p-10">
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold">Design System</h1>
-          <p className="text-sm text-muted-foreground">
-            Every shadcn component installed in this project, in one place.
-          </p>
-        </div>
-        <ModeToggle />
-      </header>
-
-      <nav className="flex flex-wrap gap-2">
-        {sections.map((item) => (
-          <Badge
-            key={item.id}
-            variant="outline"
-            // biome-ignore lint/a11y/useAnchorContent: label is passed as Badge children and merged into the anchor via the render prop
-            render={<a href={`#${item.id}`} />}
-          >
-            {item.label}
-          </Badge>
-        ))}
-      </nav>
-
-      <Separator />
-
-      <Section
-        id="buttons"
-        title="Button"
-        description="Variants, sizes, and states"
-      >
-        <Button>Default</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="outline">Outline</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="destructive">Destructive</Button>
-        <Button variant="link">Link</Button>
-        <Button size="sm">Small</Button>
-        <Button size="lg">Large</Button>
-        <Button size="icon" aria-label="Add item">
-          <AppIcon icon={PlusIcon} />
-        </Button>
-        <Button disabled>
-          <Spinner />
-          Loading
-        </Button>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="badges"
-        title="Badge"
-        description="Status and label variants"
-      >
-        <Badge>Default</Badge>
-        <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="outline">Outline</Badge>
-        <Badge variant="destructive">Destructive</Badge>
-        <Badge variant="ghost">Ghost</Badge>
-        <Badge variant="link">Link</Badge>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="avatars"
-        title="Avatar"
-        description="Single avatars and groups"
-      >
-        <Avatar size="sm">
-          <AvatarFallback>SM</AvatarFallback>
-        </Avatar>
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <Avatar size="lg">
-          <AvatarFallback>LG</AvatarFallback>
-        </Avatar>
-        <AvatarGroup>
-          <Avatar>
-            <AvatarFallback>A</AvatarFallback>
-          </Avatar>
-          <Avatar>
-            <AvatarFallback>B</AvatarFallback>
-          </Avatar>
-          <Avatar>
-            <AvatarFallback>C</AvatarFallback>
-          </Avatar>
-          <AvatarGroupCount>+3</AvatarGroupCount>
-        </AvatarGroup>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="form"
-        title="Form"
-        description="Input, textarea, label, select, checkbox, and radio group"
-        className="flex-col items-start gap-6"
-      >
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" variant="email" placeholder="you@example.com" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" variant="password" placeholder="Password" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" variant="phone" placeholder="+63 912 345 6789" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="link">Link</Label>
-          <Input id="link" variant="link" placeholder="github.com/you" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            variant="location"
-            placeholder="Quezon City, Philippines"
-          />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="date">Date</Label>
-          <Input id="date" variant="date" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="month">Month</Label>
-          <Input id="month" variant="date" type="month" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="plain">Plain</Label>
-          <Input id="plain" placeholder="No variant" />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="message">Message</Label>
-          <Textarea id="message" placeholder="Type your message here." />
-        </div>
-        <div className="grid w-full max-w-sm gap-1.5">
-          <Label htmlFor="fruit">Favorite fruit</Label>
-          <Select defaultValue="blueberry">
-            <SelectTrigger id="fruit" className="w-full">
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Fruits</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="terms" defaultChecked />
-          <Label htmlFor="terms">Accept terms and conditions</Label>
-        </div>
-        <RadioGroup defaultValue="comfortable" className="gap-2">
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="default" id="r1" />
-            <Label htmlFor="r1">Default</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="comfortable" id="r2" />
-            <Label htmlFor="r2">Comfortable</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="compact" id="r3" />
-            <Label htmlFor="r3">Compact</Label>
-          </div>
-        </RadioGroup>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="toggles"
-        title="Toggle"
-        description="Toggle, toggle group, and date picker"
-      >
-        <Toggle aria-label="Toggle bold">
-          <span className="font-bold">B</span>
-        </Toggle>
-        <Toggle aria-label="Toggle italic" variant="outline">
-          <span className="italic">I</span>
-        </Toggle>
-        <ToggleGroup defaultValue={["center"]}>
-          <ToggleGroupItem value="left" aria-label="Align left">
-            Left
-          </ToggleGroupItem>
-          <ToggleGroupItem value="center" aria-label="Align center">
-            Center
-          </ToggleGroupItem>
-          <ToggleGroupItem value="right" aria-label="Align right">
-            Right
-          </ToggleGroupItem>
-        </ToggleGroup>
-        <DatePicker />
-      </Section>
-
-      <Separator />
-
-      <Section id="tabs" title="Tabs" className="flex-col items-stretch">
-        <Tabs defaultValue="account" className="w-full max-w-sm">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="password">Password</TabsTrigger>
-          </TabsList>
-          <TabsContent value="account">
-            <p className="text-sm text-muted-foreground">
-              Update your account details here.
-            </p>
-          </TabsContent>
-          <TabsContent value="password">
-            <p className="text-sm text-muted-foreground">
-              Change your password here.
-            </p>
-          </TabsContent>
-        </Tabs>
-      </Section>
-
-      <Separator />
-
-      <Section id="card" title="Card" className="flex-col items-stretch">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-            <CardDescription>You have 3 unread messages.</CardDescription>
-            <CardAction>
-              <Badge variant="secondary">New</Badge>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Manage your notification preferences from the settings page.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline">Dismiss</Button>
-            <Button>View</Button>
-          </CardFooter>
-        </Card>
-      </Section>
-
-      <Separator />
-
-      <Section id="table" title="Table" className="flex-col items-stretch">
-        <Table>
-          <TableCaption>A list of recent invoices.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-24">Invoice</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Method</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell className="font-medium">{invoice.id}</TableCell>
-                <TableCell>
-                  <Badge variant={invoiceStatusVariant[invoice.status]}>
-                    {invoice.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>{invoice.method}</TableCell>
-                <TableCell className="text-right">{invoice.amount}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="pagination"
-        title="Pagination"
-        className="flex-col items-stretch"
-      >
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                2
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">3</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </Section>
-
-      <Separator />
-
-      <Section
-        id="overlays"
-        title="Overlays"
-        description="Dialog, sheet, popover, tooltip, and dropdown menu"
-      >
-        <Dialog>
-          <DialogTrigger render={<Button variant="outline" />}>
-            Open Dialog
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-1.5">
-              <Label htmlFor="dialog-name">Name</Label>
-              <Input id="dialog-name" defaultValue="Cyril" />
+    <div className="mx-auto max-w-5xl p-6 sm:p-10">
+      <Card>
+        <CardContent className="flex flex-col gap-10 sm:p-10">
+          <header className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="font-heading text-2xl font-semibold">
+                Design System
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Every component in this project, in one place.
+              </p>
             </div>
-            <DialogFooter>
-              <DialogClose render={<Button variant="outline" />}>
-                Cancel
-              </DialogClose>
-              <Button>Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <ModeToggle />
+          </header>
 
-        <Sheet>
-          <SheetTrigger render={<Button variant="outline" />}>
-            Open Sheet
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Edit profile</SheetTitle>
-              <SheetDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </SheetDescription>
-            </SheetHeader>
-            <SheetFooter>
-              <SheetClose render={<Button />}>Close</SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+          <nav className="flex flex-wrap gap-2">
+            {sections.map((item) => (
+              <Badge
+                key={item.id}
+                variant="outline"
+                // biome-ignore lint/a11y/useAnchorContent: label is passed as Badge children and merged into the anchor via the render prop
+                render={<a href={`#${item.id}`} />}
+              >
+                {item.label}
+              </Badge>
+            ))}
+          </nav>
 
-        <Popover>
-          <PopoverTrigger render={<Button variant="outline" />}>
-            Open Popover
-          </PopoverTrigger>
-          <PopoverContent>
-            <p className="text-sm text-muted-foreground">
-              Place content for the popover here.
-            </p>
-          </PopoverContent>
-        </Popover>
+          <Separator />
 
-        <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" />}>
-            Hover me
-          </TooltipTrigger>
-          <TooltipContent>Tooltip content</TooltipContent>
-        </Tooltip>
+          <Section
+            id="buttons"
+            title="Button"
+            description="Variants, sizes, and states"
+          >
+            <Button>Default</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="destructive">Destructive</Button>
+            <Button variant="link">Link</Button>
+            <Button size="sm">Small</Button>
+            <Button size="lg">Large</Button>
+            <Button size="icon" aria-label="Add item">
+              <AppIcon icon={PlusIcon} />
+            </Button>
+            <Button disabled>
+              <Spinner />
+              Loading
+            </Button>
+          </Section>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="outline" />}>
-            Open Menu
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <AppIcon icon={UserIcon} />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <AppIcon icon={CreditCardIcon} />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <AppIcon icon={GearIcon} />
-                Settings
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              <AppIcon icon={SignOutIcon} />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </Section>
+          <Separator />
 
-      <Separator />
+          <Section
+            id="badges"
+            title="Badge"
+            description="Status and label variants"
+          >
+            <Badge>Default</Badge>
+            <Badge variant="secondary">Secondary</Badge>
+            <Badge variant="outline">Outline</Badge>
+            <Badge variant="destructive">Destructive</Badge>
+            <Badge variant="ghost">Ghost</Badge>
+            <Badge variant="link">Link</Badge>
+          </Section>
 
-      <Section id="toast" title="Sonner" description="Toast notifications">
-        <Button
-          variant="outline"
-          onClick={() =>
-            toast("Event has been created", {
-              description: "Sunday, June 14, 2026 at 9:00 AM",
-              action: {
-                label: "Undo",
-                onClick: () => toast.dismiss(),
-              },
-            })
-          }
-        >
-          Show Toast
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => toast.success("Saved successfully")}
-        >
-          Success
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => toast.error("Something went wrong")}
-        >
-          Error
-        </Button>
-      </Section>
+          <Separator />
 
-      <Separator />
+          <Section
+            id="avatars"
+            title="Avatar"
+            description="Single avatars and groups"
+          >
+            <Avatar size="sm">
+              <AvatarFallback>SM</AvatarFallback>
+            </Avatar>
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <Avatar size="lg">
+              <AvatarFallback>LG</AvatarFallback>
+            </Avatar>
+            <AvatarGroup>
+              <Avatar>
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarFallback>B</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarFallback>C</AvatarFallback>
+              </Avatar>
+              <AvatarGroupCount>+3</AvatarGroupCount>
+            </AvatarGroup>
+          </Section>
 
-      <Section
-        id="feedback"
-        title="Feedback"
-        description="Spinner, skeleton, and empty states"
-        className="flex-col items-start gap-6"
-      >
-        <Spinner className="size-6" />
+          <Separator />
 
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-64" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-10 rounded-full" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </div>
-
-        <Empty className="w-full border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <AppIcon icon={MagnifyingGlassIcon} />
-            </EmptyMedia>
-            <EmptyTitle>No results found</EmptyTitle>
-            <EmptyDescription>
-              Try adjusting your search or filter to find what you&apos;re
-              looking for.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button variant="outline">Clear filters</Button>
-          </EmptyContent>
-        </Empty>
-      </Section>
-
-      <Separator />
-
-      <Section id="sidebar" title="Sidebar" className="flex-col items-stretch">
-        <SidebarProvider className="h-96 min-h-0 w-full overflow-hidden rounded-lg border">
-          <Sidebar collapsible="none" className="border-r">
-            <SidebarHeader>
-              <div className="flex items-center gap-2 px-2 py-1">
-                <AppIcon icon={HouseIcon} />
-                <span className="font-heading text-sm font-medium">
-                  Quinchool
-                </span>
+          <Section
+            id="form"
+            title="Form"
+            description="Input, textarea, label, select, checkbox, and radio group"
+            className="flex-col items-start gap-6"
+          >
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" variant="email" placeholder="you@example.com" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" variant="password" placeholder="Password" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                variant="phone"
+                placeholder="+63 912 345 6789"
+              />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="link">Link</Label>
+              <Input id="link" variant="link" placeholder="github.com/you" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                variant="location"
+                placeholder="Quezon City, Philippines"
+              />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="date">Date</Label>
+              <Input id="date" variant="date" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="month">Month</Label>
+              <Input id="month" variant="date" type="month" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="plain">Plain</Label>
+              <Input id="plain" placeholder="No variant" />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="message">Message</Label>
+              <Textarea id="message" placeholder="Type your message here." />
+            </div>
+            <div className="grid w-full max-w-sm gap-1.5">
+              <Label htmlFor="fruit">Favorite fruit</Label>
+              <Select defaultValue="blueberry">
+                <SelectTrigger id="fruit" className="w-full">
+                  <SelectValue placeholder="Select a fruit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Fruits</SelectLabel>
+                    <SelectItem value="apple">Apple</SelectItem>
+                    <SelectItem value="banana">Banana</SelectItem>
+                    <SelectItem value="blueberry">Blueberry</SelectItem>
+                    <SelectItem value="grapes">Grapes</SelectItem>
+                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox id="terms" defaultChecked />
+              <Label htmlFor="terms">Accept terms and conditions</Label>
+            </div>
+            <RadioGroup defaultValue="comfortable" className="gap-2">
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="default" id="r1" />
+                <Label htmlFor="r1">Default</Label>
               </div>
-            </SidebarHeader>
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Platform</SidebarGroupLabel>
-                <SidebarGroupContent>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="comfortable" id="r2" />
+                <Label htmlFor="r2">Comfortable</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="compact" id="r3" />
+                <Label htmlFor="r3">Compact</Label>
+              </div>
+            </RadioGroup>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="toggles"
+            title="Toggle"
+            description="Toggle, toggle group, and date picker"
+          >
+            <Toggle aria-label="Toggle bold">
+              <span className="font-bold">B</span>
+            </Toggle>
+            <Toggle aria-label="Toggle italic" variant="outline">
+              <span className="italic">I</span>
+            </Toggle>
+            <ToggleGroup defaultValue={["center"]}>
+              <ToggleGroupItem value="left" aria-label="Align left">
+                Left
+              </ToggleGroupItem>
+              <ToggleGroupItem value="center" aria-label="Align center">
+                Center
+              </ToggleGroupItem>
+              <ToggleGroupItem value="right" aria-label="Align right">
+                Right
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <DatePicker />
+          </Section>
+
+          <Separator />
+
+          <Section id="tabs" title="Tabs" className="flex-col items-stretch">
+            <Tabs defaultValue="account" className="w-full max-w-sm">
+              <TabsList>
+                <TabsTrigger value="account">Account</TabsTrigger>
+                <TabsTrigger value="password">Password</TabsTrigger>
+              </TabsList>
+              <TabsContent value="account">
+                <p className="text-sm text-muted-foreground">
+                  Update your account details here.
+                </p>
+              </TabsContent>
+              <TabsContent value="password">
+                <p className="text-sm text-muted-foreground">
+                  Change your password here.
+                </p>
+              </TabsContent>
+            </Tabs>
+          </Section>
+
+          <Separator />
+
+          <Section id="card" title="Card" className="flex-col items-stretch">
+            <Card className="w-full max-w-sm">
+              <CardHeader>
+                <CardTitle>Notifications</CardTitle>
+                <CardDescription>You have 3 unread messages.</CardDescription>
+                <CardAction>
+                  <Badge variant="secondary">New</Badge>
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Manage your notification preferences from the settings page.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline">Dismiss</Button>
+                <Button>View</Button>
+              </CardFooter>
+            </Card>
+          </Section>
+
+          <Separator />
+
+          <Section id="table" title="Table" className="flex-col items-stretch">
+            <Table>
+              <TableCaption>A list of recent invoices.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-24">Invoice</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell className="font-medium">{invoice.id}</TableCell>
+                    <TableCell>
+                      <Badge variant={invoiceStatusVariant[invoice.status]}>
+                        {invoice.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{invoice.method}</TableCell>
+                    <TableCell className="text-right">
+                      {invoice.amount}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="pagination"
+            title="Pagination"
+            className="flex-col items-stretch"
+          >
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious href="#" />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">1</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#" isActive>
+                    2
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">3</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext href="#" />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="overlays"
+            title="Overlays"
+            description="Dialog, sheet, popover, tooltip, and dropdown menu"
+          >
+            <Dialog>
+              <DialogTrigger render={<Button variant="outline" />}>
+                Open Dialog
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit profile</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your profile here. Click save when
+                    you&apos;re done.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="dialog-name">Name</Label>
+                  <Input id="dialog-name" defaultValue="Cyril" />
+                </div>
+                <DialogFooter>
+                  <DialogClose render={<Button variant="outline" />}>
+                    Cancel
+                  </DialogClose>
+                  <Button>Save changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Sheet>
+              <SheetTrigger render={<Button variant="outline" />}>
+                Open Sheet
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Edit profile</SheetTitle>
+                  <SheetDescription>
+                    Make changes to your profile here. Click save when
+                    you&apos;re done.
+                  </SheetDescription>
+                </SheetHeader>
+                <SheetFooter>
+                  <SheetClose render={<Button />}>Close</SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+
+            <Popover>
+              <PopoverTrigger render={<Button variant="outline" />}>
+                Open Popover
+              </PopoverTrigger>
+              <PopoverContent>
+                <p className="text-sm text-muted-foreground">
+                  Place content for the popover here.
+                </p>
+              </PopoverContent>
+            </Popover>
+
+            <Tooltip>
+              <TooltipTrigger render={<Button variant="outline" />}>
+                Hover me
+              </TooltipTrigger>
+              <TooltipContent>Tooltip content</TooltipContent>
+            </Tooltip>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="outline" />}>
+                Open Menu
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <AppIcon icon={UserIcon} />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <AppIcon icon={CreditCardIcon} />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <AppIcon icon={GearIcon} />
+                    Settings
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive">
+                  <AppIcon icon={SignOutIcon} />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Section>
+
+          <Separator />
+
+          <Section id="toast" title="Sonner" description="Toast notifications">
+            <Button
+              variant="outline"
+              onClick={() =>
+                toast("Event has been created", {
+                  description: "Sunday, June 14, 2026 at 9:00 AM",
+                  action: {
+                    label: "Undo",
+                    onClick: () => toast.dismiss(),
+                  },
+                })
+              }
+            >
+              Show Toast
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => toast.success("Saved successfully")}
+            >
+              Success
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => toast.error("Something went wrong")}
+            >
+              Error
+            </Button>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="dither"
+            title="Dither Scene"
+            description="Home greeting icon, one per time of day"
+          >
+            {(["morning", "afternoon", "evening", "night"] as const).map(
+              (period) => (
+                <div key={period} className="grid justify-items-center gap-2">
+                  <DitherScene period={period} />
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {period}
+                  </span>
+                </div>
+              ),
+            )}
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="feedback"
+            title="Feedback"
+            description="Spinner, skeleton, and empty states"
+            className="flex-col items-start gap-6"
+          >
+            <Spinner className="size-6" />
+
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-64" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-10 rounded-full" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+
+            <Empty className="w-full border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <AppIcon icon={MagnifyingGlassIcon} />
+                </EmptyMedia>
+                <EmptyTitle>No results found</EmptyTitle>
+                <EmptyDescription>
+                  Try adjusting your search or filter to find what you&apos;re
+                  looking for.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="outline">Clear filters</Button>
+              </EmptyContent>
+            </Empty>
+          </Section>
+
+          <Separator />
+
+          <Section
+            id="sidebar"
+            title="Sidebar"
+            className="flex-col items-stretch"
+          >
+            <SidebarProvider className="h-96 min-h-0 w-full overflow-hidden rounded-lg border">
+              <Sidebar collapsible="none" className="border-r">
+                <SidebarHeader>
+                  <div className="flex items-center gap-2 px-2 py-1">
+                    <AppIcon icon={HouseIcon} />
+                    <span className="font-heading text-sm font-medium">
+                      Quinchool
+                    </span>
+                  </div>
+                </SidebarHeader>
+                <SidebarContent>
+                  <SidebarGroup>
+                    <SidebarGroupLabel>Platform</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton isActive>
+                            <AppIcon icon={HouseIcon} />
+                            <span>Dashboard</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton>
+                            <AppIcon icon={BellIcon} />
+                            <span>Notifications</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton>
+                            <AppIcon icon={GearIcon} />
+                            <span>Settings</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                </SidebarContent>
+                <SidebarFooter>
                   <SidebarMenu>
                     <SidebarMenuItem>
-                      <SidebarMenuButton isActive>
-                        <AppIcon icon={HouseIcon} />
-                        <span>Dashboard</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
                       <SidebarMenuButton>
-                        <AppIcon icon={BellIcon} />
-                        <span>Notifications</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton>
-                        <AppIcon icon={GearIcon} />
-                        <span>Settings</span>
+                        <AppIcon icon={UserIcon} />
+                        <span>Account</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <AppIcon icon={UserIcon} />
-                    <span>Account</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarFooter>
-          </Sidebar>
-          <SidebarInset className="flex flex-col gap-2 p-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <span className="text-sm text-muted-foreground">
-                Sidebar content area
-              </span>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </Section>
+                </SidebarFooter>
+              </Sidebar>
+              <SidebarInset className="flex flex-col gap-2 p-4">
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger />
+                  <span className="text-sm text-muted-foreground">
+                    Sidebar content area
+                  </span>
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
+          </Section>
+        </CardContent>
+      </Card>
     </div>
   );
 }
