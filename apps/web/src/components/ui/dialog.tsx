@@ -2,7 +2,6 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
-import { AppIcon } from "@/components/ui/icon";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -53,24 +52,26 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-8 text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 flex w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border border-t-2 bg-muted p-2 text-sm text-popover-foreground shadow-lg duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className,
         )}
         {...props}
       >
-        {children}
+        {/* Muted shell around a card-colored panel, matching `Card` + `CardContent`. */}
+        <div className="grid gap-6 rounded-lg bg-card p-6">{children}</div>
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={
               <Button
                 variant="ghost"
-                className="absolute top-5 right-5"
+                className="absolute top-6 right-6"
                 size="icon-sm"
               />
             }
           >
-            <AppIcon icon={XIcon} />
+            {/* Deliberate exception to the duotone rule: a bare X reads cleaner. */}
+            <XIcon size={24} />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

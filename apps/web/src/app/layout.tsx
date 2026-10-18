@@ -38,7 +38,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${geistPixel.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col overflow-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -48,7 +48,7 @@ export default function RootLayout({
           <TanstackQueryProvider>
             <TooltipProvider>
               {children}
-              <Toaster />
+              <Toaster position="top-center" />
             </TooltipProvider>
           </TanstackQueryProvider>
         </ThemeProvider>

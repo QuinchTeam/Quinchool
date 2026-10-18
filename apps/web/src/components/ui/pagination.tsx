@@ -1,6 +1,6 @@
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
-import { DotsThreeCircleIcon } from "@phosphor-icons/react/dist/ssr/DotsThreeCircle";
+import { DotsThreeIcon } from "@phosphor-icons/react/dist/ssr/DotsThree";
 import { AppIcon } from "@/components/ui/icon";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,7 @@ function PaginationEllipsis({
       )}
       {...props}
     >
-      <AppIcon icon={DotsThreeCircleIcon} />
+      <DotsThreeIcon size={24} />
       <span className="sr-only">More pages</span>
     </span>
   );
