@@ -73,10 +73,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn(
-        "grow rounded-lg bg-card p-(--card-spacing)",
-        className,
-      )}
+      className={cn("grow rounded-lg bg-card p-(--card-spacing)", className)}
       {...props}
     />
   );

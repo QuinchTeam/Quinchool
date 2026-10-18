@@ -20,9 +20,7 @@ export function useTransactions(
   page = 1,
   limit = 20,
 ) {
-  return useQuery(
-    transactionsOptions(useFinanceScope(), filters, page, limit),
-  );
+  return useQuery(transactionsOptions(useFinanceScope(), filters, page, limit));
 }
 
 export function useSummary(period: SummaryPeriod) {

@@ -131,7 +131,11 @@
   * {
     @apply border-border outline-ring/20;
     /* Transparent track, theme-aware thumb; also drops Chrome's arrow buttons. */
-    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent)
+    scrollbar-color: color-mix(
+        in oklab,
+        var(--muted-foreground) 40%,
+        transparent
+      )
       transparent;
   }
   body {
