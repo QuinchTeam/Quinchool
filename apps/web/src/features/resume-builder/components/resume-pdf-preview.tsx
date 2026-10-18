@@ -1,6 +1,9 @@
 "use client";
 
+import { ResumeHeaderActions } from "@/features/resume-builder/components/resume-header-actions";
 import { DownloadSimpleIcon } from "@phosphor-icons/react/dist/ssr/DownloadSimple";
+import { MagnifyingGlassMinusIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlassMinus";
+import { MagnifyingGlassPlusIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlassPlus";
 import { PrinterIcon } from "@phosphor-icons/react/dist/ssr/Printer";
 import { AppIcon } from "@/components/ui/icon";
 import { useEffect, useState } from "react";
@@ -10,6 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 import { resumeFileName } from "@/features/resume-builder/lib/resume";
 import { observeOperation } from "@/lib/observability/operation";
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
 
 const previewClassName =
   "mx-auto block h-a4-height w-a4-width shrink-0 border border-black/20 bg-white shadow-sm";
@@ -134,6 +141,12 @@ export function ResumePdfPreview({
 }) {
   const [pdfError, setPdfError] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  // Round so repeated steps land on clean values (0.7, not 0.7000000000000001).
+  const stepZoom = (delta: number) =>
+    setZoom((z) =>
+      Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 10) / 10)),
+    );
 
   useEffect(() => {
     if (!profile) return;
@@ -185,29 +198,66 @@ export function ResumePdfPreview({
   }
 
   return (
-    <div className="min-w-0 flex-1">
-      {!isLoading && (
-        <div className="mb-4 flex justify-end gap-2">
+    <div className="w-full min-w-0 flex-1 xl:h-full xl:overflow-y-auto">
+      <ResumeHeaderActions>
+        {!isLoading && (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!pdfUrl}
+              onClick={downloadPdf}
+            >
+              <AppIcon icon={DownloadSimpleIcon} />
+              {pdfUrl ? "Download PDF" : "Generating PDF..."}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!pdfUrl}
+              onClick={openPdf}
+            >
+              <AppIcon icon={PrinterIcon} />
+              Open / Print
+            </Button>
+          </>
+        )}
+      </ResumeHeaderActions>
+      {/* Sticks to the top of the scrolling preview so zoom is always reachable. */}
+      <div className="sticky top-0 z-10 flex justify-end pb-2">
+        <div className="flex items-center gap-1 rounded-lg border bg-card p-1">
           <Button
             type="button"
-            variant="outline"
-            disabled={!pdfUrl}
-            onClick={downloadPdf}
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Zoom out"
+            disabled={zoom <= ZOOM_MIN}
+            onClick={() => stepZoom(-ZOOM_STEP)}
           >
-            <AppIcon icon={DownloadSimpleIcon} />
-            {pdfUrl ? "Download PDF" : "Generating PDF..."}
+            <AppIcon icon={MagnifyingGlassMinusIcon} />
           </Button>
           <Button
             type="button"
-            variant="outline"
-            disabled={!pdfUrl}
-            onClick={openPdf}
+            variant="ghost"
+            size="xs"
+            aria-label="Reset zoom"
+            className="min-w-14 font-mono tabular-nums"
+            onClick={() => setZoom(1)}
           >
-            <AppIcon icon={PrinterIcon} />
-            Open / Print
+            {Math.round(zoom * 100)}%
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Zoom in"
+            disabled={zoom >= ZOOM_MAX}
+            onClick={() => stepZoom(ZOOM_STEP)}
+          >
+            <AppIcon icon={MagnifyingGlassPlusIcon} />
           </Button>
         </div>
-      )}
+      </div>
       <div className="w-full overflow-x-auto pb-8">
         <div className="min-w-a4-width">
           {isLoading || (!pdfUrl && !pdfError) ? (
@@ -227,7 +277,14 @@ export function ResumePdfPreview({
             </div>
           ) : (
             <iframe
+              // Chrome's PDF viewer ignores CSS zoom and just gets cropped, so
+              // zoom resizes the frame and remounts it: view=FitH refits the page.
+              key={zoom}
               className={previewClassName}
+              style={{
+                width: `calc(var(--spacing-a4-width) * ${zoom})`,
+                height: `calc(var(--spacing-a4-height) * ${zoom})`,
+              }}
               src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
               title="Generated resume PDF"
             />

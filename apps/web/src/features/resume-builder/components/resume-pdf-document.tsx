@@ -10,8 +10,10 @@ import {
 import {
   displayUrl,
   formatDateRange,
+  RESUME_CONTACT_FIELDS,
+  type ResumeContactField,
+  type ResumeProfile,
 } from "@/features/resume-builder/lib/resume";
-import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 
 const styles = StyleSheet.create({
   page: {
@@ -143,26 +145,25 @@ export function ResumePdfDocument({
   profile,
 }: {
   onRender?: React.ComponentProps<typeof Document>["onRender"];
-  profile: CareerProfileValues;
+  profile: ResumeProfile;
 }) {
-  const contacts = [
-    { label: profile.email, src: `mailto:${profile.email}` },
-    ...(profile.linkedin
-      ? [{ label: displayUrl(profile.linkedin), src: profile.linkedin }]
-      : []),
-    ...(profile.personalWebsite
-      ? [
-          {
-            label: displayUrl(profile.personalWebsite),
-            src: profile.personalWebsite,
-          },
-        ]
-      : []),
-    ...(profile.github
-      ? [{ label: displayUrl(profile.github), src: profile.github }]
-      : []),
-    { label: profile.contactNumber, src: `tel:${profile.contactNumber}` },
-  ];
+  const links: Record<ResumeContactField, string> = {
+    email: profile.email && `mailto:${profile.email}`,
+    linkedin: profile.linkedin,
+    personalWebsite: profile.personalWebsite,
+    github: profile.github,
+    contactNumber: profile.contactNumber && `tel:${profile.contactNumber}`,
+  };
+  // Hidden contacts arrive blank from the builder, so blanks are skipped.
+  const contacts = (profile.contactOrder ?? RESUME_CONTACT_FIELDS)
+    .filter((field) => profile[field])
+    .map((field) => ({
+      label:
+        field === "email" || field === "contactNumber"
+          ? profile[field]
+          : displayUrl(profile[field]),
+      src: links[field],
+    }));
 
   return (
     <Document

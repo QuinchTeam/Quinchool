@@ -157,43 +157,106 @@ export function resumeFileName(name: string) {
   return `${base || "resume"}-resume.pdf`;
 }
 
+/** Default contact order on the PDF header. */
+export const RESUME_CONTACT_FIELDS = [
+  "email",
+  "linkedin",
+  "personalWebsite",
+  "github",
+  "contactNumber",
+] as const;
+
+export type ResumeContactField = (typeof RESUME_CONTACT_FIELDS)[number];
+
+/** The profile as rendered: the builder can also reorder contacts. */
+export type ResumeProfile = CareerProfileValues & {
+  contactOrder?: ResumeContactField[];
+};
+
+/** Picks and orders items by index, skipping excluded `${prefix}:${index}` keys. */
+function pick<T>(
+  items: readonly T[],
+  prefix: string,
+  excluded: ReadonlySet<string>,
+  order: Readonly<Record<string, readonly number[]>>,
+): T[] {
+  return getResumeItemOrder(items.length, order[prefix])
+    .filter((index) => !excluded.has(`${prefix}:${index}`))
+    .flatMap((index) => (index in items ? [items[index] as T] : []));
+}
+
+/**
+ * Applies the builder's choices. Hide keys: `section:<contact|skill|exp|proj|edu>`
+ * for a whole section, `exp:<i>` / `proj:<i>` / `skill:<i>` for a whole entry,
+ * `contact:<i>` (index into RESUME_CONTACT_FIELDS), `edu:<i>`,
+ * `exp:<i>:<j>`, `proj:<i>:<j>`, `skill:<i>:<j>`; `order` uses the same
+ * prefixes without the last index (`edu`, `exp:<i>`, ...).
+ */
 export function filterResumeContent(
   profile: CareerProfileValues,
-  excludedBullets: ReadonlySet<string>,
-  excludedSkills: ReadonlySet<string>,
-  bulletOrder: Readonly<Record<number, readonly number[]>> = {},
-  skillOrder: Readonly<Record<number, readonly number[]>> = {},
-): CareerProfileValues {
+  excluded: ReadonlySet<string>,
+  order: Readonly<Record<string, readonly number[]>> = {},
+): ResumeProfile {
+  const shown = (section: string) => !excluded.has(`section:${section}`);
+  const contacts = Object.fromEntries(
+    RESUME_CONTACT_FIELDS.map((field, i) => [
+      field,
+      shown("contact") && !excluded.has(`contact:${i}`) ? profile[field] : "",
+    ]),
+  );
   return {
     ...profile,
-    experiences: profile.experiences.map((experience, experienceIndex) => ({
-      ...experience,
-      bullets: getResumeItemOrder(
-        experience.bullets.length,
-        bulletOrder[experienceIndex],
-      )
-        .filter(
-          (bulletIndex) =>
-            !excludedBullets.has(`${experienceIndex}:${bulletIndex}`),
+    ...contacts,
+    contactOrder: getResumeItemOrder(
+      RESUME_CONTACT_FIELDS.length,
+      order.contact,
+    ).map((i) => RESUME_CONTACT_FIELDS[i] as ResumeContactField),
+    educations: shown("edu")
+      ? pick(profile.educations, "edu", excluded, order)
+      : [],
+    experiences: shown("exp")
+      ? profile.experiences.flatMap((experience, i) =>
+          excluded.has(`exp:${i}`)
+            ? []
+            : [
+                {
+                  ...experience,
+                  bullets: pick(
+                    experience.bullets,
+                    `exp:${i}`,
+                    excluded,
+                    order,
+                  ),
+                },
+              ],
         )
-        .flatMap((bulletIndex) => {
-          const bullet = experience.bullets[bulletIndex];
-          return bullet ? [bullet] : [];
-        }),
-    })),
-    skillGroups: profile.skillGroups
-      .map((group, groupIndex) => ({
-        ...group,
-        skills: getResumeItemOrder(group.skills.length, skillOrder[groupIndex])
-          .filter(
-            (skillIndex) => !excludedSkills.has(`${groupIndex}:${skillIndex}`),
+      : [],
+    projects: shown("proj")
+      ? profile.projects.flatMap((project, i) =>
+          excluded.has(`proj:${i}`)
+            ? []
+            : [
+                {
+                  ...project,
+                  bullets: pick(project.bullets, `proj:${i}`, excluded, order),
+                },
+              ],
+        )
+      : [],
+    skillGroups: shown("skill")
+      ? profile.skillGroups
+          .flatMap((group, i) =>
+            excluded.has(`skill:${i}`)
+              ? []
+              : [
+                  {
+                    ...group,
+                    skills: pick(group.skills, `skill:${i}`, excluded, order),
+                  },
+                ],
           )
-          .flatMap((skillIndex) => {
-            const skill = group.skills[skillIndex];
-            return skill === undefined ? [] : [skill];
-          }),
-      }))
-      .filter((group) => group.skills.length > 0),
+          .filter((group) => group.skills.length > 0)
+      : [],
   };
 }
 

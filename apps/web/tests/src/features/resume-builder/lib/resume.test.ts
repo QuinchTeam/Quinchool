@@ -57,10 +57,8 @@ test("filters and orders session-only resume bullets and skills", () => {
   };
   const filtered = filterResumeContent(
     profile,
-    new Set(["0:1"]),
-    new Set(["0:1", "1:0"]),
-    { 0: [2, 1, 0] },
-    { 0: [2, 0, 1] },
+    new Set(["exp:0:1", "skill:0:1", "skill:1:0", "contact:0"]),
+    { "exp:0": [2, 1, 0], "skill:0": [2, 0, 1], contact: [4, 3] },
   );
 
   assert.deepEqual(filtered.experiences[0]?.bullets, [
@@ -69,6 +67,15 @@ test("filters and orders session-only resume bullets and skills", () => {
   ]);
   assert.deepEqual(filtered.skillGroups, [
     { label: "Frontend", skills: ["TypeScript", "React"] },
+  ]);
+  assert.equal(filtered.email, "");
+  // Contact number (4) then GitHub (3) first, the rest in default order.
+  assert.deepEqual(filtered.contactOrder, [
+    "contactNumber",
+    "github",
+    "email",
+    "linkedin",
+    "personalWebsite",
   ]);
   assert.equal(profile.experiences[0]?.bullets.length, 3);
 });
@@ -186,4 +193,21 @@ test("renders labels only until a tailored result arrives", () => {
   ]);
   assert.deepEqual(tailored.skillGroups[0]?.skills, ["Next.js"]);
   assert.equal(tailorProfile.experiences[0]?.bullets.length, 2);
+});
+
+test("hides whole sections and whole entries", () => {
+  const withoutIntern = filterResumeContent(tailorProfile, new Set(["exp:1"]));
+  assert.deepEqual(
+    withoutIntern.experiences.map((experience) => experience.jobTitle),
+    ["Engineer"],
+  );
+
+  const noSections = filterResumeContent(
+    tailorProfile,
+    new Set(["section:exp", "section:skill", "section:contact"]),
+  );
+  assert.deepEqual(noSections.experiences, []);
+  assert.deepEqual(noSections.skillGroups, []);
+  assert.equal(noSections.email, "");
+  assert.equal(noSections.contactNumber, "");
 });

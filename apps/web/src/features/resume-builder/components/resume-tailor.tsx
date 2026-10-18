@@ -1,11 +1,14 @@
 "use client";
 
+import { MagicWandIcon } from "@phosphor-icons/react/dist/ssr/MagicWand";
 import { useMemo, useState } from "react";
 
 import { CareerProfileFallback } from "@/features/career-profile/components/career-profile-fallback";
 import { ResumePdfPreview } from "@/features/resume-builder/components/resume-pdf-preview";
 import { TextModelSelector } from "@/components/shared/text-model-selector";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { AppIcon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCareerProfile } from "@/features/career-profile/hooks/use-career-profile";
@@ -19,7 +22,7 @@ export function ResumeTailor() {
   const [modelId, setModelId] = useState<TextGenerationModelId>(
     DEFAULT_TEXT_GENERATION_MODEL_ID,
   );
-  const { careerProfile, isError, isLoading, refetch } = useCareerProfile();
+  const { careerProfile, error, isLoading, refetch } = useCareerProfile();
   const { buildResume } = useResumeBuilder(careerProfile);
   // Until a tailored result comes back this renders the personal details,
   // education and skill-group labels only — bullets and skills stay empty.
@@ -31,15 +34,16 @@ export function ResumeTailor() {
     [buildResume.data, careerProfile],
   );
 
-  if (isError || (!isLoading && !careerProfile)) {
-    return (
-      <CareerProfileFallback isError={isError} onRetry={() => refetch()} />
-    );
+  if (error || (!isLoading && !careerProfile)) {
+    return <CareerProfileFallback error={error} retry={() => void refetch()} />;
   }
 
   return (
-    <div className="flex w-full flex-col items-start gap-6 xl:flex-row">
-      <aside className="grid w-full shrink-0 gap-4 rounded-md border bg-card p-4 xl:sticky xl:top-6 xl:w-80">
+    <div className="flex w-full flex-col items-start gap-6 xl:min-h-0 xl:flex-1 xl:flex-row">
+      <Card
+        variant="minimal"
+        className="w-full shrink-0 gap-4 xl:w-md"
+      >
         <h2 className="font-semibold">Tailor to a job</h2>
         <TextModelSelector
           label="Model"
@@ -66,6 +70,7 @@ export function ResumeTailor() {
             })
           }
         >
+          <AppIcon icon={MagicWandIcon} />
           {buildResume.isPending ? "Tailoring..." : "Tailor Resume"}
         </Button>
         {buildResume.isError && (
@@ -73,7 +78,7 @@ export function ResumeTailor() {
             {buildResume.error.message}
           </p>
         )}
-      </aside>
+      </Card>
       <ResumePdfPreview
         isLoading={isLoading || buildResume.isPending}
         profile={resumeProfile}

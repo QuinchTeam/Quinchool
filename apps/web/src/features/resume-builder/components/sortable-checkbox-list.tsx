@@ -1,28 +1,13 @@
 "use client";
 
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVertical";
-import { AppIcon } from "@/components/ui/icon";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AppIcon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
+import { SortableList } from "@/features/career-profile/components/sortable-list";
+import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import { cn } from "@/lib/utils";
 
 export type SortableCheckboxItem = {
@@ -38,42 +23,45 @@ function SortableCheckboxRow({
   item: SortableCheckboxItem;
   onCheckedChange: (id: string, checked: boolean) => void;
 }) {
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setActivatorNodeRef,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: item.id });
-  const checkboxId = `resume-content-${item.id.replaceAll(":", "-")}`;
-
+  // Same drag feel as the career profile: lift, fade siblings, outline the zone.
+  const { dragClassName, handleProps, isDragging, itemProps } = useSortableItem(
+    item.id,
+  );
   return (
     <div
-      ref={setNodeRef}
+      {...itemProps}
       className={cn(
-        "flex items-start gap-1 rounded-sm bg-card py-0.5",
-        isDragging && "relative z-10 bg-muted shadow-sm",
+        "flex items-start gap-1 rounded-lg p-1",
+        dragClassName,
+        isDragging && "bg-card ring-1 ring-border",
       )}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
     >
       <Button
-        ref={setActivatorNodeRef}
+        {...handleProps}
         type="button"
         variant="ghost"
         size="icon-xs"
         className="shrink-0 cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
         title="Drag to reorder"
-        {...attributes}
-        {...listeners}
       >
         <AppIcon icon={DotsSixVerticalIcon} />
         <span className="sr-only">Reorder {item.label}</span>
       </Button>
+      <CheckboxLabel item={item} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
+
+function CheckboxLabel({
+  item,
+  onCheckedChange,
+}: {
+  item: SortableCheckboxItem;
+  onCheckedChange: (id: string, checked: boolean) => void;
+}) {
+  const checkboxId = `resume-content-${item.id.replaceAll(":", "-")}`;
+  return (
+    <>
       <Checkbox
         id={checkboxId}
         className="mt-1"
@@ -86,54 +74,42 @@ function SortableCheckboxRow({
       >
         {item.label}
       </Label>
-    </div>
+    </>
   );
 }
 
 export function SortableCheckboxList({
+  columns = false,
   items,
   onCheckedChange,
   onReorder,
 }: {
+  /** Short labels (skills) sit 3 per row; long ones (bullets) stay one per row. */
+  columns?: boolean;
   items: SortableCheckboxItem[];
   onCheckedChange: (id: string, checked: boolean) => void;
   onReorder: (ids: string[]) => void;
 }) {
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  function handleDragEnd({ active, over }: DragEndEvent) {
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = items.findIndex((item) => item.id === active.id);
-    const newIndex = items.findIndex((item) => item.id === over.id);
-
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    onReorder(arrayMove(items, oldIndex, newIndex).map((item) => item.id));
-  }
-
+  const layout = cn("grid gap-1", columns && "grid-cols-3");
+  const ids = items.map((item) => item.id);
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      sensors={sensors}
-      onDragEnd={handleDragEnd}
+    <SortableList
+      className={layout}
+      ids={ids}
+      wrap={columns}
+      onMove={(from, to) => {
+        const next = [...ids];
+        next.splice(to, 0, ...next.splice(from, 1));
+        onReorder(next);
+      }}
     >
-      <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        <div className="grid gap-2">
-          {items.map((item) => (
-            <SortableCheckboxRow
-              item={item}
-              key={item.id}
-              onCheckedChange={onCheckedChange}
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+      {items.map((item) => (
+        <SortableCheckboxRow
+          item={item}
+          key={item.id}
+          onCheckedChange={onCheckedChange}
+        />
+      ))}
+    </SortableList>
   );
 }
