@@ -1,19 +1,23 @@
 import "server-only";
 
+import { PlusCircleIcon } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { FileTextIcon } from "@phosphor-icons/react/dist/ssr/FileText";
 import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
-import { UserCircleIcon } from "@phosphor-icons/react/dist/ssr/UserCircle";
+import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
 import { AppIcon, type AppIconProps } from "@/components/ui/icon";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
-import { DashboardGreeting } from "@/features/dashboard/components/dashboard-greeting";
 import {
   amountClassName,
   formatMoney,
@@ -77,20 +81,7 @@ export async function DashboardHome() {
     : 0;
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-8 p-6">
-      <div className="flex items-start justify-between gap-4">
-        <DashboardGreeting />
-        <Button
-          aria-label="Profile"
-          variant="ghost"
-          size="icon"
-          nativeButton={false}
-          render={<Link href="/profile" />}
-        >
-          <AppIcon icon={UserCircleIcon} />
-        </Button>
-      </div>
-
+    <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           href="/finance-tracker"
@@ -136,7 +127,11 @@ export async function DashboardHome() {
           href="/career-profile"
           icon={IdentificationCardIcon}
           label="Career profile"
-          value={career ? `${career.experiences.length} roles` : "Empty"}
+          value={
+            career
+              ? `${career.experiences.length} ${career.experiences.length === 1 ? "role" : "roles"}`
+              : "Empty"
+          }
           hint={
             career
               ? `${career.projects.length} projects, ${skillCount} skills, ${bulletCount} bullets`
@@ -179,12 +174,22 @@ export async function DashboardHome() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  No transactions yet.{" "}
-                  <Link className="link-underline" href="/finance-tracker">
-                    Add one
-                  </Link>
-                </p>
+                <EmptyState
+                  icon={ReceiptIcon}
+                  title="No Transactions Yet"
+                  description="Record income or an expense to see it here."
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={<Link href="/finance-tracker" />}
+                    >
+                      <AppIcon icon={PlusCircleIcon} />
+                      Add transaction
+                    </Button>
+                  }
+                />
               )}
             </CardContent>
             <CardFooter>
@@ -220,12 +225,22 @@ export async function DashboardHome() {
                     </div>
                   ))
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Nothing new.{" "}
-                  <Link className="link-underline" href="/jobs-scraper">
-                    Run a scan
-                  </Link>
-                </p>
+                <EmptyState
+                  icon={MagnifyingGlassIcon}
+                  title="No New Matches"
+                  description="Run a scan to find jobs that fit your criteria."
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={<Link href="/jobs-scraper" />}
+                    >
+                      <AppIcon icon={MagnifyingGlassIcon} />
+                      Run a scan
+                    </Button>
+                  }
+                />
               )}
             </CardContent>
             <CardFooter>
@@ -266,6 +281,76 @@ export async function DashboardHome() {
           />
         </div>
       </section>
+    </>
+  );
+}
+
+/** Mirrors the tiles below the greeting while the dashboard data loads. */
+export function DashboardSkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-8"
+      role="status"
+      aria-label="Loading dashboard"
+      aria-busy="true"
+    >
+      <span className="sr-only">Loading dashboard…</span>
+      <div className="contents" aria-hidden="true">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((tile) => (
+            <Card key={tile} size="sm" className="h-full">
+              <CardContent className="grid min-w-0 gap-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-4" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-7 w-28" />
+                <Skeleton className="h-4 w-40 max-w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {[0, 1].map((panel) => (
+            <div key={panel} className="flex flex-col gap-3">
+              <Skeleton className="h-5 w-36" />
+              <Card className="flex-1">
+                <CardContent className="grid content-start gap-3">
+                  <Empty className="h-full border border-dashed">
+                    <EmptyHeader className="w-full">
+                      <Skeleton className="mb-2 size-12 rounded-lg" />
+                      <Skeleton className="h-7 w-40 max-w-full" />
+                      <Skeleton className="h-6 w-72 max-w-full" />
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Skeleton className="h-12 w-36" />
+                    </EmptyContent>
+                  </Empty>
+                </CardContent>
+                <CardFooter>
+                  <Skeleton className="h-12 w-44 max-w-full" />
+                </CardFooter>
+              </Card>
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-3">
+          <Skeleton className="h-5 w-24" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((shortcut) => (
+              <Card key={shortcut} className="h-full">
+                <CardContent className="flex items-start gap-4">
+                  <Skeleton className="size-12 shrink-0 rounded-lg" />
+                  <div className="grid min-w-0 flex-1 gap-1">
+                    <Skeleton className="h-6 w-36 max-w-full" />
+                    <Skeleton className="h-5 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -324,9 +409,9 @@ function Shortcut({
     <Link href={href} className="group block">
       <Card className="h-full transition-colors group-hover:bg-secondary">
         <CardContent className="flex items-start gap-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+          <EmptyMedia variant="icon" className="mb-0">
             <AppIcon icon={icon} />
-          </div>
+          </EmptyMedia>
           <div className="grid min-w-0 gap-1">
             <CardTitle>{title}</CardTitle>
             <p className="text-sm text-muted-foreground">{description}</p>

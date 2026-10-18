@@ -1,5 +1,6 @@
 "use client";
 
+import { initialsOf } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -31,17 +32,6 @@ const memberSince = new Intl.DateTimeFormat("en-PH", {
   dateStyle: "long",
   timeZone: "Asia/Manila",
 });
-
-function initialsOf(name: string) {
-  return (
-    name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "?"
-  );
-}
 
 export function ProfileView() {
   const router = useRouter();
