@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { JobCard } from "@/features/jobs-scraper/components/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -110,19 +110,25 @@ export function JobsScraper() {
       </div>
 
       <div className="grid w-full gap-8 px-6 py-6 lg:grid-cols-4">
-        <aside className="grid content-start gap-6 lg:col-span-1">
-          <div className="flex items-center gap-2">
-            <AppIcon
-              icon={FunnelIcon}
-              className="size-4 text-muted-foreground"
-            />
-            <h2 className="text-sm font-semibold">Search criteria</h2>
-          </div>
-          {state ? (
-            <CriteriaSummary config={state.config} />
-          ) : (
-            <CriteriaLoading />
-          )}
+        <aside className="content-start lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AppIcon
+                  icon={FunnelIcon}
+                  className="size-4 text-muted-foreground"
+                />
+                Search criteria
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              {state ? (
+                <CriteriaSummary config={state.config} />
+              ) : (
+                <CriteriaLoading />
+              )}
+            </CardContent>
+          </Card>
         </aside>
 
         <section className="min-w-0 lg:col-span-3">
