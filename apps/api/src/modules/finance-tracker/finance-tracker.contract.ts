@@ -65,10 +65,19 @@ export const transferSchema = z
   });
 
 export const transactionQuerySchema = z.strictObject({
-  cursor: z.string().min(1).max(512).optional(),
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   walletId: financeIdSchema.optional(),
   type: transactionTypeSchema.optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+  excludeTransfers: z.stringbool().default(false),
+  sort: z.enum(["newest", "oldest", "highest", "lowest"]).default("newest"),
+});
+
+export const summaryQuerySchema = z.strictObject({
+  period: z.enum(["day", "week", "month", "year"]).default("month"),
 });
 
 export const labelQuerySchema = z.strictObject({
@@ -76,15 +85,10 @@ export const labelQuerySchema = z.strictObject({
   search: z.string().trim().max(120).default(""),
 });
 
-export const transactionCursorSchema = z.strictObject({
-  id: financeIdSchema,
-  occurredAt: z.iso.datetime(),
-});
-
 export type WalletInput = z.infer<typeof walletSchema>;
 export type WalletOrder = z.infer<typeof walletOrderSchema>;
 export type TransactionInput = z.infer<typeof transactionSchema>;
 export type TransferInput = z.infer<typeof transferSchema>;
 export type TransactionQuery = z.infer<typeof transactionQuerySchema>;
+export type SummaryQuery = z.infer<typeof summaryQuerySchema>;
 export type LabelQuery = z.infer<typeof labelQuerySchema>;
-export type TransactionCursor = z.infer<typeof transactionCursorSchema>;

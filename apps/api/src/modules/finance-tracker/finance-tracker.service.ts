@@ -9,9 +9,9 @@ import { ApiResponse } from "../../core/http/api-response";
 import { Prisma } from "../../generated/prisma/client";
 import {
   type LabelQuery,
+  type SummaryQuery,
   type TransactionInput,
   type TransactionQuery,
-  transactionCursorSchema,
   type TransferInput,
   type WalletInput,
 } from "./finance-tracker.contract";
@@ -54,6 +54,15 @@ export class FinanceTrackerService {
     };
   }
 
+  async getSummary(userId: string, { period }: SummaryQuery) {
+    const buckets = await this.repository.summaryForUser(userId, period);
+    const sum = (key: "income" | "expense") =>
+      buckets
+        .reduce((total, row) => total.plus(row[key]), new Prisma.Decimal(0))
+        .toFixed(2);
+    return { period, income: sum("income"), expense: sum("expense"), buckets };
+  }
+
   async createWallet(userId: string, input: WalletInput) {
     const wallet = await this.write(() =>
       this.repository.createWallet(userId, input),
@@ -88,26 +97,9 @@ export class FinanceTrackerService {
   }
 
   async listTransactions(userId: string, query: TransactionQuery) {
-    let cursor: ReturnType<typeof transactionCursorSchema.parse> | undefined;
-    if (query.cursor) {
-      try {
-        if (!/^[A-Za-z0-9_-]+$/.test(query.cursor))
-          throw new Error("Invalid cursor");
-        cursor = transactionCursorSchema.parse(
-          JSON.parse(Buffer.from(query.cursor, "base64url").toString("utf8")),
-        );
-      } catch {
-        throw new BadRequestException({
-          code: "INVALID_CURSOR",
-          message: "Invalid transaction cursor.",
-        });
-      }
-    }
-    const rows = await this.repository.listTransactions(userId, query, cursor);
-    const items = rows.slice(0, query.limit);
-    const last = items.at(-1);
+    const [rows, total] = await this.repository.listTransactions(userId, query);
     return new ApiResponse(
-      items.map((item) => ({
+      rows.map((item) => ({
         id: item.id,
         type: item.type,
         amount: item.amount.toFixed(2),
@@ -117,15 +109,10 @@ export class FinanceTrackerService {
         label: item.label,
       })),
       {
-        nextCursor:
-          rows.length > query.limit && last
-            ? Buffer.from(
-                JSON.stringify({
-                  id: last.id,
-                  occurredAt: last.occurredAt.toISOString(),
-                }),
-              ).toString("base64url")
-            : null,
+        page: query.page,
+        pageSize: query.limit,
+        total,
+        pageCount: Math.max(1, Math.ceil(total / query.limit)),
       },
     );
   }

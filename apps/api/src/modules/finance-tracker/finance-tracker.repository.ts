@@ -3,7 +3,7 @@ import { PrismaService } from "../../core/database/prisma/prisma.service";
 import { Prisma } from "../../generated/prisma/client";
 import type {
   LabelQuery,
-  TransactionCursor,
+  SummaryQuery,
   TransactionInput,
   TransactionQuery,
   TransferInput,
@@ -14,6 +14,20 @@ const transactionInclude = {
   wallet: { select: { id: true, name: true, color: true } },
   label: { select: { id: true, name: true } },
 } satisfies Prisma.FinanceTransactionInclude;
+
+const SUMMARY_BUCKETS = {
+  day: "hour",
+  week: "day",
+  month: "day",
+  year: "month",
+} as const;
+
+const TRANSACTION_SORTS = {
+  newest: { field: "occurredAt", direction: "desc" },
+  oldest: { field: "occurredAt", direction: "asc" },
+  highest: { field: "amount", direction: "desc" },
+  lowest: { field: "amount", direction: "asc" },
+} as const;
 
 @Injectable()
 export class FinanceTrackerRepository {
@@ -89,27 +103,80 @@ export class FinanceTrackerRepository {
     );
   }
 
-  listTransactions(
-    userId: string,
-    query: TransactionQuery,
-    cursor?: TransactionCursor,
-  ) {
-    return this.prisma.financeTransaction.findMany({
-      where: {
-        userId,
-        walletId: query.walletId,
-        type: query.type,
-        ...(cursor && {
-          OR: [
-            { occurredAt: { lt: new Date(cursor.occurredAt) } },
-            { occurredAt: new Date(cursor.occurredAt), id: { lt: cursor.id } },
-          ],
-        }),
+  /** One page of matching transactions plus the total match count. */
+  listTransactions(userId: string, query: TransactionQuery) {
+    const { field, direction } = TRANSACTION_SORTS[query.sort];
+    const where: Prisma.FinanceTransactionWhereInput = {
+      userId,
+      walletId: query.walletId,
+      type: query.type,
+      occurredAt: {
+        gte: query.from && new Date(query.from),
+        lt: query.to && new Date(query.to),
       },
-      include: transactionInclude,
-      orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
-      take: query.limit + 1,
-    });
+      // Transfers are the generated "Transfer to/from <wallet>" label pairs.
+      ...(query.excludeTransfers && {
+        label: {
+          NOT: [
+            { name: { startsWith: "Transfer to " } },
+            { name: { startsWith: "Transfer from " } },
+          ],
+        },
+      }),
+      ...(query.search && {
+        OR: [
+          { label: { name: { contains: query.search, mode: "insensitive" } } },
+          { notes: { contains: query.search, mode: "insensitive" } },
+        ],
+      }),
+    };
+    return this.prisma.$transaction([
+      this.prisma.financeTransaction.findMany({
+        where,
+        include: transactionInclude,
+        orderBy: [{ [field]: direction }, { id: direction }],
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+      }),
+      this.prisma.financeTransaction.count({ where }),
+    ]);
+  }
+
+  /**
+   * Income and expense per bucket for the current Manila-time period, with
+   * empty buckets filled so charts keep their shape.
+   */
+  summaryForUser(userId: string, period: SummaryQuery["period"]) {
+    const bucket = SUMMARY_BUCKETS[period];
+    // ponytail: transfers are matched by their generated label names; add a transfer flag column if users start naming labels "Transfer to ...".
+    return this.prisma.$queryRaw<
+      { bucket: string; income: string; expense: string }[]
+    >`
+      WITH bounds AS (
+        SELECT date_trunc(${period}::text, now() AT TIME ZONE 'Asia/Manila') AS start
+      )
+      SELECT
+        to_char(s.bucket, 'YYYY-MM-DD"T"HH24:MI') AS bucket,
+        COALESCE(SUM(t.amount) FILTER (WHERE t.type = 'INCOME'), 0)::text AS income,
+        COALESCE(SUM(t.amount) FILTER (WHERE t.type = 'EXPENSE'), 0)::text AS expense
+      FROM bounds b
+      CROSS JOIN generate_series(
+        b.start,
+        b.start + ('1 ' || ${period}::text)::interval - ('1 ' || ${bucket}::text)::interval,
+        ('1 ' || ${bucket}::text)::interval
+      ) AS s(bucket)
+      LEFT JOIN (
+        finance_transaction t
+        JOIN finance_label l
+          ON l.id = t."labelId"
+          AND l.name NOT LIKE 'Transfer to %'
+          AND l.name NOT LIKE 'Transfer from %'
+      )
+        ON t."userId" = ${userId}
+        AND date_trunc(${bucket}::text, t."occurredAt" AT TIME ZONE 'Asia/Manila') = s.bucket
+      GROUP BY s.bucket
+      ORDER BY s.bucket
+    `;
   }
 
   listLabels(userId: string, query: LabelQuery) {

@@ -15,6 +15,8 @@ import { ZodValidationPipe } from "../../shared/pipes/zod-validation.pipe";
 import {
   financeIdSchema,
   type LabelQuery,
+  type SummaryQuery,
+  summaryQuerySchema,
   labelQuerySchema,
   type TransactionInput,
   type TransactionQuery,
@@ -37,6 +39,14 @@ export class FinanceTrackerController {
   @Get()
   getOverview(@UserId() userId: string) {
     return this.finance.getOverview(userId);
+  }
+
+  @Get("summary")
+  getSummary(
+    @UserId() userId: string,
+    @Query(new ZodValidationPipe(summaryQuerySchema)) query: SummaryQuery,
+  ) {
+    return this.finance.getSummary(userId, query);
   }
 
   @Post("wallets")
