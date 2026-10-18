@@ -40,10 +40,7 @@ export function ResumeTailor() {
 
   return (
     <div className="flex w-full flex-col items-start gap-6 xl:min-h-0 xl:flex-1 xl:flex-row">
-      <Card
-        variant="minimal"
-        className="w-full shrink-0 gap-4 xl:w-md"
-      >
+      <Card variant="minimal" className="w-full shrink-0 gap-4 xl:w-md">
         <h2 className="font-semibold">Tailor to a job</h2>
         <TextModelSelector
           label="Model"

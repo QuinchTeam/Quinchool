@@ -148,7 +148,6 @@
     @apply font-sans;
   }
 
-
   /* App-wide grain background, painted behind all page content.
      Only shows through transparent areas, so page containers must not set bg-background.
      One SVG tile rasterized once, jittered via transform so animation stays on the compositor.
