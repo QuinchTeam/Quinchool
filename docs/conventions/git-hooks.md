@@ -1,6 +1,6 @@
 # Git Hooks
 
-Husky runs `pnpm exec vp staged --concurrent false` before each commit. Rules live in the root `vite.config.ts`.
+Husky runs `pnpm exec vp staged --concurrent false --relative` before each commit. Rules live in the root `vite.config.ts`.
 
 Use Node.js 22.22.1 or newer for the commit tooling.
 
@@ -13,6 +13,8 @@ Use Node.js 22.22.1 or newer for the commit tooling.
 - Scan all staged files for secrets with Secretlint's recommended rules, including files force-added despite `.gitignore`.
 
 Tasks run sequentially so formatters and scanners do not read or write the same file concurrently. Vite+ handles partially staged files and adds fixes back to the index.
+
+Use relative file paths to keep large staged file lists within Windows command-length limits.
 
 ## Commit messages
 
