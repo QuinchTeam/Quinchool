@@ -1,1 +1,5 @@
-export { FinanceHistoryLoading as default } from "@/features/finance-tracker/components/shared/finance-loading";
+import { FinanceHistoryLoading } from "@/features/finance-tracker/components/shared/finance-loading";
+
+export default function Loading() {
+  return <FinanceHistoryLoading />;
+}
