@@ -10,8 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-// The header lives in the layout but its buttons need the PDF state inside
-// each tab, so the tab portals them into this slot.
+// Tabs portal actions here because the shared header sits outside their PDF state.
 const SlotContext = createContext<
   [HTMLElement | null, Dispatch<SetStateAction<HTMLElement | null>>] | null
 >(null);
@@ -30,7 +29,6 @@ export function ResumeHeaderActionsProvider({
 
 export function ResumeHeaderActionsSlot() {
   const slot = useContext(SlotContext);
-  // `contents` keeps the portaled buttons in the header's flex row.
   return <div ref={slot?.[1]} className="contents" />;
 }
 

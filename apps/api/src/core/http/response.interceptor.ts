@@ -7,10 +7,13 @@ import {
 import { map, type Observable } from "rxjs";
 import { ApiResponse } from "./api-response";
 
-/** Wraps every successful body in `{ data }`. A 204 route returns nothing and stays bodiless. */
+// Leave 204 responses empty instead of adding the data envelope.
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     return next.handle().pipe(
       map((value: unknown) => {
         if (value === undefined) return undefined;

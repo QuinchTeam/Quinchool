@@ -1,8 +1,4 @@
-/**
- * The response envelope from docs/conventions/backend/api-responses.md. Controllers
- * return plain values and the ResponseInterceptor wraps them in `{ data }`;
- * return an ApiResponse only when the response also carries `meta` or `links`.
- */
+// Use ApiResponse only when the response needs meta or links.
 export class ApiResponse<T, M = Record<string, unknown>> {
   constructor(
     readonly data: T,
@@ -23,10 +19,7 @@ export interface ApiErrorDetail {
   message: string;
 }
 
-/**
- * The payload to throw inside any HttpException. `meta` is optional context
- * for the client (an id to quote in a bug report), never internal details.
- */
+// Error metadata is client-visible; never include internal details.
 export interface ApiErrorPayload extends ApiErrorBody {
   meta?: Record<string, unknown>;
 }

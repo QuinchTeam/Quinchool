@@ -40,7 +40,6 @@ const CONTACT_LABELS: Record<(typeof RESUME_CONTACT_FIELDS)[number], string> = {
 
 type Order = Record<string, number[]>;
 
-/** Eye button that shows or hides a whole section or entry on the resume. */
 function VisibilityToggle({
   hidden,
   label,
@@ -64,7 +63,6 @@ function VisibilityToggle({
   );
 }
 
-/** Title row of an experience, project or skill group, with its own toggle. */
 function EntryHeader({
   hidden,
   onToggle,
@@ -98,7 +96,6 @@ function PanelSection({
   title,
 }: {
   children: ReactNode;
-  /** True when the profile has nothing for this section yet. */
   empty: boolean;
   hidden: boolean;
   icon: Icon;
@@ -128,7 +125,6 @@ function PanelSection({
           description="Add them in your career profile to show them here."
         />
       ) : (
-        // Hidden sections stay editable, just dimmed.
         <div className={cn("grid gap-4", hidden && "opacity-50")}>
           {children}
         </div>
@@ -158,25 +154,21 @@ function ResumeContentToolbar({
       return next;
     });
 
-  /** Props for a section or entry eye toggle keyed `id`. */
   const visibility = (id: string) => ({
     hidden: excluded.has(id),
     onToggle: () => toggle(id, excluded.has(id)),
   });
   const section = (key: string) => visibility(`section:${key}`);
   const entry = visibility;
-  /** Fades an entry's list while the whole entry is hidden. */
   const dimmed = (id: string, content: ReactNode) => (
     <div className={cn(excluded.has(id) && "opacity-50")}>{content}</div>
   );
 
-  /** Checkbox list over `labels`, keyed `${prefix}:${index}`, reorderable. */
-  // Values sit on a muted surface so they read as content under their titles.
   const list = (prefix: string, labels: string[], columns = false) => (
     <div className="rounded-lg bg-muted/50 p-2">
       <SortableCheckboxList
         columns={columns}
-        // Blank labels (unfilled contacts) are skipped but keep their index.
+        // Preserve contact indices when skipping blanks so hide/order keys stay aligned.
         items={getResumeItemOrder(labels.length, order[prefix]).flatMap(
           (index) => {
             const id = `${prefix}:${index}`;
@@ -338,7 +330,6 @@ export function ResumePreview() {
   );
 }
 
-/** Mounted once the saved layout has loaded, so state can start from it. */
 function ResumeBuilder({
   layout,
   profile,
@@ -355,7 +346,6 @@ function ResumeBuilder({
     [profile, excluded, order],
   );
 
-  // Save after changes settle, so a burst of clicks or a drag sends one request.
   const loaded = useRef(true);
   useEffect(() => {
     if (loaded.current) {

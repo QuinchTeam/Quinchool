@@ -92,7 +92,7 @@ export function domainName(scope: string): string {
   return name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 }
 
-// Existing Nest messages can contain user/provider payloads; export context, not message bodies.
+// Nest messages can contain private payloads; export context without message bodies.
 export class TelemetryLogger implements LoggerService {
   log(message: unknown, ...args: unknown[]) {
     this.write("info", message, args);

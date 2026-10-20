@@ -39,7 +39,7 @@ export class CareerProfileRepository {
     });
   }
 
-  /** Count is 0 when the user has no profile to attach the layout to. */
+  // A zero update count means the user has no profile to attach this layout to.
   saveResumeLayout(userId: string, layout: ResumeLayout) {
     return this.prisma.careerProfile.updateMany({
       where: { userId },
@@ -70,9 +70,7 @@ export class CareerProfileRepository {
         update: contact,
       });
 
-      // ponytail: whole-profile replacement is atomic and simple; preserve
-      // child IDs when embeddings or concurrent editing make stable identity
-      // necessary.
+      // shortcut: replacing child rows changes IDs; preserve them if concurrent edits need stable identity.
       await transaction.experience.deleteMany({
         where: { careerProfileId: profile.id },
       });

@@ -1,11 +1,7 @@
 import { ToolActionForm } from "@/features/chatbot/components/tools/tool-action-form";
 import type { ToolActionRenderer } from "@/features/chatbot/components/tools/types";
 
-/**
- * Which component draws a pending action, keyed by the domain the API reports.
- * Domains only appear here when the default field form is not enough — a new
- * tool in an existing domain needs no change at all.
- */
+// Register a domain renderer only when the default field form cannot handle its layout.
 const BY_DOMAIN: Record<string, ToolActionRenderer> = {
   "career-profile": ToolActionForm,
 };

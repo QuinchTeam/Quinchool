@@ -57,7 +57,6 @@ function DialogContent({
         )}
         {...props}
       >
-        {/* Muted shell around a card-colored panel, matching `Card` + `CardContent`. */}
         <div className="grid gap-6 rounded-lg bg-card p-6">{children}</div>
         {showCloseButton && (
           <DialogPrimitive.Close
@@ -70,7 +69,6 @@ function DialogContent({
               />
             }
           >
-            {/* Deliberate exception to the duotone rule: a bare X reads cleaner. */}
             <XIcon size={24} />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

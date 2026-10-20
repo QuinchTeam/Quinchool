@@ -34,8 +34,7 @@ class ChatbotRequest(CamelModel):
     messages: list[ChatMessage] = Field(min_length=1, max_length=24)
     model_id: TextGenerationModelId
     tool_results: list[ToolResult] = Field(default_factory=list, max_length=8)
-    # Nest folds everything older than the recent window into this, so a long
-    # conversation stays a fixed-size prompt.
+    # Older messages are summarized so prompt history stays bounded.
     summary: str | None = Field(default=None, max_length=8_000)
 
     @model_validator(mode="after")

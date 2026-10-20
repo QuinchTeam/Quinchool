@@ -1,9 +1,3 @@
-"""HTTP surface for a job scan. Stateless: config in, graded listings out.
-
-The caller (Nest) owns the scan id, the config, and the persistence that
-apps/web/src/app/api/jobs-scraper/route.ts used to do inline.
-"""
-
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -58,11 +52,7 @@ async def scan(request: ScanRequest, response: Response):
 def get_scan_failure(
     error: Crawl4AiUnavailableError | genai_errors.APIError,
 ) -> tuple[str, int]:
-    """Turns a scan failure into the sentence the user reads. Gemini's own
-    wording says more than any generic message can — whether the model is
-    overloaded, the quota is spent, or the request was rejected — so it is
-    passed through.
-    """
+    # Keep Google's error wording so callers can distinguish quota and overload failures.
     if isinstance(error, Crawl4AiUnavailableError):
         return "Crawl4AI is offline. Start the crawl4ai Docker service.", 503
 
@@ -77,7 +67,6 @@ def get_scan_failure(
 
     return (
         f"Gemini could not classify this scan. {detail or f'The API returned {status}.'}",
-        # Google's status is already an HTTP code; forward it so a 503 still
-        # reads as "retry later" instead of a flat server error.
+        # Preserve Google's retryable HTTP status instead of converting it to 500.
         status if 400 <= status <= 599 else 502,
     )

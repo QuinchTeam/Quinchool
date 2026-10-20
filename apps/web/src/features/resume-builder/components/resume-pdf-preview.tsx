@@ -130,8 +130,6 @@ function ResumeSkeleton() {
   );
 }
 
-/** Renders a career profile to a PDF in the browser and shows it, with
- * download and print actions. Shared by the resume builder and the tailor. */
 export function ResumePdfPreview({
   isLoading = false,
   profile,
@@ -142,7 +140,7 @@ export function ResumePdfPreview({
   const [pdfError, setPdfError] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  // Round so repeated steps land on clean values (0.7, not 0.7000000000000001).
+  // Round zoom steps to avoid floating-point values such as 0.7000000000000001.
   const stepZoom = (delta: number) =>
     setZoom((z) =>
       Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 10) / 10)),
@@ -223,7 +221,6 @@ export function ResumePdfPreview({
           </>
         )}
       </ResumeHeaderActions>
-      {/* Sticks to the top of the scrolling preview so zoom is always reachable. */}
       <div className="sticky top-0 z-10 flex justify-end pb-2">
         <div className="flex items-center gap-1 rounded-lg border bg-card p-1">
           <Button
@@ -277,8 +274,7 @@ export function ResumePdfPreview({
             </div>
           ) : (
             <iframe
-              // Chrome's PDF viewer ignores CSS zoom and just gets cropped, so
-              // zoom resizes the frame and remounts it: view=FitH refits the page.
+              // Remount at each zoom level so Chrome's PDF viewer refits instead of cropping.
               key={zoom}
               className={previewClassName}
               style={{

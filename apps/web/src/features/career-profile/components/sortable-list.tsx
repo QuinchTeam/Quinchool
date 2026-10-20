@@ -29,7 +29,6 @@ export function SortableList({
   wrap = false,
 }: {
   children: ReactNode;
-  /** Layout for the item container, e.g. "grid gap-5". */
   className: string;
   ids: string[];
   onMove: (from: number, to: number) => void;

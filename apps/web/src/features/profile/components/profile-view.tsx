@@ -126,8 +126,7 @@ export function ProfileView() {
   );
 }
 
-/** Shows the name and email, and swaps the name for a one-field form on edit.
- * better-auth serves /update-user out of the box, so there is no API route. */
+// better-auth provides update-user; no custom API route is needed.
 function NameEditor({
   email,
   name,

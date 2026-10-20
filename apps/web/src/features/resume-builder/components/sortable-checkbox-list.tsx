@@ -23,7 +23,6 @@ function SortableCheckboxRow({
   item: SortableCheckboxItem;
   onCheckedChange: (id: string, checked: boolean) => void;
 }) {
-  // Same drag feel as the career profile: lift, fade siblings, outline the zone.
   const { dragClassName, handleProps, isDragging, itemProps } = useSortableItem(
     item.id,
   );
@@ -84,7 +83,7 @@ export function SortableCheckboxList({
   onCheckedChange,
   onReorder,
 }: {
-  /** Short labels (skills) sit 3 per row; long ones (bullets) stay one per row. */
+  // Short skill labels use three columns; bullets stay full width.
   columns?: boolean;
   items: SortableCheckboxItem[];
   onCheckedChange: (id: string, checked: boolean) => void;

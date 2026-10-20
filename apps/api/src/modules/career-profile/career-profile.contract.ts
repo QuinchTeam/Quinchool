@@ -1,9 +1,4 @@
-/**
- * The career profile as it travels over the wire, and every rule it has to
- * satisfy. Kept identical to apps/web/src/lib/validations/career-profile.ts:
- * the web app validates the same shape client-side so its form can report
- * errors per field before it ever sends them.
- */
+// Keep this contract aligned with the web career-profile schema.
 
 import { z } from "zod";
 
@@ -163,7 +158,6 @@ export const careerProfileSchema = z
 
 export type CareerProfileValues = z.infer<typeof careerProfileSchema>;
 
-/** The resume builder's hide/reorder choices; see the web app's filterResumeContent. */
 export const resumeLayoutSchema = z.object({
   excluded: z.array(z.string().max(100)).max(5_000),
   order: z.record(

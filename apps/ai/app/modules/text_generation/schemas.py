@@ -1,10 +1,3 @@
-"""Text-generation request and response contracts.
-
-Port of apps/api/src/text-generation/{types.ts,text-generation.contract.ts}.
-The display name and description of each model stay in the web app: they are
-UI copy, and nothing here needs them.
-"""
-
 from __future__ import annotations
 
 from typing import Annotated, ClassVar, Literal
@@ -19,8 +12,7 @@ class CamelModel(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
-        # `modelId` is a real field here, and pydantic reserves the `model_`
-        # prefix unless it is told otherwise.
+        # Allow modelId as a field despite Pydantic's reserved model_ prefix.
         protected_namespaces=(),
     )
 

@@ -18,7 +18,7 @@ import { TransactionDialog } from "./transaction-dialog";
 export function TransactionRow({ transaction }: { transaction: Transaction }) {
   const remove = useDeleteTransaction();
   const income = transaction.type === "INCOME";
-  // Transfers are generated as labeled pairs; show them as moves, not spending.
+  // Generated transfer pairs are wallet moves, not ordinary spending.
   const transfer = /^Transfer (to|from) /.test(transaction.label.name);
   return (
     <li className="flex items-center gap-3 border-b py-4 last:border-b-0">

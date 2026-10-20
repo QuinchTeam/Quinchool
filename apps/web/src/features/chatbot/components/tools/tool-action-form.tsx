@@ -13,11 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 
-/**
- * The default renderer for a pending write. Works for any domain because the
- * API describes its own fields; a domain only needs its own component when the
- * plain field list is not enough.
- */
 export function ToolActionForm({
   action,
   error,

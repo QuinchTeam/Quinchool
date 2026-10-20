@@ -12,18 +12,12 @@ export const chatTitleSchema = z.object({
 });
 
 export const chatbotRequestSchema = z.object({
-  /** Absent for the first message of a new chat, which creates one. */
+  // Omitting chatId creates a new chat.
   chatId: chatIdSchema.optional(),
   content: z.string().trim().min(1).max(8_000),
   modelId: z.string().trim().min(1),
 });
 
-/**
- * What the browser sends back once the user has filled in and confirmed the
- * form a write tool asked for. `arguments` is echoed from the pending action so
- * the server knows which entry is being changed, and `messageId` is the stored
- * assistant turn that proposed it, so the outcome persists on reload.
- */
 export const toolActionSchema = z.object({
   chatId: chatIdSchema,
   messageId: chatIdSchema,

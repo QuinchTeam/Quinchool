@@ -15,11 +15,7 @@ const criteriaSchema = z
   .max(30)
   .transform(uniqueStrings);
 
-/**
- * Every criteria list may be empty: a new account starts with nothing filled
- * in, and a half-finished config is still worth saving. Running a scan is what
- * needs the criteria set — see getUnsetScanCriteria.
- */
+// Empty criteria can be saved; scan readiness is checked separately.
 export const jobScraperConfigSchema = z
   .object({
     roles: criteriaSchema,
@@ -74,10 +70,6 @@ export const jobScraperConfigSchema = z
 
 export type JobScraperConfig = z.infer<typeof jobScraperConfigSchema>;
 
-/**
- * The criteria a scan cannot run without, in the words the prompt uses. The API
- * checks the same four before it calls the AI service.
- */
 export function getUnsetScanCriteria(config: JobScraperConfig): string[] {
   return [
     config.roles.length === 0 ? "a role" : "",

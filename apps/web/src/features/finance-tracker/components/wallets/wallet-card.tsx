@@ -51,14 +51,13 @@ export function WalletCard({
   return (
     <article
       ref={setNodeRef}
-      // "lock" also freezes vertical scroll: the lifted card scales past the grid.
+      // lock freezes vertical scrolling while a lifted card scales beyond the grid.
       data-dragging={isDragging ? "lock" : undefined}
       className={cn(
         "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4 transition-opacity",
-        // Lift the picked-up card; `scale`/`rotate` compose with dnd-kit's inline transform.
+        // Compose CSS scale/rotate with dnd-kit's inline translation.
         isDragging &&
           "relative z-10 -rotate-1 scale-105 cursor-grabbing shadow-2xl",
-        // Fade the rest so the moving card and its landing spot stand out.
         active && !isDragging && "opacity-60",
       )}
       style={
@@ -67,8 +66,7 @@ export function WalletCard({
           transition,
           "--wallet-color": wallet.color,
           borderTopColor: wallet.color,
-          // Sides use the wallet color at 25%, full strength while lifted. Longhands
-          // only: React warns when a `borderColor` shorthand mixes with `borderTopColor`.
+          // Use border longhands to avoid React warnings when borderTopColor changes.
           borderRightColor: side,
           borderBottomColor: side,
           borderLeftColor: side,

@@ -1,8 +1,4 @@
-/**
- * Backspace in an empty chip input: the last chip comes back as editable text
- * minus its last character. Restricted lists only accept known values, so
- * a half-typed chip could never be re-added; there the chip goes whole.
- */
+// Restricted lists delete whole chips; free-text lists reopen the last chip for editing.
 export function chipBackspace(
   chips: string[],
   restricted: boolean,

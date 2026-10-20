@@ -16,18 +16,10 @@ import {
   type PendingToolAction,
 } from "./chatbot.service";
 
-/**
- * How many messages the model sees word for word. Everything older is folded
- * into the chat's running summary, so prompt size stays flat no matter how long
- * a conversation runs.
- */
+// Older messages become a running summary to bound prompt size.
 const RECENT_MESSAGES = 10;
 
-/**
- * Summarizing costs a model call on the request that triggers it, so it does
- * not run every turn — only once the unsummarized tail has drifted this far
- * past the window.
- */
+// Batch summaries to avoid an extra model call on every turn.
 const SUMMARIZE_WHEN_OVER = 20;
 
 export interface ChatTurn {
@@ -62,7 +54,6 @@ export class ChatService {
     return this.chats.deleteChat(userId, chatId);
   }
 
-  /** Records the user's turn, answers it, and records the answer. */
   async send(userId: string, request: ChatbotRequest): Promise<ChatTurn> {
     const chat = request.chatId
       ? await this.chats.requireChat(userId, request.chatId)
@@ -85,10 +76,7 @@ export class ChatService {
     return this.recordReply(userId, chat.id, chat.title, modelId, result);
   }
 
-  /**
-   * Runs a confirmed write and records the follow-up turn. The stored message
-   * that proposed the form is marked done, so a reload does not offer it again.
-   */
+  // Mark the stored confirmation complete so reloads cannot offer it again.
   async confirmAction(userId: string, action: ToolAction): Promise<ChatTurn> {
     const chat = await this.chats.requireChat(userId, action.chatId);
     const modelId = action.modelId as TextGenerationModelId;
@@ -139,11 +127,7 @@ export class ChatService {
     };
   }
 
-  /**
-   * Builds the prompt context, summarizing first when the tail has grown too
-   * long. Without background jobs this runs inline, so it deliberately fires
-   * once every ten turns rather than on every one.
-   */
+  // Summarize inline only when the unsummarized tail exceeds the window.
   private async buildContext(
     chat: { id: string; summary: string | null; summarizedUpTo: number },
     modelId: TextGenerationModelId,
@@ -177,8 +161,7 @@ export class ChatService {
     };
   }
 
-  /** A failed summary is not worth failing the user's message over: the turn
-   * carries on with a longer window this time and retries next turn. */
+  // If summarizing fails, keep the longer history and retry on the next turn.
   private async summarize(
     messages: StoredMessage[],
     previousSummary: string | null,
@@ -205,8 +188,7 @@ export class ChatService {
     }
   }
 
-  /** Titles the chat from its opening exchange, the way ChatGPT does. Falls
-   * back to the first message so the sidebar never shows an untitled row. */
+  // Fall back to the opening message if title generation fails.
   private async titleFor(
     userId: string,
     chatId: string,
@@ -243,12 +225,7 @@ function toChatMessage({ content, role }: StoredMessage): ChatMessage {
   return { content, role };
 }
 
-/**
- * The AI service only accepts a history ending on a user turn. Sending does
- * that anyway, but resuming after a confirmed write does not: the last stored
- * message is the assistant's form. Dropping it puts the model back on the
- * request that prompted the write, now with the tool result in hand.
- */
+// After a confirmed write, drop the assistant's form so history ends on the original request.
 export function endOnUserTurn(messages: StoredMessage[]): StoredMessage[] {
   const lastUser = messages.findLastIndex((message) => message.role === "user");
 

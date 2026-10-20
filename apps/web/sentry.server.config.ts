@@ -16,7 +16,6 @@ Sentry.init({
       : "https://local@localhost/1",
   transport: process.env.NODE_ENV === "production" ? undefined : localTransport,
 
-  // Sample 10% of production traces for the OpenTelemetry collector.
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
   tracePropagationTargets: apiTracePropagationTargets(
     process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001",
@@ -26,9 +25,7 @@ Sentry.init({
     ? [new BatchSpanProcessor(new SafeTraceExporter())]
     : [],
 
-  // ponytail: Sentry stays the span engine but only receives errors; sampled
-  // spans reach the collector via the processor above. Switch to an own
-  // NodeSDK with skipOpenTelemetrySetup if Sentry's span overhead matters.
+  // Sentry creates spans; only the collector receives them.
   beforeSendTransaction: () => null,
 
   beforeSend(event, hint) {

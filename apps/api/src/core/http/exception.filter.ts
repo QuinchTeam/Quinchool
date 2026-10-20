@@ -11,11 +11,7 @@ import type { ApiErrorBody, ApiErrorPayload } from "./api-response";
 
 const logger = new Logger("ExceptionsHandler");
 
-/**
- * Turns every thrown error into `{ error: { code, message, details? } }`.
- * Routes throw `{ code, message }`; Nest's own exceptions (unknown route,
- * bare `new ForbiddenException()`) get a code derived from their status.
- */
+// Derive codes from HTTP status when a Nest exception has no explicit code.
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {

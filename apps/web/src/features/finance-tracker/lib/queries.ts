@@ -35,7 +35,7 @@ export function overviewOptions(userId: string) {
   });
 }
 
-/** Period presets in the browser's local time, as `[from, to)` instants. */
+// Period filters use browser-local [from, to) instants, not Manila bucket labels.
 export function periodRange(period: HistoryPeriod, now = new Date()) {
   const day = (offset = 0) =>
     new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
@@ -91,12 +91,10 @@ export function transactionsOptions(
     queryFn: ({ signal }) =>
       requestTransactionPage(filters, page, limit, { signal }),
     staleTime: 30_000,
-    // Keep the current page on screen while the next one loads.
     placeholderData: keepPreviousData,
   });
 }
 
-/** Transactions come back as `{ data, meta: { page, pageSize, total, pageCount } }`. */
 export async function requestTransactionPage(
   filters: TransactionFilters = {},
   page = 1,

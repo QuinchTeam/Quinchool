@@ -8,14 +8,12 @@ export const AI_ERROR_CODES = {
 
 export type AiErrorCode = (typeof AI_ERROR_CODES)[keyof typeof AI_ERROR_CODES];
 
-/** The error body apps/ai sends back. */
 export interface AiErrorResponse {
   code: AiErrorCode;
   error: string;
   providerId?: string;
   providerModelId?: string;
 }
-
 
 export class AiServiceError extends Error {
   code: AiErrorCode;

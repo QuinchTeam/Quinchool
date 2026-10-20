@@ -1,11 +1,3 @@
-"""One call to one provider. No fallback, no tracing, no app types beyond the
-usage numbers every provider reports.
-
-Port of apps/api/src/text-generation/providers/*.ts. The adapter layer that sat
-between them and the service is gone: the four calls already return the same
-shape, so there was nothing left for it to translate.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -21,8 +13,7 @@ from app.modules.text_generation.schemas import (
     TextGenerationUsage,
 )
 
-# One prompt, one answer. Long enough for a slow open-weight model, short
-# enough that a hung provider still leaves time for the next one in the chain.
+# Leave time for fallback when a provider hangs.
 GENERATION_TIMEOUT_SECONDS = 120.0
 
 CLOUDFLARE_API_URL = "https://api.cloudflare.com/client/v4/accounts"
@@ -57,8 +48,7 @@ async def generate_google_ai_studio(
     response = await get_google_client().aio.models.generate_content(  # pyright: ignore[reportUnknownMemberType]
         model=provider_model_id,
         contents=prompt,
-        # Nothing here calls a tool, and leaving AFC on makes the SDK warn that
-        # generate_content is the wrong place for it.
+        # Disable automatic function calling because this request never invokes tools.
         config={"automatic_function_calling": {"disable": True}},
     )
     text = (response.text or "").strip()
@@ -97,8 +87,7 @@ async def generate_cloudflare_workers_ai(
         label="Cloudflare Workers AI",
     )
     result = _read_dict(body, "result")
-    # Chat models answer under choices; the older text models answer under
-    # response. Both shapes come back from the same endpoint.
+    # Workers AI serves both chat choices and legacy text response shapes.
     text = _read_choice_text(result) or _read_str(result, "response").strip()
 
     if not text:
@@ -140,7 +129,6 @@ TEXT_GENERATION_PROVIDERS: dict[
 async def _generate_openai_chat(
     *, api_key: str, label: str, prompt: str, provider_model_id: str, url: str
 ) -> ProviderText:
-    """Groq and OpenRouter both speak the OpenAI chat-completions shape."""
     body = await _post_json(
         url=url,
         api_key=api_key,
@@ -198,9 +186,7 @@ def _require_key(value: str, name: str) -> str:
 
 
 def _read_provider_message(body: dict[str, object]) -> str:
-    """OpenAI-shaped providers report `error.message`; Cloudflare reports the
-    first entry of an `errors` array.
-    """
+    # Cloudflare uses errors[0]; OpenAI-compatible providers use error.message.
     message = _read_str(_read_dict(body, "error"), "message")
 
     if message:
@@ -209,7 +195,11 @@ def _read_provider_message(body: dict[str, object]) -> str:
     errors = body.get("errors")
     first = errors[0] if isinstance(errors, list) and errors else None
 
-    return _read_str(cast(dict[str, object], first), "message") if isinstance(first, dict) else ""
+    return (
+        _read_str(cast(dict[str, object], first), "message")
+        if isinstance(first, dict)
+        else ""
+    )
 
 
 def _read_choice_text(body: dict[str, object]) -> str:

@@ -5,12 +5,10 @@ import { useEffect, useRef } from "react";
 import type { DayPeriod } from "@/features/dashboard/lib/greeting";
 
 const FPS = 12;
-/** Brightness steps. Dithering between neighbouring steps (not just on/off)
- * gives a real tonal range while keeping the dotted texture. */
+// Quantize brightness to six levels instead of a binary on/off pattern.
 const LEVELS = 6;
 
-// 8x8 Bayer matrix built from the 2x2 base, normalized to (0, 1): the
-// ordered-dither thresholds. 64 levels give smooth gradients at high res.
+// Center Bayer thresholds within each of the 64 brightness intervals.
 const BAYER_SIZE = 8;
 const BAYER = (() => {
   let matrix = [
@@ -38,10 +36,9 @@ const disk = (x: number, y: number, cx: number, cy: number, r: number) =>
   dist(x, y, cx, cy) < r;
 const glow = (x: number, y: number, cx: number, cy: number, r: number) =>
   Math.max(0, 1 - dist(x, y, cx, cy) / r);
-/** Vertical gradient so the whole tile carries the pattern, not just the subject. */
 const sky = (y: number, top: number, bottom: number) =>
   top + (bottom - top) * y;
-/** Puffy cloud: three overlapping circles and a flat base, drifting right and wrapping. */
+// Overlapping disks and a flat base make a cloud that wraps across the scene.
 const cloud = (
   x: number,
   y: number,
@@ -59,7 +56,7 @@ const cloud = (
   );
 };
 
-// Fixed star field for the night scene: [x, y, phase, size].
+// Star tuples are [x, y, twinkle phase, size] in normalized scene coordinates.
 const STARS = [
   [0.12, 0.14, 0, 0.022],
   [0.3, 0.08, 1.7, 0.014],
@@ -73,9 +70,9 @@ const STARS = [
   [0.6, 0.06, 0.6, 0.012],
 ] as const;
 
-/** Brightness (0–1) of point (x, y) in the unit square at time t seconds. */
+// Scenes return brightness from 0 to 1 at normalized (x, y) and time in seconds.
 const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
-  // Sun rising behind rolling hills, clouds drifting across a pale sky.
+  // Layer the rising sun behind rolling hills and drifting clouds.
   morning: (x, y, t) => {
     const sunY = 0.6 - 0.04 * Math.sin(t * 0.7);
     const front = 0.8 + 0.05 * Math.sin(x * 6 + 1);
@@ -92,7 +89,7 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
       glow(x, y, 0.5, sunY, 0.5) * (0.45 + 0.35 * rays),
     );
   },
-  // High sun with a corona ring and slowly turning rays; a cloud passes below.
+  // Draw the sun's corona and rotating rays above a passing cloud.
   afternoon: (x, y, t) => {
     if (cloud(x, y, t, 0.04, 0.74, 1.3)) return 0.85;
     const d = dist(x, y, 0.5, 0.42);
@@ -102,12 +99,12 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
     if (d < 0.44 && spike > 0.9) return 0.9 - d;
     return Math.max(sky(y, 0.32, 0.1), glow(x, y, 0.5, 0.42, 0.5) * 0.55);
   },
-  // Retro striped sun sinking into the sea, its reflection rippling below.
+  // Stripe the setting sun and ripple its reflection below the horizon.
   evening: (x, y, t) => {
     const horizon = 0.6;
     if (y < horizon) {
       if (disk(x, y, 0.5, horizon, 0.28)) {
-        // Gaps widen toward the horizon and scroll down slowly.
+        // Widen and scroll the stripe gaps toward the horizon.
         const depth = (y - (horizon - 0.28)) / 0.28;
         const stripe = (((y * 26 - t * 0.6) % 1) + 1) % 1;
         return depth > 0.35 && stripe < depth * 0.55 ? 0.15 : 1;
@@ -125,14 +122,14 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
     const sparkle = Math.sin(x * 53 + t * 4) * Math.sin(y * 71 - t * 3);
     return sparkle > 0.92 ? 0.7 : 0.14 + 0.08 * depth;
   },
-  // Cratered crescent moon, twinkling stars and a passing shooting star.
+  // Combine a crescent moon, twinkling stars, and a periodic shooting star.
   night: (x, y, t) => {
     const mx = 0.5;
     const my = 0.48;
     const mr = 0.27;
     const d = dist(x, y, mx, my);
     if (d < mr) {
-      // Sphere normal, lit from the left: a crescent with a soft terminator.
+      // Approximate a sphere normal and light it from the left to form the crescent.
       const nx = (x - mx) / mr;
       const ny = (y - my) / mr;
       const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
@@ -142,24 +139,21 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
         glow(x, y, 0.46, 0.66, 0.045) +
         glow(x, y, 0.36, 0.38, 0.04) +
         glow(x, y, 0.55, 0.36, 0.035);
-      // Earthshine keeps the dark side faintly visible.
+      // Earthshine keeps the unlit side faintly visible.
       return Math.max(0.16, light * (1 - 0.55 * Math.min(1, crater * 1.6)));
     }
-    // Halo just outside the rim.
     if (d < mr + 0.08)
       return Math.max(sky(y, 0.04, 0.16), (mr + 0.08 - d) * 3.2);
-    // Dim clouds drifting behind everything.
     if (cloud(x, y, t, 0.02, 0.8, 1.6) || cloud(x, y, t, 0.015, 0.2, 1.2))
       return 0.2;
     for (const [sx, sy, phase, size] of STARS) {
       const d = dist(x, y, sx, sy);
       const twinkle = 0.5 + 0.5 * Math.sin(t * 2.2 + phase);
-      // Bright core plus a faint cross that flares as the star twinkles.
       if (d < size) return 0.55 + 0.45 * twinkle;
       const onCross = Math.abs(x - sx) < 0.006 || Math.abs(y - sy) < 0.006;
       if (twinkle > 0.7 && onCross && d < size * 2.6) return 0.6;
     }
-    // A shooting star every 7s, crossing the top-left on a diagonal.
+    // A shooting star crosses the scene every seven seconds.
     const p = (t % 7) / 1.2;
     if (p < 1) {
       const hx = 0.1 + p * 0.5;
@@ -172,10 +166,9 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
   },
 };
 
-/**
- * A small animated, ordered-dithered scene for the time of day. Draws in the
- * element's text color; holds still for prefers-reduced-motion.
- */
+/* Sample the scene into six brightness levels using Bayer thresholds.
+   Paint alpha in the text color; reduced-motion users get one frame.
+   A low frame rate keeps the animation's stepped motion. */
 export function DitherScene({ period }: { period: DayPeriod }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -190,7 +183,7 @@ export function DitherScene({ period }: { period: DayPeriod }) {
     const scene = SCENES[period];
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const image = context.createImageData(size, size);
-    // Resolve the CSS text color (any format) to RGB via the 2D context.
+    // Convert any CSS text color to RGB through the canvas context.
     context.fillStyle = getComputedStyle(canvas).color;
     context.fillRect(0, 0, 1, 1);
     const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
@@ -225,7 +218,6 @@ export function DitherScene({ period }: { period: DayPeriod }) {
     let frame = 0;
     let last = 0;
     const tick = (now: number) => {
-      // Low frame rate on purpose: stepped motion suits the dither look.
       if (now - last > 1000 / FPS) {
         last = now;
         draw(now / 1000);
@@ -236,7 +228,6 @@ export function DitherScene({ period }: { period: DayPeriod }) {
     return () => cancelAnimationFrame(frame);
   }, [period]);
 
-  // Framed here so every use shares one look: thick outer ring, muted inner tile.
   return (
     <div className="size-20 shrink-0 rounded-xl border-2 p-1">
       <div className="size-full overflow-hidden rounded-lg bg-muted text-primary">

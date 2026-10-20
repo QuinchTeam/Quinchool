@@ -12,11 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolField } from "@/features/chatbot/lib/types";
 
-/**
- * Renders whatever fields a tool asked for. Field descriptors come from the
- * API, so a new tool or section needs no component here — only a domain that
- * wants its own layout registers a replacement.
- */
 export function ToolFormFields({
   fields,
   onChange,
@@ -124,7 +119,6 @@ function ToolListField({
   onChange: (name: string, value: unknown) => void;
   value: string[];
 }) {
-  // Always leave one empty row so there is somewhere to type.
   const rows = value.length > 0 ? value : [""];
 
   function update(index: number, next: string) {

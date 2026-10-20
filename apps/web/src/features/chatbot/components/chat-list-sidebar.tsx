@@ -19,11 +19,7 @@ const updated = new Intl.DateTimeFormat("en-PH", {
   timeZone: "Asia/Manila",
 });
 
-/**
- * The chat list. Rendered as a flex sibling rather than a second
- * `SidebarProvider`, because the dashboard already owns one for the app nav and
- * nesting them fights over the same cookie and keyboard shortcut.
- */
+// Use a flex sibling; another SidebarProvider would share the nav cookie and shortcut.
 export function ChatListSidebar({
   activeChatId,
   isOpen,
@@ -120,7 +116,7 @@ function ChatRow({
             size="icon-sm"
             type="submit"
             variant="ghost"
-            // Blur fires before click, so commit on pointer down instead.
+            // Prevent blur from closing the editor before its action receives the click.
             onMouseDown={(event) => event.preventDefault()}
           >
             <AppIcon icon={CheckIcon} />

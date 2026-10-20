@@ -103,7 +103,6 @@ export class FinanceTrackerRepository {
     );
   }
 
-  /** One page of matching transactions plus the total match count. */
   listTransactions(userId: string, query: TransactionQuery) {
     const { field, direction } = TRANSACTION_SORTS[query.sort];
     const where: Prisma.FinanceTransactionWhereInput = {
@@ -114,7 +113,7 @@ export class FinanceTrackerRepository {
         gte: query.from && new Date(query.from),
         lt: query.to && new Date(query.to),
       },
-      // Transfers are the generated "Transfer to/from <wallet>" label pairs.
+      // Transfers use generated Transfer to/from wallet label pairs.
       ...(query.excludeTransfers && {
         label: {
           NOT: [
@@ -142,13 +141,10 @@ export class FinanceTrackerRepository {
     ]);
   }
 
-  /**
-   * Income and expense per bucket for the current Manila-time period, with
-   * empty buckets filled so charts keep their shape.
-   */
+  // Fill empty Manila-time buckets so gaps do not collapse the chart.
   summaryForUser(userId: string, period: SummaryQuery["period"]) {
     const bucket = SUMMARY_BUCKETS[period];
-    // ponytail: transfers are matched by their generated label names; add a transfer flag column if users start naming labels "Transfer to ...".
+    // shortcut: transfer detection depends on label names; use a flag if users can create matching labels.
     return this.prisma.$queryRaw<
       { bucket: string; income: string; expense: string }[]
     >`

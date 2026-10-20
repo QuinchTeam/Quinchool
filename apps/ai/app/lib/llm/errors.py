@@ -1,8 +1,3 @@
-"""Provider failures, translated into the response Nest already forwards.
-
-Port of apps/api/src/text-generation/errors.ts.
-"""
-
 from __future__ import annotations
 
 import json
@@ -17,8 +12,6 @@ from app.modules.text_generation.schemas import (
 
 
 class ProviderHttpError(Exception):
-    """A non-2xx from a provider's HTTP API, with its status kept."""
-
     def __init__(self, message: str, status: int) -> None:
         super().__init__(message)
         self.message: str = message
@@ -26,8 +19,6 @@ class ProviderHttpError(Exception):
 
 
 class TextGenerationError(Exception):
-    """A failure the caller is meant to read: which provider, and why."""
-
     def __init__(
         self,
         *,
@@ -50,10 +41,7 @@ def map_provider_error(
     provider_id: TextGenerationProviderId,
     provider_model_id: str,
 ) -> Exception:
-    """A rate limit is the one provider failure worth naming: it tells the user
-    to wait rather than to retry. Everything else is passed through so the next
-    provider in the chain still gets its turn.
-    """
+    # Wrap rate limits for the caller; leave other failures available for fallback.
     if _get_provider_status(error) != 429:
         return error
 
@@ -67,10 +55,7 @@ def map_provider_error(
 
 
 def read_provider_error_message(error: Exception) -> str | None:
-    """The readable sentence behind a provider failure. Google can hand back the
-    whole HTTP error body, so the useful text arrives wrapped in a JSON
-    envelope: {"error":{"code":503,"message":"...","status":"UNAVAILABLE"}}.
-    """
+    # Google may return error.message inside a JSON envelope.
     if isinstance(error, genai_errors.APIError):
         message = error.message or ""
     elif isinstance(error, ProviderHttpError):

@@ -25,10 +25,7 @@ import {
   jobIdSchema,
 } from "./jobs-scraper.contract";
 
-/**
- * The whole jobs scraper surface. Every route answers with the same state
- * object so the client never has to stitch a response together from two calls.
- */
+// Return the full scraper state so the client does not need a second request.
 @Controller("jobs-scraper")
 @UseGuards(SessionGuard)
 export class JobsScraperController {
@@ -75,12 +72,6 @@ export class JobsScraperController {
     return this.repository.getState(userId);
   }
 
-  /**
-   * Scans with the criteria this user has saved, stores the graded listings,
-   * and answers with the state the review page renders. A failed scan throws
-   * from the service with the AI service's own status and wording. A scan
-   * is stored, so this answers 201.
-   */
   @Post("scans")
   async scan(@UserId() userId: string): Promise<JobScraperState> {
     const config = await this.repository.getConfig(userId);

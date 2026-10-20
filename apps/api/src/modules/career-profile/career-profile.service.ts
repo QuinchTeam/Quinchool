@@ -11,7 +11,6 @@ import { CareerProfileRepository } from "./career-profile.repository";
 export class CareerProfileService {
   constructor(private readonly repository: CareerProfileRepository) {}
 
-  /** Null when the user has not built a profile yet. */
   async get(userId: string): Promise<CareerProfileValues | null> {
     const profile = await this.repository.findByUserId(userId);
 
@@ -61,7 +60,6 @@ export class CareerProfileService {
     };
   }
 
-  /** Empty layout until the builder saves one; stored JSON is re-validated. */
   async getResumeLayout(userId: string): Promise<ResumeLayout> {
     const stored = await this.repository.findResumeLayout(userId);
     const parsed = resumeLayoutSchema.safeParse(stored?.resumeLayout);
@@ -91,7 +89,7 @@ export class CareerProfileService {
   }
 }
 
-/** The form works in months, the database in dates. */
+// Forms store YYYY-MM; the database stores full dates.
 function toMonth(date: Date): string {
   return date.toISOString().slice(0, 7);
 }

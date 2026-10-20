@@ -35,8 +35,6 @@ export function deleteChat(chatId: string): Promise<void> {
   return request<void>(`/chatbot/chats/${chatId}`, { method: "DELETE" });
 }
 
-/** Sends a message. Omitting `chatId` starts a new chat server-side, so an
- * abandoned "New chat" never leaves an empty row in the sidebar. */
 export async function sendChatMessage(body: {
   chatId?: string;
   content: string;
@@ -48,7 +46,7 @@ export async function sendChatMessage(body: {
       body,
     });
 
-    // A tool call can leave the text empty, but a pending form is still a reply.
+    // A pending tool form is a valid reply even when its text is empty.
     if (!turn.text && !turn.pendingAction) {
       throw new Error(FALLBACK_ERROR);
     }
@@ -57,10 +55,7 @@ export async function sendChatMessage(body: {
   });
 }
 
-/**
- * Runs a write the user confirmed. The reply is a normal chat turn: the model
- * gets to react to what changed, so a confirmation can carry the chain on.
- */
+// Return the model's follow-up after the user confirms a write.
 export function runToolAction({
   action,
   chatId,

@@ -25,7 +25,7 @@ import { apiTracePropagationTargets } from "./lib/observability/trace-propagatio
       ...(production ? [Sentry.replayIntegration()] : []),
     ],
 
-    // Sentry is for errors: replays only record sessions that hit one.
+    // Record replays only for sessions that encounter an error.
     replaysOnErrorSampleRate: 1.0,
     beforeSend: mirrorError,
     beforeSendTransaction: exportTransaction,

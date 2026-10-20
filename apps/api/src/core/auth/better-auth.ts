@@ -1,8 +1,3 @@
-/**
- * The better-auth instance, now that the API issues sessions rather than the
- * web app. The web app keeps the React client and reads the same cookie.
- */
-
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
@@ -12,27 +7,26 @@ import { domainLog } from "../observability/logger";
 
 export type Auth = ReturnType<typeof createAuth>;
 
-/**
- * Takes the client Nest already built so the process keeps one connection
- * pool. The `nextCookies()` plugin is gone with Next: it only existed to set
- * cookies on server-action responses.
- */
+// Reuse Nest's Prisma client so auth shares the connection pool.
 export function createAuth(prisma: PrismaService) {
   return betterAuth({
-    logger: { log: (level) => domainLog(level === "error" ? "error" : level === "warn" ? "warn" : "info", "auth.message", { domain: "auth" }) },
+    logger: {
+      log: (level) =>
+        domainLog(
+          level === "error" ? "error" : level === "warn" ? "warn" : "info",
+          "auth.message",
+          { domain: "auth" },
+        ),
+    },
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
-    // The browser calls this from the web app's origin, so that origin has to
-    // be trusted for the cookie to be accepted.
+    // Trust the web origin so cross-origin session cookies are accepted.
     trustedOrigins: [env.WEB_ORIGIN],
     database: prismaAdapter(prisma, {
       provider: "postgresql",
     }),
     advanced: {
-      // In production the API and the web app are different subdomains, and the
-      // web app's middleware reads this cookie itself. Without a shared parent
-      // domain the cookie stays host-only to the API and that check never sees
-      // it. Off locally, where a domain on localhost is meaningless.
+      // Share cookies with the web subdomain so its proxy can read the session.
       crossSubDomainCookies: env.COOKIE_DOMAIN
         ? { enabled: true, domain: env.COOKIE_DOMAIN }
         : { enabled: false },
@@ -40,13 +34,14 @@ export function createAuth(prisma: PrismaService) {
     emailAndPassword: {
       enabled: true,
       sendResetPassword: async ({ user, url }) => {
-        domainLog("warn", "auth.password-reset.delivery-unconfigured", { domain: "auth" });
-        // No SMTP in local/dev — log the reset link so it can be opened
-        // manually. Swap this for a real email sender when wiring up
-        // production.
-        if (process.env.NODE_ENV !== "production") console.log(
-          `\n[better-auth] Password reset link for ${user.email}:\n${url}\n`,
-        );
+        domainLog("warn", "auth.password-reset.delivery-unconfigured", {
+          domain: "auth",
+        });
+        // Development prints reset links; production still needs an email sender.
+        if (process.env.NODE_ENV !== "production")
+          console.log(
+            `\n[better-auth] Password reset link for ${user.email}:\n${url}\n`,
+          );
       },
     },
   });

@@ -4,7 +4,7 @@ import { createContext, type ReactNode, useContext } from "react";
 
 const FinanceScopeContext = createContext<string | null>(null);
 
-/** `scope` is an opaque per-login key that partitions the finance query cache. */
+// Scope is an opaque per-login cache key, never the session cookie.
 export function FinanceScope({
   scope,
   children,

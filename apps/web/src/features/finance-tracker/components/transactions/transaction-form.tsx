@@ -71,7 +71,7 @@ export function TransactionForm({
       );
       onSaved();
     } catch {
-      // Keep the form open with its mutation error and entered values.
+      // Preserve entered values and show the mutation error inside the form.
     } finally {
       onPendingChange(false);
     }

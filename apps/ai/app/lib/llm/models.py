@@ -1,8 +1,4 @@
-"""Which providers serve a model, and under what name.
-
-Port of apps/api/src/text-generation/{models.ts,provider-chain.ts}. Insertion
-order is the fallback order: the first provider listed is tried first.
-"""
+# Provider insertion order is the fallback order.
 
 from __future__ import annotations
 
@@ -34,7 +30,6 @@ TEXT_GENERATION_MODELS: dict[
 def get_provider_chain(
     model_id: TextGenerationModelId,
 ) -> list[tuple[TextGenerationProviderId, str]]:
-    """Every provider that can serve this model, in the order to try them."""
     provider_models = TEXT_GENERATION_MODELS.get(model_id)
 
     if not provider_models:

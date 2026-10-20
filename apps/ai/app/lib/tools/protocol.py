@@ -1,11 +1,4 @@
-"""Reading a tool call back out of plain model text.
-
-Four providers serve these models and only one of them supports native function
-calling, so the wire format has to be text the fallback chain can carry. The
-parser is deliberately forgiving: models wrap JSON in code fences, add a
-preamble, or emit the tag twice, and none of that should reach the user as a
-literal answer.
-"""
+# Use text tool calls across providers because native calling is not available everywhere.
 
 from __future__ import annotations
 
@@ -30,17 +23,12 @@ class ParsedToolCall:
 
 
 def parse_tool_call(text: str) -> tuple[ParsedToolCall | None, str]:
-    """Split model output into a tool call and whatever prose surrounded it.
-
-    Returns (None, text) when there is no usable call, so a malformed tag
-    degrades into an ordinary answer instead of an error.
-    """
+    # Malformed tool JSON falls back to prose with its tag removed.
     match = _TOOL_CALL.search(text)
 
     if not match:
         return None, text.strip()
 
-    # Whatever happens next, the tag itself must not reach the user.
     without_tag = (text[: match.start()] + text[match.end() :]).strip()
     payload = _CODE_FENCE.sub("", match.group(1)).strip()
 

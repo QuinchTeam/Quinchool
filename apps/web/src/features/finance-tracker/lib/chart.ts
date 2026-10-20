@@ -1,7 +1,4 @@
-/**
- * Evenly spaced axis ticks from 0 that cover `max`, stepping by 1, 2, 2.5 or 5
- * times a power of ten. e.g. niceTicks(73_000) -> [0, 20000, 40000, 60000, 80000]
- */
+// Round tick spacing to 1, 2, 2.5, 5, or 10 times a power of ten.
 export function niceTicks(max: number, count = 4): number[] {
   if (max <= 0) return [0, 1];
   const rough = max / count;
@@ -13,9 +10,8 @@ export function niceTicks(max: number, count = 4): number[] {
   return Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
 }
 
-/** Now as a Manila wall-clock key, comparable with summary bucket keys. */
 export function manilaNowKey(now = new Date()) {
-  // sv-SE formats as "YYYY-MM-DD HH:mm".
+  // sv-SE produces sortable YYYY-MM-DD HH:mm wall-clock labels.
   return now
     .toLocaleString("sv-SE", {
       timeZone: "Asia/Manila",

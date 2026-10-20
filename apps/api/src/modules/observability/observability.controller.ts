@@ -1,9 +1,20 @@
-import { Body, Controller, ForbiddenException, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import type { Request } from "express";
 import { env } from "../../core/config/env";
 import { SessionGuard, UserId } from "../../core/auth/session.guard";
 import { ZodValidationPipe } from "../../shared/pipes/zod-validation.pipe";
-import { type WebTelemetry, webTelemetrySchema } from "./observability.contract";
+import {
+  type WebTelemetry,
+  webTelemetrySchema,
+} from "./observability.contract";
 import { ObservabilityService } from "./observability.service";
 
 @Controller("observability")
@@ -26,8 +37,16 @@ export class ObservabilityController {
     @Body(new ZodValidationPipe(webTelemetrySchema)) records: WebTelemetry,
     @Req() request: Request,
   ) {
-    if (request.headers.origin !== new URL(env.WEB_ORIGIN).origin) throw new ForbiddenException({ code: "ORIGIN_NOT_ALLOWED", message: "Origin not allowed" });
-    // Origin is not authentication; anonymous telemetry stays explicitly untrusted and tightly bounded.
-    await this.service.receive(records, `anonymous:${request.socket.remoteAddress ?? "unknown"}`, 20);
+    if (request.headers.origin !== new URL(env.WEB_ORIGIN).origin)
+      throw new ForbiddenException({
+        code: "ORIGIN_NOT_ALLOWED",
+        message: "Origin not allowed",
+      });
+    // Anonymous telemetry is untrusted even when its origin is allowed.
+    await this.service.receive(
+      records,
+      `anonymous:${request.socket.remoteAddress ?? "unknown"}`,
+      20,
+    );
   }
 }

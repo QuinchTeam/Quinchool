@@ -19,9 +19,7 @@ export function useSortableItem(id: string) {
 
   return {
     isDragging,
-    // Same feel as wallet cards: lift the picked-up item, fade its siblings.
-    // No tilt and a tiny scale: on full-width items even 1deg swings the ends
-    // tens of pixels past the drop zone.
+    // Avoid tilt on wide rows because it pushes their edges outside the drop zone.
     dragClassName: cn(
       "transition-opacity",
       isDragging && "relative z-10 scale-101 cursor-grabbing shadow-2xl",
@@ -29,10 +27,9 @@ export function useSortableItem(id: string) {
     ),
     itemProps: {
       ref: setNodeRef,
-      // The dashboard panel hides its horizontal scrollbar while dragging, but
-      // keeps vertical scroll so long lists can still be reached.
+      // Hide horizontal overflow during drag while keeping long lists vertically scrollable.
       "data-dragging": isDragging || undefined,
-      // Translate, not Transform: scaling distorts variable-width chips.
+      // Translate without scaling so variable-width chips keep their shape.
       style: { transform: CSS.Translate.toString(transform), transition },
     },
     handleProps: { ref: setActivatorNodeRef, ...attributes, ...listeners },

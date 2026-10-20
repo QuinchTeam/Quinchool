@@ -53,9 +53,8 @@ function MiniClock() {
 
 export function DashboardGreeting() {
   const { data: session, isPending } = useSession();
-  // Captured once per mount: the greeting should not change mid-visit.
+  // Capture once so the greeting does not change mid-visit.
   const [now] = useState(() => new Date());
-  // Manila clock, so the greeting matches the time the user is actually on.
   const { hour, weekday } = manilaClock(now);
   const period = dayPeriod(hour);
   const user = session?.user;

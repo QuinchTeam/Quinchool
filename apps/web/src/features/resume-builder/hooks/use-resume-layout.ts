@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
-/** The builder's hide/reorder choices, keyed as in `filterResumeContent`. */
 export interface ResumeLayout {
   excluded: string[];
   order: Record<string, number[]>;

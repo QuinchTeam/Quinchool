@@ -75,7 +75,7 @@ test("a CUSTOM range may not run backwards", () => {
 });
 
 test("an old but well-formed CUSTOM range still scans", () => {
-  // The seven-day recency rule belongs to saving a config, not running a scan.
+  // Seven-day recency is a save rule; an older saved range must still scan.
   const parsed = jobScraperConfigSchema.safeParse({
     ...validConfig,
     timeRange: "CUSTOM",

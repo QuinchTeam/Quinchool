@@ -127,7 +127,7 @@ function TransferForm({
       toast.success("Money transferred.");
       onSaved();
     } catch {
-      // Keep the dialog open with its mutation error and entered values.
+      // Preserve entered values and show the mutation error inside the dialog.
     } finally {
       onPendingChange(false);
     }

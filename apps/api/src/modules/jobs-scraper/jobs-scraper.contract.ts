@@ -1,11 +1,3 @@
-/**
- * The wire contract for a scan, and the rules for reporting one that failed.
- *
- * Kept free of Nest decorators so it stays directly runnable under `node --test`
- * and importable from anywhere. The criteria themselves are a port of
- * `jobScraperConfigSchema` in apps/web/src/lib/jobs-scraper/schema.ts.
- */
-
 import { z } from "zod";
 
 export const JOB_SOURCES = ["LinkedIn", "JobStreet"] as const;
@@ -19,13 +11,12 @@ export const JOB_TIME_RANGES = [
 export const JOB_CLASSIFICATIONS = ["MATCH", "POTENTIAL", "REJECTED"] as const;
 
 const criterionSchema = z.string().trim().min(1).max(80);
-const criteriaSchema = z.array(criterionSchema).max(30).transform(uniqueStrings);
+const criteriaSchema = z
+  .array(criterionSchema)
+  .max(30)
+  .transform(uniqueStrings);
 
-/**
- * Every criteria list may be empty here: a new account starts with nothing
- * filled in, and a half-finished config is still worth storing. What a scan
- * actually needs is `isScannableConfig`, checked at the scan boundary.
- */
+// Empty criteria can be saved; scan readiness is checked separately.
 export const jobScraperConfigSchema = z
   .object({
     roles: criteriaSchema,
@@ -37,7 +28,9 @@ export const jobScraperConfigSchema = z
     timeRange: z.enum(JOB_TIME_RANGES),
     customStartDate: z.iso.date().nullable(),
     customEndDate: z.iso.date().nullable(),
-    worldwideWorkModes: z.array(z.enum(JOB_WORK_MODES)).transform(uniqueStrings),
+    worldwideWorkModes: z
+      .array(z.enum(JOB_WORK_MODES))
+      .transform(uniqueStrings),
     philippinesWorkModes: z
       .array(z.enum(JOB_WORK_MODES))
       .transform(uniqueStrings),
@@ -56,10 +49,7 @@ export const jobScraperConfigSchema = z
       return;
     }
 
-    // The web app also rejects a custom range outside the latest seven days.
-    // That is a config-save rule, not a scan rule: enforcing it here would fail
-    // a scan for a config that was valid when it was stored. Only the ordering
-    // matters to build a window, and the AI service agrees on exactly this.
+    // Saved ranges may be older than seven days; scanning only checks their order.
     if (value.customStartDate > value.customEndDate) {
       context.addIssue({
         code: "custom",
@@ -79,7 +69,6 @@ export const scanRequestSchema = z.object({
 
 export type ScanRequest = z.infer<typeof scanRequestSchema>;
 
-/** One graded listing, already flattened by the AI service into a storable row. */
 export interface ScannedJob {
   classification: (typeof JOB_CLASSIFICATIONS)[number];
   company: string;
@@ -113,22 +102,18 @@ export interface ScanFailure {
   status: number;
 }
 
-/**
- * Turns an AI-service reply into the sentence the caller reads. The service
- * already phrases crawler and classification failures for a human — whether
- * the service is overloaded, quota is spent, or the crawler is down — so its
- * wording is passed through rather than replaced with a generic message.
- */
+// Preserve the AI service's readable error and HTTP status for the client.
 export function mapScanFailure(status: number, body: unknown): ScanFailure {
   const message =
-    body && typeof body === "object" && typeof (body as { error?: unknown }).error === "string"
+    body &&
+    typeof body === "object" &&
+    typeof (body as { error?: unknown }).error === "string"
       ? (body as { error: string }).error
       : null;
 
   return {
-    message: message ?? `The job scan failed. The AI service returned ${status}.`,
-    // The AI service already answers with a meaningful HTTP code; forward it
-    // so a retryable failure still reads as one instead of collapsing to 500.
+    message:
+      message ?? `The job scan failed. The AI service returned ${status}.`,
     status: status >= 400 && status <= 599 ? status : 502,
   };
 }
@@ -145,11 +130,7 @@ function uniqueStrings<T extends string>(values: T[]): T[] {
   });
 }
 
-/**
- * What a first-time user starts with: nothing. Criteria are personal, so the
- * app asks rather than guesses. Only the two things that are not a preference —
- * which boards exist, and a sane window — come pre-filled.
- */
+// Start with empty personal criteria; only boards and the date window have defaults.
 export const DEFAULT_JOB_SCRAPER_CONFIG: JobScraperConfig = {
   roles: [],
   includedLevels: [],
@@ -164,11 +145,7 @@ export const DEFAULT_JOB_SCRAPER_CONFIG: JobScraperConfig = {
   philippinesWorkModes: [],
 };
 
-/**
- * Whether a config can produce a scan. A search URL is built per role, filtered
- * by work mode, so those cannot be empty; levels are what the classifier grades
- * against. The AI service enforces the same four, and answers 422 without them.
- */
+// These four criteria are required by both the API and AI scan boundaries.
 export function getUnsetScanCriteria(config: JobScraperConfig): string[] {
   return [
     config.roles.length === 0 ? "a role" : "",
@@ -191,7 +168,6 @@ export const classificationUpdateSchema = z.object({
 
 export type ClassificationUpdate = z.infer<typeof classificationUpdateSchema>;
 
-/** One stored listing as the review page reads it. */
 export interface SavedJob extends Omit<ScannedJob, "description"> {
   firstSeenAt: string;
   id: string;
@@ -215,10 +191,7 @@ export interface JobScraperState {
   sourceIssues: JobSourceIssue[];
 }
 
-/**
- * The stable per-source id a listing is deduplicated on. Both sites put a
- * numeric id in the path; the lowercased path is the fallback when they don't.
- */
+// Use the source's numeric job ID, falling back to the lowercase URL path.
 export function getSourceJobId(
   url: string,
   source: (typeof JOB_SOURCES)[number],

@@ -1,4 +1,3 @@
-/** Marks finance tracker pages so the dashboard card reserves scrollbar space. */
 export default function FinanceTrackerLayout({
   children,
 }: {

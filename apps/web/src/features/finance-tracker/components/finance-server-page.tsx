@@ -7,17 +7,13 @@ import { FinanceDashboard } from "./finance-dashboard";
 import { FinanceScope } from "./shared/finance-scope";
 import { TransactionHistory } from "./transaction-history";
 
-/**
- * Renders instantly: no data is awaited here. Each section runs its own query
- * on the client, so a slow endpoint only delays its own section.
- */
+// Fetch sections client-side so a slow endpoint does not block the whole page.
 export async function FinanceServerPage({
   history = false,
 }: {
   history?: boolean;
 }) {
-  // A hash of the session cookie scopes the query cache per login without a
-  // round trip for the user id, and never exposes the cookie to client JS.
+  // Hash the session to partition client caches without exposing the cookie.
   const session = getSessionCookie(await headers()) ?? "";
   const scope = createHash("sha256").update(session).digest("hex");
 

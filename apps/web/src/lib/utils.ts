@@ -5,7 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** "Cyril James" -> "CJ"; "?" when there is no name. */
 export function initialsOf(name: string) {
   return (
     name

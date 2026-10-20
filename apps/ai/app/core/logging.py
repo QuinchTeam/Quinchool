@@ -1,7 +1,3 @@
-"""Structured service logs. Port of apps/web/src/lib/jobs-scraper/logging.ts, so
-a scan reads the same in this service's output as it did in the Next.js one.
-"""
-
 from __future__ import annotations
 
 import json
@@ -23,7 +19,7 @@ _span: ContextVar[trace.Span | None] = ContextVar("domain_log_span", default=Non
 
 @contextmanager
 def use_log_span(span):
-    # Langfuse has its own provider; infrastructure logs must link to an exported infrastructure span.
+    # Link infrastructure logs to infrastructure spans; Langfuse uses a separate provider.
     token = _span.set(span)
     try:
         yield
@@ -122,12 +118,11 @@ def log_jobs_scraper(
 
 
 def elapsed_ms(started_at: float) -> int:
-    """Milliseconds since a time.monotonic() reading."""
     return round((time.monotonic() - started_at) * 1000)
 
 
 def to_iso_z(value: datetime) -> str:
-    """The `2026-08-29T04:05:06.000Z` shape JavaScript's toISOString() emits."""
+    # Match JavaScript's millisecond UTC timestamp format.
     return (
         value.astimezone(timezone.utc)
         .isoformat(timespec="milliseconds")

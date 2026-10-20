@@ -20,24 +20,20 @@ export function toLocalDateTime(value = new Date().toISOString()) {
   return local.toISOString().slice(0, 16);
 }
 
-/**
- * How a signed amount reads: money in is emerald, money out is destructive.
- * Shared so the dashboard and the tracker cannot drift apart.
- */
 export function amountClassName(type: "INCOME" | "EXPENSE") {
   return type === "INCOME"
     ? "text-emerald-700 dark:text-emerald-400"
     : "text-destructive";
 }
 
-/** First is the app primary (dark theme); the rest are popular Tailwind 500 hues. */
+// Keep the dark-theme primary color first as the default wallet color.
 export const WALLET_COLORS = [
-  "#2ec4b6", // primary
-  "#3b82f6", // blue
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#f43f5e", // rose
-  "#f97316", // orange
-  "#f59e0b", // amber
-  "#22c55e", // green
+  "#2ec4b6",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#f43f5e",
+  "#f97316",
+  "#f59e0b",
+  "#22c55e",
 ];

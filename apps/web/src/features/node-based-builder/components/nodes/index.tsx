@@ -30,12 +30,9 @@ import {
   type TextGeneratorNodeData,
 } from "./text-generator-node";
 
-// Drag-and-drop payload key shared with the toolbar. A button sets the node
-// type here on drag start; the canvas reads it on drop.
 export const NODE_DRAG_MIME = "application/reactflow-type";
 
-// Every spawnable card is described once here so the toolbar, the drag/drop
-// canvas and the nodeTypes map all stay in sync. Add a new card = add a row.
+// Add node types here so toolbar options and canvas registration stay aligned.
 export const NODE_CARDS = [
   { type: "prompt", label: "Prompt", icon: ParagraphIcon },
   { type: "enhancer", label: "Enhancer", icon: MagicWandIcon },
@@ -44,7 +41,6 @@ export const NODE_CARDS = [
 
 export type NodeCardType = (typeof NODE_CARDS)[number]["type"];
 
-// Fresh data for a newly spawned node of a given type.
 export type NodeData =
   | PromptNodeData
   | EnhancerNodeData
@@ -68,9 +64,6 @@ export function createNodeData(type: NodeCardType): NodeData {
       };
   }
 }
-
-// ─── Info ────────────────────────────────────────────────────────────────────
-// Debug inspector: the node's own id/type/position plus the ids it is wired to.
 
 function InfoRow({
   label,
@@ -105,10 +98,7 @@ function ConnectionRow({ label, ids }: { label: string; ids: string[] }) {
 function NodeInfoPopover({ id }: { id: string }) {
   const connections = useNodeConnections({ id });
 
-  // Subscribe to the store so type/position stay live. getNode() is an
-  // imperative snapshot — dragging a node only transforms its wrapper and never
-  // re-renders this component, so the position would otherwise freeze. Selecting
-  // primitives means only this node re-renders, and only when its value changes.
+  // Subscribe to the store; getNode() snapshots do not update while a node is dragged.
   const nodeType = useStore((store) => store.nodeLookup.get(id)?.type ?? "—");
   const position = useStore((store) => {
     const node = store.nodeLookup.get(id);
@@ -119,8 +109,7 @@ function NodeInfoPopover({ id }: { id: string }) {
     return `${Math.round(x)}, ${Math.round(y)}`;
   });
 
-  // A connection lists this node as either source or target; the other end is
-  // the neighbour. Self-loops intentionally show in both lists.
+  // Self-loops intentionally appear in both neighbor lists.
   const incoming = connections
     .filter((connection) => connection.target === id)
     .map((connection) => connection.source);
@@ -154,10 +143,6 @@ function NodeInfoPopover({ id }: { id: string }) {
   );
 }
 
-// ─── Shell ───────────────────────────────────────────────────────────────────
-// Shared chrome for every card: a target handle on the left, a source handle on
-// the right, a titled header and a body slot. Cards only supply their body.
-
 export function NodeShell({
   active = false,
   id,
@@ -186,7 +171,6 @@ export function NodeShell({
         <div className="ml-auto flex items-center">
           <NodeInfoPopover id={id} />
           <Button
-            // nodrag stops the click from grabbing and dragging the node.
             className="nodrag"
             type="button"
             variant="ghost"

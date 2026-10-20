@@ -49,7 +49,6 @@ const SORTS: Record<TransactionSort, string> = {
   lowest: "Lowest amount",
 };
 
-/** A labelled-for-screen-readers select over a fixed `value -> label` map. */
 function FilterSelect<T extends string>({
   label,
   value,
@@ -97,7 +96,6 @@ export function HistoryFilters({
     wallets[wallet.id] = wallet.name;
   }
 
-  // Typing stays local; the query only changes once the user pauses.
   const [search, setSearch] = useState(filters.search ?? "");
   useEffect(() => {
     const next = search.trim() || undefined;
@@ -119,7 +117,7 @@ export function HistoryFilters({
             <Button
               variant="ghost"
               size="sm"
-              // The card shell is already bg-muted, so hover on the card colour instead.
+              // Use the card color for hover because the surrounding shell is already muted.
               className="hover:bg-card!"
               onClick={() => {
                 setSearch("");

@@ -1,10 +1,4 @@
-/**
- * Where the NestJS API lives, for the browser to call directly.
- *
- * Spell the host as localhost rather than 127.0.0.1: the session cookie is set
- * on localhost and is not sent to 127.0.0.1, and the two also count as
- * different sites for SameSite purposes.
- */
+// Use localhost consistently; session cookies do not cross to 127.0.0.1.
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
 ).replace(/\/$/, "");
@@ -13,13 +7,9 @@ export function apiUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
 }
 
-/**
- * Every API request needs the session cookie, which the browser only sends
- * cross-origin when asked.
- */
+// Cross-origin API requests need credentials to include the session cookie.
 export const withCredentials = { credentials: "include" } as const;
 
-/** One failed API call, from the `{ error }` envelope in docs/conventions/backend/api-responses.md. */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -38,10 +28,7 @@ export interface ApiEnvelope<T, M = Record<string, unknown>> {
   links?: Record<string, string>;
 }
 
-/**
- * Reads an API response: the whole `{ data, meta, links }` envelope on
- * success, an ApiError on failure. A 204 reads as `{ data: undefined }`.
- */
+// A 204 response has no envelope; expose it as data: undefined.
 export async function readApiEnvelope<T, M = Record<string, unknown>>(
   response: Response,
   fallbackMessage: string,
@@ -70,7 +57,6 @@ export async function readApiEnvelope<T, M = Record<string, unknown>>(
   return body;
 }
 
-/** Same as readApiEnvelope, for the common case that only needs `data`. */
 export async function readApiData<T>(
   response: Response,
   fallbackMessage: string,

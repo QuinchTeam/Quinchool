@@ -1,10 +1,3 @@
-"""HTTP surface for the two calls that are a single LLM round trip and nothing
-else. Stateless: prompt in, text out.
-
-Port of apps/api/src/text-generation/text-generation.controller.ts. The session
-check stays in Nest — it owns auth, and it is the only caller.
-"""
-
 from __future__ import annotations
 
 from fastapi import APIRouter

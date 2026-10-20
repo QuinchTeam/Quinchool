@@ -86,7 +86,7 @@ export function CareerProfileField({
           onPaste={(event) => {
             event.preventDefault();
             const target = event.currentTarget;
-            // setRangeText keeps the caret where the paste ends.
+            // setRangeText leaves the caret at the end of the pasted text.
             target.setRangeText(
               normalizePastedText(event.clipboardData.getData("text")),
               target.selectionStart,
@@ -175,7 +175,7 @@ export function BulletsField({
         <div className="flex flex-wrap gap-2">
           <ImportBulletsDialog
             onImport={(bullets) => {
-              // A lone blank bullet is the new-entry placeholder; replace it.
+              // Replace the blank new-entry placeholder when pasting bullets.
               if (fields.length === 1 && !getValues(`${name}.0.text`).trim())
                 remove(0);
               append(bullets.map((text) => ({ text })));
@@ -235,14 +235,12 @@ function BulletRow({
     <div
       {...itemProps}
       className={cn(
-        // Padding is always there (bled out with -mx-2) so lifting a row does not shift it.
+        // Keep padding at rest so lifting a row does not shift its layout.
         "-mx-2 flex items-start gap-2 rounded-lg p-2",
         dragClassName,
-        // Give the lifted row a surface; at rest it sits flat on the entry card.
         isDragging && "bg-card ring-1 ring-border",
       )}
     >
-      {/* mt-7 drops the handle and trash past the label onto the textarea. */}
       <div className="mt-7">
         <DragHandle label={label.toLowerCase()} {...handleProps} />
       </div>

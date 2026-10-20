@@ -14,8 +14,7 @@ export default function ResumeLayout({
 }>) {
   return (
     <ResumeHeaderActionsProvider>
-      {/* xl: fill the panel so header, tabs and side panels stay put; only the
-          PDF scrolls. Smaller screens stack and scroll as one page. */}
+      {/* On xl screens, only the PDF scrolls; smaller screens scroll the whole page. */}
       <div className="flex w-full min-w-0 flex-col gap-8 p-6 xl:h-full">
         <AppHeader
           icon={NotepadIcon}

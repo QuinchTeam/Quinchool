@@ -1,6 +1,5 @@
 import { defineConfig } from "vite-plus";
 
-// Next.js owns dev and build.
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   lint: {

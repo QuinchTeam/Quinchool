@@ -27,7 +27,6 @@ function Chip({
     <span
       {...handleProps}
       {...itemProps}
-      // The whole chip is the drag handle.
       ref={(node) => {
         itemProps.ref(node);
         handleProps.ref(node);
@@ -68,7 +67,7 @@ export function StringListInput({
   value: string[];
 }) {
   const [draft, setDraft] = useState("");
-  // Ctrl/Cmd+A in an empty input selects every chip; Backspace then clears them.
+  // Ctrl/Cmd+A in an empty input selects all chips; Backspace clears them.
   const [allSelected, setAllSelected] = useState(false);
   const suggestionsId = useId();
 
@@ -113,7 +112,6 @@ export function StringListInput({
 
   return (
     <>
-      {/* Shares the input's border, fill, focus and invalid rings; grows to fit chips. */}
       <InputGroup className="h-auto min-h-14 flex-wrap gap-2 px-4 py-2">
         <SortableList
           className="flex flex-wrap gap-2 empty:hidden"

@@ -1,20 +1,5 @@
 #!/usr/bin/env node
-// Fails if any Tailwind CSS *arbitrary value* (e.g. `w-[240px]`, `text-[#abc]`)
-// or arbitrary property (e.g. `[mask-type:luminance]`) appears in first-party
-// source. Use design-system tokens instead (`w-60`, `text-primary`), or add a
-// token to `@theme` in `src/app/globals.css`.
-//
-//   - Arbitrary *variants* are allowed: `data-[state=open]:…`, `[&_svg]:…`,
-//     `supports-[...]:…`, `min-[900px]:…`. Only arbitrary values and
-//     properties are blocked.
-//   - Vendored shadcn primitives under `src/components/ui/**` are not scanned
-//     (generated code).
-//   - Escape hatch: put `tailwind-allow-arbitrary` in a comment on the line.
-//
-// Usage:
-//   node scripts/check-tailwind-arbitrary.mjs            # scan src/
-//   node scripts/check-tailwind-arbitrary.mjs <files...> # scan given files
-//                                                        # (used by lint-staged)
+// Scan for arbitrary values and properties; arbitrary variants are allowed.
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
@@ -23,11 +8,10 @@ const ROOT = process.cwd();
 const SCAN_DIRS = ["src"];
 const SOURCE_EXT = /\.(?:[cm]?[jt]sx?|mdx?|css)$/;
 
-// Posix-style path fragments that are exempt from the rule.
 const IGNORED = [
-  "src/components/ui/", // vendored shadcn output
-  "scripts/check-tailwind-arbitrary.mjs", // documents forbidden syntax
-  "scripts/check-tailwind-arbitrary.test.mjs", // regression fixtures
+  "src/components/ui/", // Vendored shadcn output.
+  "scripts/check-tailwind-arbitrary.mjs", // Contains forbidden syntax used in examples.
+  "scripts/check-tailwind-arbitrary.test.mjs",
   "node_modules/",
   ".next/",
 ];
@@ -65,9 +49,7 @@ function collectFiles(args) {
     const abs = join(ROOT, dir);
     try {
       if (statSync(abs).isDirectory()) files.push(...walk(abs));
-    } catch {
-      // missing scan dir — skip
-    }
+    } catch {}
   }
   return files;
 }
@@ -104,8 +86,7 @@ function findArbitraryValues(line) {
 
     if (!isUtilityValue && !isProperty) continue;
 
-    // A balanced bracket group immediately followed by ":" is an arbitrary
-    // variant. Skip its nested selector content as one allowed unit.
+    // Bracket groups followed by : are allowed variants, including nested selectors.
     if (line[close + 1] === ":") {
       i = close;
       continue;

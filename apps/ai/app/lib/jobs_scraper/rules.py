@@ -22,7 +22,6 @@ def get_job_rejection_reasons(
     config: JobScraperConfig,
     now: datetime,
 ) -> list[str]:
-    """Return every configured criterion that disqualifies a job."""
     is_lenient = isinstance(job, PotentialJob)
     searchable_text = " ".join([job.title, job.summary, *job.matched_skills])
     level_text = f"{job.title} {job.level}"

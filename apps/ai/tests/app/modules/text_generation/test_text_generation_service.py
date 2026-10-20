@@ -19,7 +19,6 @@ from app.modules.text_generation.service import generate_text
 @final
 class TextGenerationTest(IsolatedAsyncioTestCase):
     async def test_falls_through_to_the_next_provider(self) -> None:
-        # gpt-oss-20b lists Groq, then OpenRouter, then Cloudflare.
         model_id: TextGenerationModelId = "gpt-oss-20b"
         self.assertEqual(
             [provider for provider, _ in get_provider_chain(model_id)],
@@ -44,16 +43,19 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         self.assertEqual(result.text, "answer")
 
     async def test_reports_the_last_failure_when_every_provider_fails(self) -> None:
-        with patch.dict(
-            "app.modules.text_generation.service.TEXT_GENERATION_PROVIDERS",
-            {
-                "google-ai-studio": AsyncMock(
-                    side_effect=ProviderHttpError(
-                        '{"error":{"message":"Quota exceeded."}}', 429
+        with (
+            patch.dict(
+                "app.modules.text_generation.service.TEXT_GENERATION_PROVIDERS",
+                {
+                    "google-ai-studio": AsyncMock(
+                        side_effect=ProviderHttpError(
+                            '{"error":{"message":"Quota exceeded."}}', 429
+                        )
                     )
-                )
-            },
-        ), self.assertRaises(TextGenerationError) as raised:
+                },
+            ),
+            self.assertRaises(TextGenerationError) as raised,
+        ):
             _ = await generate_text("gemini-3.5-flash", "hello")
 
         self.assertEqual(raised.exception.status, 429)

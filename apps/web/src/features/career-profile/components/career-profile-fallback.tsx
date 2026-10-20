@@ -9,8 +9,6 @@ import { ErrorState } from "@/components/shared/error-state";
 import { Button } from "@/components/ui/button";
 import { AppIcon } from "@/components/ui/icon";
 
-/** Shown instead of a preview when the career profile failed to load or has
- * not been filled in yet. */
 export function CareerProfileFallback({
   error,
   retry,

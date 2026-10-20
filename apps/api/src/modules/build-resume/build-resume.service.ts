@@ -1,5 +1,3 @@
-/** Reads resume source data and delegates the stateless tailoring workflow. */
-
 import {
   Injectable,
   Logger,
@@ -27,7 +25,6 @@ export class BuildResumeService {
     userId: string,
     values: BuildResumeValues,
   ): Promise<TailoredResume> {
-    // Keep the same ordering as GET /career-profile and the resume preview.
     const [careerProfile, savedJob] = await Promise.all([
       this.repository.findCareerProfile(userId),
       values.jobId

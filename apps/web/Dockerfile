@@ -14,9 +14,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM dependencies AS build
 ARG NEXT_PUBLIC_API_URL=https://api.quinchool.quinchy.dev
-# NEXT_PUBLIC_* is inlined at build time, so the DSN has to be here rather than
-# a Cloud Run env var, or browser error reporting is silently off. DSNs are
-# public by design; the auth token below is the only real secret.
+# Browser DSNs are public and must be supplied at build time.
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG SENTRY_ORG
 ARG SENTRY_PROJECT
@@ -25,9 +23,7 @@ ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_ORG=$SENTRY_ORG
 ENV SENTRY_PROJECT=$SENTRY_PROJECT
 COPY apps/web apps/web
-# The token only uploads source maps. It is mounted for this one command
-# instead of passed as ARG, which would leave it readable in image history.
-# Absent, the build still succeeds and just skips the upload.
+# Mount the upload token as a secret so it never enters image history.
 RUN --mount=type=secret,id=sentry_auth_token \
   SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" \
   pnpm --filter @quinchool/web build

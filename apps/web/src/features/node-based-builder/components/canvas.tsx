@@ -43,8 +43,7 @@ function nextNodeId() {
   return `node-${nodeCounter}`;
 }
 
-// React Flow reads window.matchMedia during render for colorMode="system",
-// which would mismatch the server's initial light render during hydration.
+// Wait for hydration before React Flow reads the system color mode.
 function useSsrSafeColorMode(): ColorMode {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);

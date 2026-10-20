@@ -1,11 +1,3 @@
-/**
- * Session checking for a better-auth session issued by the web app.
- *
- * better-auth stores every session in Postgres and hands the browser an opaque
- * token, so validating one is a lookup rather than a signature check. That
- * keeps better-auth itself a web-only dependency.
- */
-
 import {
   type CanActivate,
   createParamDecorator,
@@ -16,14 +8,12 @@ import {
 
 import { PrismaService } from "../database/prisma/prisma.service";
 
-// better-auth prefixes the cookie with __Secure- once it sets it over HTTPS.
+// HTTPS session cookies use the __Secure- prefix.
 const COOKIE_NAMES = [
   "better-auth.session_token",
   "__Secure-better-auth.session_token",
 ];
 
-// Structural, so the guard does not pull in express types the API does not
-// otherwise depend on.
 interface AuthenticatedRequest {
   headers: { cookie?: string };
   userId?: string;
@@ -61,20 +51,13 @@ export class SessionGuard implements CanActivate {
   }
 }
 
-/** The id the guard resolved. Only valid on a route the guard protects. */
+// Only routes protected by SessionGuard have a resolved user ID.
 export const UserId = createParamDecorator(
   (_data: unknown, context: ExecutionContext): string =>
     context.switchToHttp().getRequest<AuthenticatedRequest>().userId as string,
 );
 
-/**
- * Pulls the session token out of a Cookie header. The cookie value is
- * `<token>.<signature>`; better-auth signs it to detect tampering, but the
- * token is a random secret either way, so the database lookup is what decides.
- *
- * ponytail: hand-parsed to keep cookie-parser out of the dependency list. Swap
- * it in if anything else here needs cookies.
- */
+// Session lookup validates the token; strip the cookie signature before lookup.
 function readSessionToken(header: string | undefined): string | null {
   if (!header) return null;
 

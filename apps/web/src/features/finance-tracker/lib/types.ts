@@ -92,6 +92,6 @@ export interface FinanceSummary {
   period: SummaryPeriod;
   income: string;
   expense: string;
-  /** `bucket` is Manila local time, `YYYY-MM-DDTHH:mm`. */
+  // bucket is Manila wall-clock time in YYYY-MM-DDTHH:mm form.
   buckets: { bucket: string; income: string; expense: string }[];
 }

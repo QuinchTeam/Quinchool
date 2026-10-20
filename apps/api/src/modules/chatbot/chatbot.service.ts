@@ -19,7 +19,7 @@ interface AIChatbotResult extends GenerateTextResult {
   toolCall: AIToolCall | null;
 }
 
-/** A write the user still has to confirm, with the form to confirm it in. */
+// Writes stay pending until the user confirms the form.
 export interface PendingToolAction extends ToolForm {
   tool: string;
   arguments: Record<string, unknown>;
@@ -35,8 +35,7 @@ interface ToolResult {
   result: unknown;
 }
 
-/** One turn's worth of context: the recent window, plus the summary standing
- * in for everything older. */
+// The summary stands in for messages outside the recent window.
 export interface ChainInput {
   messages: ChatMessage[];
   modelId: TextGenerationModelId;
@@ -46,11 +45,7 @@ export interface ChainInput {
 
 const FALLBACK = "The assistant could not respond. Try again.";
 
-/**
- * How many reads may run before the model has to answer. One request can chain
- * "look at my skills" then "look at my experience" then reply; the cap is what
- * stops a model that keeps asking for the same thing from burning tokens.
- */
+// Cap tool reads so a model loop cannot keep spending tokens.
 const MAX_TOOL_STEPS = 4;
 
 @Injectable()
@@ -63,10 +58,7 @@ export class ChatbotService {
     return this.runChain(input, []);
   }
 
-  /**
-   * Runs a write the user confirmed, then picks the chain back up so the model
-   * can react to what just changed instead of the conversation dead-ending.
-   */
+  // Resume the model after a confirmed write so it can respond to the result.
   async runAction(
     userId: string,
     action: Pick<ToolAction, "tool" | "arguments" | "values">,
@@ -75,7 +67,9 @@ export class ChatbotService {
     const tool = this.tools.require(action.tool);
 
     if (tool.kind !== "write") {
-      throw new ToolExecutionError(`${action.tool} is not a confirmable action`);
+      throw new ToolExecutionError(
+        `${action.tool} is not a confirmable action`,
+      );
     }
 
     const args = tool.arguments.safeParse(action.arguments);
@@ -85,18 +79,16 @@ export class ChatbotService {
       throw new ToolExecutionError("That action is no longer valid.");
     }
 
-    const result = await observeDomain("chatbot.tool.write", () => tool.run(userId, args.data, values.data));
+    const result = await observeDomain("chatbot.tool.write", () =>
+      tool.run(userId, args.data, values.data),
+    );
 
-    return this.runChain({ ...context, userId }, [
-      { name: tool.name, result },
-    ]);
+    return this.runChain({ ...context, userId }, [{ name: tool.name, result }]);
   }
 
-  /**
-   * FastAPI decides whether a tool is needed; Nest decides what running it
-   * means. Reads run straight away and feed the next pass. A write stops the
-   * chain and comes back as a form, because nothing is saved without the user.
-   */
+  /* FastAPI selects tools; Nest validates and executes them.
+     Reads feed the next pass; writes stop for user confirmation.
+     The step cap forces a final answer if reads keep chaining. */
   private async runChain(
     { messages, modelId, summary, userId }: ChainInput,
     seed: ToolResult[],
@@ -104,7 +96,12 @@ export class ChatbotService {
     const toolResults = [...seed];
 
     for (let step = 0; step < MAX_TOOL_STEPS; step += 1) {
-      const answer = await this.ask({ messages, modelId, summary, toolResults });
+      const answer = await this.ask({
+        messages,
+        modelId,
+        summary,
+        toolResults,
+      });
 
       if (!answer.toolCall) {
         return {
@@ -132,7 +129,9 @@ export class ChatbotService {
       }
 
       if (tool.kind === "write") {
-        const form = await observeDomain("chatbot.tool.prepare", () => tool.prepare(userId, parsed.data));
+        const form = await observeDomain("chatbot.tool.prepare", () =>
+          tool.prepare(userId, parsed.data),
+        );
 
         return {
           ...stripToolCall(answer),
@@ -148,19 +147,19 @@ export class ChatbotService {
 
       toolResults.push({
         name: tool.name,
-        result: await observeDomain("chatbot.tool.read", () => tool.run(userId, parsed.data)),
+        result: await observeDomain("chatbot.tool.read", () =>
+          tool.run(userId, parsed.data),
+        ),
       });
     }
 
     this.logger.warn("chat.tool.step-limit");
 
-    // Out of steps, so answer with what has been gathered instead of looping.
     const final = await this.ask({ messages, modelId, summary, toolResults });
 
     return { ...stripToolCall(final), toolUsed: true };
   }
 
-  /** Seam for tests: the only place this service talks to the AI service. */
   protected ask(body: {
     messages: ChatMessage[];
     modelId: TextGenerationModelId;

@@ -3,8 +3,6 @@ import type { ReactNode } from "react";
 
 import { AppIcon } from "@/components/ui/icon";
 
-// No className on purpose: every page header shares one look. Pass an icon on
-// top-level pages only; child pages go without.
 export function AppHeader({
   title,
   icon,

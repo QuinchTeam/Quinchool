@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// Every rule carries its own message: Zod's defaults ("Too small: expected
-// array to have >=1 items") surface verbatim in the form.
+// Validation messages reach the form unchanged, so each rule needs user-facing wording.
 const tooLong = (max: number) => `Keep this under ${max} characters`;
 const tooMany = (max: number, noun: string) => `Add at most ${max} ${noun}`;
 const requiredText = (label: string, max = 500) =>

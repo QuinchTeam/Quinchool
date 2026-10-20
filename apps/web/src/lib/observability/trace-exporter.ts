@@ -50,7 +50,7 @@ export function sanitizeSpan(span: ExportedSpan): ExportedSpan {
   };
 }
 
-// Only the infrastructure export is sanitized; Sentry keeps its original spans.
+// Sanitize only the collector export; Sentry keeps the original spans.
 export class SafeTraceExporter extends OTLPTraceExporter {
   override export(
     spans: Parameters<OTLPTraceExporter["export"]>[0],

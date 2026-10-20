@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
-// Links use inputMode, not type="url", so "github.com/me" without a scheme stays valid.
+// Use inputMode for links so addresses without a URL scheme stay valid.
 const iconVariants = {
   email: { icon: EnvelopeIcon, props: { type: "email" } },
   phone: { icon: PhoneIcon, props: { type: "tel" } },
@@ -28,7 +28,6 @@ const iconVariants = {
   location: { icon: MapPinIcon, props: {} },
 } as const;
 
-// Shown only while the browser has autofilled the field.
 const autofillTag = (
   <span className="hidden rounded-sm bg-primary/15 px-1.5 py-0.5 font-mono text-xs text-primary group-has-[input:autofill]/input-group:inline-block">
     autofilled
@@ -49,7 +48,6 @@ function Input({
     return <PasswordInput className={className} {...props} />;
   if (variant === "date") return <DateInput className={className} {...props} />;
   const iconVariant = variant ? iconVariants[variant] : undefined;
-  // Every input renders as a group so the autofill check has a slot to live in.
   return (
     <InputGroup className={className}>
       <InputGroupInput {...iconVariant?.props} {...props} />
@@ -58,7 +56,7 @@ function Input({
           <AppIcon icon={iconVariant.icon} />
         </InputGroupAddon>
       )}
-      {/* Hidden addon so an empty slot does not pad the right edge. */}
+      {/* Hide empty addons so they do not add right padding. */}
       <InputGroupAddon
         align="inline-end"
         className="hidden group-has-[input:autofill]/input-group:flex"
@@ -69,7 +67,7 @@ function Input({
   );
 }
 
-/** Bare styled input. Only InputGroupInput should use this; pages use Input. */
+// Only InputGroupInput uses the bare input; page forms use Input.
 function InputBase({
   className,
   type,
@@ -111,7 +109,6 @@ function PasswordInput({ className, ...props }: React.ComponentProps<"input">) {
   );
 }
 
-// Pass type="month" for month-only fields; defaults to a full date.
 function DateInput({
   className,
   type = "date",

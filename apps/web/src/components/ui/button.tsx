@@ -36,7 +36,7 @@ const buttonVariants = cva(
         sm: "rounded-sm",
       },
     },
-    // Size padding/height/radius would push or clip the underline off the text.
+    // Size padding would push or clip the link underline off the text.
     compoundVariants: [{ variant: "link", class: "h-auto rounded-none px-0" }],
     defaultVariants: {
       variant: "default",

@@ -86,7 +86,6 @@ function EntryCard({
   const title = useWatch<CareerProfileValues>({
     name: `${path}.${titleField}` as FieldPath<CareerProfileValues>,
   });
-  // Entries with errors stay open so their messages are never hidden.
   const open = !collapsed || invalid;
 
   return (
@@ -125,7 +124,7 @@ function EntryCard({
           <span className="sr-only">Remove {label.toLowerCase()}</span>
         </Button>
       </div>
-      {/* Hidden, not unmounted, so collapsed fields keep their registration. */}
+      {/* Keep collapsed fields mounted so they stay registered with the form. */}
       <div id={bodyId} className={open ? "grid gap-5" : "hidden"}>
         {children}
       </div>

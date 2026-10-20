@@ -1,9 +1,7 @@
 import type { TailorSelection } from "@/features/resume-builder/validations/build-resume";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 
-/** What `POST /api/build-resume` returns: positionally aligned to the career
- * profile's `experiences` and `skillGroups`, so every experience and every
- * skill group is present even when nothing in it was selected. */
+// Arrays stay aligned with source entries, including entries with no selected content.
 export interface TailoredResume {
   experiences: { companyName: string; jobTitle: string; bullets: string[] }[];
   projects: { projectName: string; bullets: string[] }[];
@@ -19,8 +17,7 @@ interface TailorSource {
   skillGroups: readonly { label: string; skills: readonly string[] }[];
 }
 
-/** Parse the first JSON object in a model reply, tolerating code fences and
- * chatter around it. */
+// Ignore surrounding prose and code fences when reading the model's JSON object.
 export function parseJsonObject(text: string): unknown {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
@@ -34,9 +31,7 @@ export function parseJsonObject(text: string): unknown {
   }
 }
 
-/** Put the model's picks in its own order, dropping anything the profile does
- * not actually contain. With `keepRest`, entries the model left out are
- * appended in their original order instead of being cut. */
+// Drop unknown picks; keepRest appends unselected source values in their original order.
 function orderKnown(
   available: readonly string[],
   chosen: readonly string[] = [],
@@ -58,9 +53,7 @@ function orderKnown(
   return [...ordered, ...available.filter((value) => !taken.has(value))];
 }
 
-/** Keep only the bullets the profile actually contains, in the model's order,
- * so a reworded or hallucinated bullet is dropped. Skills are only reordered:
- * every skill of every group survives, relevant ones first. */
+// Reject invented bullets; preserve every skill with the model's picks first.
 export function reconcileTailoredResume(
   source: TailorSource,
   selection: TailorSelection,
@@ -89,7 +82,6 @@ export function reconcileTailoredResume(
   };
 }
 
-/** Merge the stateless tailor result into the stored profile for rendering. */
 export function applyTailoredResume(
   profile: CareerProfileValues,
   tailored: TailoredResume | null | undefined,
@@ -157,7 +149,6 @@ export function resumeFileName(name: string) {
   return `${base || "resume"}-resume.pdf`;
 }
 
-/** Default contact order on the PDF header. */
 export const RESUME_CONTACT_FIELDS = [
   "email",
   "linkedin",
@@ -168,12 +159,10 @@ export const RESUME_CONTACT_FIELDS = [
 
 export type ResumeContactField = (typeof RESUME_CONTACT_FIELDS)[number];
 
-/** The profile as rendered: the builder can also reorder contacts. */
 export type ResumeProfile = CareerProfileValues & {
   contactOrder?: ResumeContactField[];
 };
 
-/** Picks and orders items by index, skipping excluded `${prefix}:${index}` keys. */
 function pick<T>(
   items: readonly T[],
   prefix: string,
@@ -185,13 +174,9 @@ function pick<T>(
     .flatMap((index) => (index in items ? [items[index] as T] : []));
 }
 
-/**
- * Applies the builder's choices. Hide keys: `section:<contact|skill|exp|proj|edu>`
- * for a whole section, `exp:<i>` / `proj:<i>` / `skill:<i>` for a whole entry,
- * `contact:<i>` (index into RESUME_CONTACT_FIELDS), `edu:<i>`,
- * `exp:<i>:<j>`, `proj:<i>:<j>`, `skill:<i>:<j>`; `order` uses the same
- * prefixes without the last index (`edu`, `exp:<i>`, ...).
- */
+/* Apply section, entry, and item exclusions before ordering the resume.
+   Layout keys reference original profile indices, even after filtering.
+   See docs/features/resume-builder.md:83. */
 export function filterResumeContent(
   profile: CareerProfileValues,
   excluded: ReadonlySet<string>,

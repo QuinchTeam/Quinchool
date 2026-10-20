@@ -2,8 +2,6 @@ import { WarningIcon } from "@phosphor-icons/react/dist/ssr/Warning";
 
 import { AppIcon } from "@/components/ui/icon";
 
-// No className on purpose: every form shows its errors the same way.
-// Renders nothing when there are no errors.
 export function FormErrors({
   errors,
 }: {
@@ -23,7 +21,6 @@ export function FormErrors({
         Fix {errors.length} {errors.length === 1 ? "field" : "fields"} before
         saving
       </p>
-      {/* ml-8 lines the bullets up under the title text, past the icon. */}
       <ul className="ml-8 grid list-disc gap-1.5 pl-4 text-sm marker:text-muted-foreground">
         {errors.map(({ label, message }) => (
           <li key={`${label}:${message}`}>

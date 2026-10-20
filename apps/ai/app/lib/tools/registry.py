@@ -1,11 +1,3 @@
-"""What tools exist, what they do, and how they are described to a model.
-
-Every LLM concern lives on this side of the boundary. Nest never sees a tool
-description or a prompt: it receives a tool name plus arguments and decides
-what to run. Adding a domain means adding a module next to career_profile.py
-and registering it here.
-"""
-
 from __future__ import annotations
 
 import json
@@ -14,8 +6,6 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class Tool:
-    """One callable operation, as the model sees it."""
-
     name: str
     """Namespaced as `<domain>.<operation>`, e.g. career_profile.add_item."""
 
@@ -54,7 +44,6 @@ class ToolRegistry:
         return list(self._tools.values())
 
     def catalog_text(self) -> str:
-        """The tool list as the prompt sees it, grouped by domain."""
         lines: list[str] = []
         domain = ""
 
@@ -65,7 +54,11 @@ class ToolRegistry:
                 domain = tool_domain
                 lines.append(f"\nDOMAIN: {domain}")
 
-            suffix = " [changes data, the user confirms before it runs]" if tool.writes else ""
+            suffix = (
+                " [changes data, the user confirms before it runs]"
+                if tool.writes
+                else ""
+            )
             lines.append(f"- {tool.name}: {tool.description}{suffix}")
 
             for argument, spec in tool.arguments.items():
@@ -81,7 +74,6 @@ registry = ToolRegistry()
 
 
 def register_tools() -> ToolRegistry:
-    """Import every domain module so its tools land in the registry."""
     from app.lib.tools import career_profile  # noqa: F401
 
     return registry

@@ -12,7 +12,7 @@ export function TransactionList({
 }) {
   if (!transactions.length) {
     return (
-      // Laid over an invisible skeleton so empty, loading and five-row states share one height.
+      // The invisible skeleton keeps empty, loading, and populated states the same height.
       <div className="relative">
         <div aria-hidden className="invisible">
           <TransactionsLoading />

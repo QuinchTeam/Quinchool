@@ -4,10 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-/**
- * A skeleton sized by real text: it takes the same font classes as the line it
- * stands in for, so its height is that line's exact line-height.
- */
 function TextSkeleton({
   className,
   text,
@@ -25,7 +21,6 @@ function TextSkeleton({
   );
 }
 
-/** Mirrors the total balance card: label, amount, wallet count. */
 export function BalanceSkeleton() {
   return (
     <Card variant="minimal" className="gap-3">
@@ -36,7 +31,6 @@ export function BalanceSkeleton() {
   );
 }
 
-/** Mirrors `WalletCard`: icon tile, name/type, balance, count and actions. */
 export function WalletsSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -70,7 +64,6 @@ export function WalletsSkeleton() {
 
 const CHART_BARS = [40, 65, 30, 80, 55, 20, 70, 45, 60, 35, 75, 50];
 
-/** Mirrors the cash flow totals and bar chart. */
 export function CashFlowSkeleton() {
   return (
     <>
@@ -102,7 +95,6 @@ export function CashFlowSkeleton() {
   );
 }
 
-/** Mirrors `TransactionRow`: type icon, label, wallet/date, amount. */
 export function TransactionsLoading() {
   return (
     <output className="grid" aria-label="Loading transactions">

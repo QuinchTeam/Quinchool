@@ -63,7 +63,7 @@ export function WalletForm({
       toast.success(wallet ? "Wallet updated." : "Wallet added.");
       onSaved();
     } catch {
-      // Mutation error stays beside the form; entered values remain intact.
+      // Preserve entered values and show the mutation error inside the form.
     } finally {
       onPendingChange(false);
     }
@@ -158,7 +158,7 @@ export function WalletForm({
                     onClick={() => field.onChange(color)}
                   />
                 ))}
-                {/* Native swatch padding differs per browser, so draw our own and lay the picker over it. */}
+                {/* Draw the swatch ourselves because native picker padding differs across browsers. */}
                 <span className="relative flex size-12 shrink-0 items-center justify-center rounded-sm border p-1 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/25">
                   <span
                     className="size-full rounded-xs"

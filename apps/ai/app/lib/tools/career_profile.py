@@ -1,11 +1,3 @@
-"""Career profile tools.
-
-Five operations cover every section rather than one tool per section per verb:
-the section is an argument, so adding a section costs an enum value, not a new
-tool. `target` addresses a single entry inside a list section, which is what
-makes "delete one skill from one group" possible without a bespoke tool.
-"""
-
 from __future__ import annotations
 
 from app.lib.tools.registry import Tool, registry
@@ -23,7 +15,7 @@ LIST_SECTIONS = "educations | skillGroups | skills | experiences | projects"
 
 _TARGET = (
     'object identifying one entry. Use {"match": "<text>"} to match on its name '
-    '(institutionName, skill group label, company name, project name, or skill '
+    "(institutionName, skill group label, company name, project name, or skill "
     'name), or {"index": <n>} for its position. For section "skills" also pass '
     '"group" with the skill group label.'
 )
@@ -71,7 +63,9 @@ registry.register(
             ),
         },
         writes=True,
-        examples=['{"section": "skills", "values": {"group": "Backend", "name": "NestJS"}}'],
+        examples=[
+            '{"section": "skills", "values": {"group": "Backend", "name": "NestJS"}}'
+        ],
     ),
     Tool(
         name="career_profile.update_item",
@@ -86,8 +80,10 @@ registry.register(
         },
         writes=True,
         examples=[
-            '{"section": "skillGroups", "target": {"match": "Backend"}, '
-            '"values": {"label": "Backend & APIs"}}'
+            (
+                '{"section": "skillGroups", "target": {"match": "Backend"}, '
+                '"values": {"label": "Backend & APIs"}}'
+            )
         ],
     ),
     Tool(

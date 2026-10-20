@@ -17,12 +17,7 @@ import {
   textGenerationSchema,
 } from "./text-generation.contract";
 
-/**
- * The two routes that are a single LLM call and nothing else. The call itself
- * happens in apps/ai; both routes sit behind the session guard because they
- * spend provider quota, so they are not open to anyone who finds the URL.
- * Nothing is stored, so both answer 200 rather than 201.
- */
+// Session guards protect provider quota; these stateless calls return 200.
 @Controller("text-generation")
 @UseGuards(SessionGuard)
 export class TextGenerationController {
@@ -59,11 +54,7 @@ export class TextGenerationController {
   }
 }
 
-/**
- * A provider failure already carries the status and wording a caller needs —
- * which provider ran out of quota, which model was overloaded — so it is
- * forwarded rather than flattened into a generic 500.
- */
+// Keep provider status and wording instead of replacing failures with a generic 500.
 function toHttpException(
   error: unknown,
   fallback: { code: string; message: string },

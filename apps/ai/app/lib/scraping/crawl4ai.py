@@ -1,8 +1,3 @@
-"""Crawl4AI client: search pages in, readable job documents out.
-
-Port of apps/web/src/lib/jobs-scraper/crawler.ts.
-"""
-
 from __future__ import annotations
 
 import re
@@ -35,10 +30,7 @@ from app.modules.jobs_scraper.schemas import (
 )
 
 MAX_JOBS_PER_SOURCE = 10
-# Job pages put the tech stack well below the summary, and 12k characters was
-# cutting it off — listings were rejected for "no required technology" when the
-# stack sat just past the limit. Raising this costs Gemini tokens per scan;
-# lower it if quota becomes the binding constraint.
+# Keep full tech stacks; shorter text limits caused false technology rejections.
 MAX_DOCUMENT_LENGTH = 30_000
 CRAWL_TIMEOUT_SECONDS = 180.0
 
@@ -273,13 +265,7 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
                 "magic": True,
                 "page_timeout": 60_000,
                 "stream": False,
-                # LinkedIn renders locations and relative posting times in the
-                # browser from navigator.language, which the random user agent
-                # leaves random — scans came back in French and German. The
-                # browser locale is what settles it; the Accept-Language header
-                # above only covers server-rendered markup. Manila time also
-                # keeps a relative label such as "18 minutes ago" resolving to
-                # the same calendar day the date filters use.
+                # Pin browser locale and timezone so client-rendered labels match Manila date filters.
                 "locale": "en-US",
                 "timezone_id": "Asia/Manila",
             },
@@ -311,10 +297,7 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
 
 
 def _authorization_header(base_url: str) -> dict[str, str]:
-    """On Cloud Run crawl4ai is private — a public one is an open proxy — so
-    calls to it carry an ID token minted for its URL and Cloud Run does the
-    verifying. Locally it is plain http on the compose network, with no token.
-    """
+    # Cloud Run checks audience-bound ID tokens; local HTTP calls need none.
     if not base_url.startswith("https://"):
         return {}
 

@@ -1,7 +1,4 @@
-/**
- * Text pasted from PDFs and docs arrives hard-wrapped and often with its own
- * bullet mark. A resume bullet is one line, so join the wraps and drop the mark.
- */
+// Join hard wraps and strip bullet markers from pasted PDF text.
 export function normalizePastedText(text: string): string {
   return text
     .replace(/\s+/g, " ")
@@ -11,11 +8,7 @@ export function normalizePastedText(text: string): string {
 
 const BULLET_MARK = /^[•●▪◦*\-–—]\s*/;
 
-/**
- * Splits a pasted bullet list into one string per bullet. A line starting with
- * a bullet mark opens a new bullet; unmarked lines are hard wraps and join the
- * one above. Without any marks, each line is its own bullet.
- */
+// Unmarked lines continue a bullet; without any markers, each line becomes a bullet.
 export function parsePastedBullets(text: string): string[] {
   const lines = text
     .split(/\r?\n/)

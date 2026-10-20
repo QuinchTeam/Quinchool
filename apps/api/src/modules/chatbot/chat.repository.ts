@@ -59,14 +59,15 @@ export class ChatRepository {
     });
   }
 
-  /** Every read goes through here, so a chat id from another user is a 404. */
+  // Scope chat lookup to the user so another user's chat returns 404.
   async requireChat(userId: string, chatId: string) {
     const chat = await this.prisma.chat.findFirst({
       where: { id: chatId, userId },
       select: { id: true, title: true, summary: true, summarizedUpTo: true },
     });
 
-    if (!chat) throw new NotFoundException({
+    if (!chat)
+      throw new NotFoundException({
         code: "CHAT_NOT_FOUND",
         message: "Chat not found",
       });
@@ -92,7 +93,6 @@ export class ChatRepository {
     return { id: chat.id, title: chat.title, messages: messages.map(toStored) };
   }
 
-  /** The messages the model still sees verbatim: everything past the summary. */
   async getUnsummarized(chatId: string, summarizedUpTo: number) {
     const messages = await this.prisma.chatMessage.findMany({
       where: { chatId, position: { gt: summarizedUpTo } },
@@ -113,8 +113,7 @@ export class ChatRepository {
       pendingAction?: unknown;
     },
   ): Promise<StoredMessage> {
-    // The unique [chatId, position] is what keeps two concurrent sends from
-    // silently interleaving into the same slot; a retry is the caller's call.
+    // A unique chat position prevents concurrent sends from silently overwriting each other.
     const last = await this.prisma.chatMessage.findFirst({
       where: { chatId },
       select: { position: true },

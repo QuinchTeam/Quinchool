@@ -8,7 +8,7 @@ import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 try {
   process.loadEnvFile();
 } catch {
-  // Deployment supplies environment variables directly.
+  // Production supplies variables directly; a missing .env is expected.
 }
 
 export const telemetrySdk = process.env.OTEL_EXPORTER_OTLP_ENDPOINT

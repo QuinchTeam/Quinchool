@@ -40,8 +40,6 @@ export function ChatHeader({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {/* A new chat is just the untitled route: the row appears in the list
-              once the first message has actually created it. */}
           <Button
             type="button"
             variant="ghost"

@@ -36,7 +36,7 @@ const PERIODS: Record<SummaryPeriod, string> = {
 };
 const STORAGE_KEY = "finance-tracker:summary-period";
 
-// ponytail: persisted per browser; move to the API if it must follow you across devices.
+// shortcut: chart period is browser-local; use the API to sync it across devices.
 function subscribe(onChange: () => void) {
   window.addEventListener("storage", onChange);
   return () => window.removeEventListener("storage", onChange);
@@ -143,7 +143,7 @@ function Total({
   );
 }
 
-/** Buckets arrive as Manila wall-clock time, so format them in UTC to avoid shifting. */
+// Format Manila wall-clock buckets as UTC so the displayed time does not shift.
 function formatBucket(
   bucket: string,
   period: SummaryPeriod,
@@ -175,10 +175,8 @@ const compact = new Intl.NumberFormat("en-PH", {
 const INCOME_FILL = "bg-emerald-600 dark:bg-emerald-400";
 const EXPENSE_FILL = "bg-rose-600 dark:bg-rose-400";
 
-/**
- * Paired income/expense columns per bucket on a shared zero baseline, with a
- * hairline grid and a tooltip per bucket. Buckets still ahead are dimmed.
- */
+// Plot income and expense against a shared zero baseline.
+// Dim future buckets so they do not look like missing historical data.
 function CashFlowChart({ summary }: { summary: FinanceSummary }) {
   const max = Math.max(
     ...summary.buckets.flatMap((b) => [Number(b.income), Number(b.expense)]),
@@ -198,7 +196,7 @@ function CashFlowChart({ summary }: { summary: FinanceSummary }) {
   const ticks = niceTicks(max);
   const top = ticks.at(-1) ?? max;
   const now = manilaNowKey();
-  // Thin out axis labels so they never collide.
+  // Show at most 12 axis labels to avoid overlaps.
   const every = Math.ceil(summary.buckets.length / 12);
   const percent = (value: number) => `${(value / top) * 100}%`;
 
@@ -214,7 +212,6 @@ function CashFlowChart({ summary }: { summary: FinanceSummary }) {
           Expense
         </span>
       </figcaption>
-      {/* pt-3 leaves room for the top tick label, which is centred on its gridline. */}
       <div className="flex min-h-0 flex-1 gap-3 pt-3">
         <div
           aria-hidden
@@ -317,7 +314,6 @@ function CashFlowChart({ summary }: { summary: FinanceSummary }) {
   );
 }
 
-/** A tooltip readout row: a short line key in the series color, label, value. */
 function TooltipRow({
   fill,
   label,

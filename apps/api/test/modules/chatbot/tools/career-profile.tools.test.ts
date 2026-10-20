@@ -29,7 +29,6 @@ function profile(
   };
 }
 
-/** Stands in for the database: records whatever the tool decided to save. */
 function harness(initial: CareerProfileValues | null = profile()) {
   let stored = initial;
   const service = {
@@ -137,7 +136,6 @@ test("refuses a patch that breaks a whole-profile rule", async () => {
   const app = harness();
   const tool = app.write("career_profile.add_item");
 
-  // An experience may only claim skills that exist in a skill group.
   await assert.rejects(
     () =>
       tool.run(

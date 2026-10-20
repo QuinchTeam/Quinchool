@@ -37,8 +37,7 @@ import { apiUrl, readApiData } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 import { cn } from "@/lib/utils";
 
-/** Every tile degrades to "unavailable" on its own, so one API being down
- * still leaves the rest of the dashboard useful. */
+// A failed tile request returns null so other dashboard tiles can still render.
 async function load<T>(path: string, cookie: string): Promise<T | null> {
   try {
     return await observeOperation("dashboard.tile", async () => {
@@ -148,8 +147,6 @@ export async function DashboardHome() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium">Recent transactions</h2>
-          {/* flex-1 makes the two cards match height; content-start keeps short
-              lists packed at the top instead of spread down the card. */}
           <Card className="flex-1">
             <CardContent className="grid content-start gap-3">
               {transactions?.length ? (
@@ -290,7 +287,6 @@ export async function DashboardHome() {
   );
 }
 
-/** Mirrors the tiles below the greeting while the dashboard data loads. */
 export function DashboardSkeleton() {
   return (
     <div

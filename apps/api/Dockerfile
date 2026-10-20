@@ -24,8 +24,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production
 ENV PORT=8080
 WORKDIR /app/apps/api
-# The slim base ships no OpenSSL, so Prisma's migration engine cannot detect a
-# libssl version and falls back to guessing 1.1.x on a Debian 12 image.
+# Install OpenSSL so Prisma detects Debian's libssl version.
 RUN apt-get update \
   && apt-get install --yes --no-install-recommends openssl \
   && rm -rf /var/lib/apt/lists/* \
@@ -33,15 +32,11 @@ RUN apt-get update \
   && useradd --system --uid 1001 --gid nodejs api
 COPY --from=build --chown=api:nodejs /opt/api ./
 COPY --from=build --chown=api:nodejs /workspace/apps/api/dist ./dist
-# Both land inside the app directory rather than at /app: the Prisma CLI loads
-# prisma.config.ts as a module, so it has to sit where `prisma/config` resolves
-# — next to node_modules. Its schema and migrations paths are relative to it.
+# Keep Prisma config beside node_modules so prisma/config resolves.
 COPY --from=build --chown=api:nodejs /workspace/prisma.config.ts ./prisma.config.ts
 COPY --from=build --chown=api:nodejs /workspace/packages/prisma ./packages/prisma
 USER api
 EXPOSE 8080
-# Migrations run at boot rather than from CI: the database is only reachable
-# through the Cloud SQL connector attached to this service. Concurrent
-# instances are safe — `migrate deploy` takes an advisory lock.
+# Run migrations at boot because only Cloud Run can reach Cloud SQL.
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --config prisma.config.ts && exec node dist/main.js"]
 

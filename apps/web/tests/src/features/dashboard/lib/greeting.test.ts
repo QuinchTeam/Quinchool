@@ -33,7 +33,6 @@ test("every weekday has a message for every period", () => {
 });
 
 test("reads the Manila clock, not the machine's", () => {
-  // 2026-10-18 13:30 UTC is Sunday 21:30 in Manila (UTC+8).
   assert.deepEqual(manilaClock(new Date("2026-10-18T13:30:00Z")), {
     hour: 21,
     weekday: 0,

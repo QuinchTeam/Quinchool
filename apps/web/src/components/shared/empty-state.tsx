@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/empty";
 import { AppIcon } from "@/components/ui/icon";
 
-// No className on purpose: every empty and error state shares one look. Size
-// it from the parent (it fills the height it is given).
 export function EmptyState({
   icon,
   title,

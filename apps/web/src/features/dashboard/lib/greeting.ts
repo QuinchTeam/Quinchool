@@ -1,6 +1,5 @@
 export type DayPeriod = "morning" | "afternoon" | "evening" | "night";
 
-/** Philippine convention: morning 5–11:59, afternoon 12–5:59, evening 6–9:59, night 10 onward. */
 export function dayPeriod(hour: number): DayPeriod {
   if (hour >= 5 && hour < 12) return "morning";
   if (hour >= 12 && hour < 18) return "afternoon";
@@ -15,7 +14,7 @@ export const GREETINGS: Record<DayPeriod, string> = {
   night: "Good night",
 };
 
-// One line per weekday and period, repeating every week. Index 0 is Sunday.
+// Weekday index 0 is Sunday.
 const MESSAGES: Record<DayPeriod, string>[] = [
   {
     morning: "Slow Sunday. Rest is part of the work.",
@@ -65,7 +64,7 @@ export function greetingMessage(weekday: number, period: DayPeriod): string {
   return MESSAGES[weekday]?.[period] ?? "";
 }
 
-/** Hour (0–23) and weekday (0 = Sunday) on the Manila clock. */
+// Weekday uses JavaScript's Sunday=0 convention on the Manila clock.
 export function manilaClock(date: Date): { hour: number; weekday: number } {
   const parts = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",

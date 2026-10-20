@@ -1,8 +1,3 @@
-"""One prompt in, one answer out, with the next provider tried when one fails.
-
-Port of apps/api/src/text-generation/{service.ts,prompts.ts}.
-"""
-
 from __future__ import annotations
 
 from app.core.logging import log_event

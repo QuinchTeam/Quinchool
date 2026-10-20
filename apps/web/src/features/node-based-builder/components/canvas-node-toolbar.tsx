@@ -7,8 +7,6 @@ import {
 } from "@/features/node-based-builder/components/nodes";
 import { Button } from "@/components/ui/button";
 
-// Each entry both clicks (spawn at canvas center) and drags (spawn at drop
-// point). The canvas owns the actual spawn; the toolbar only reports intent.
 export function CanvasNodeToolbar({
   onSpawn,
 }: {

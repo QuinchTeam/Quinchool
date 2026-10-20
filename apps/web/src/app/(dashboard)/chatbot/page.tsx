@@ -3,8 +3,7 @@ import { Chatbot } from "@/features/chatbot/components/chatbot";
 
 export const metadata: Metadata = { title: "Quinchbot - Quinchool" };
 
-/** A new chat. The first message is what actually creates one, so an abandoned
- * visit here leaves nothing behind. */
+// Visiting New chat creates no row until the first message is sent.
 export default function ChatbotPage() {
   return <Chatbot />;
 }

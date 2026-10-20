@@ -112,7 +112,7 @@ function report(records: TelemetryRecord[]) {
     return;
   }
 
-  // Telemetry must not change error handling or recursively report delivery failures.
+  // Failed telemetry delivery must not affect requests or recursively report itself.
   const init = {
     ...withCredentials,
     method: "POST",
@@ -151,7 +151,7 @@ export function exportLog(
   message: string,
   errorType?: string,
 ) {
-  // Local servers without a collector only log to the console (see logger.ts).
+  // Without a collector, local server logs fall back to the console.
   if (
     typeof window === "undefined" &&
     process.env.NODE_ENV !== "production" &&
@@ -193,7 +193,7 @@ function telemetryDomain(operation: string): string {
     : "application";
 }
 
-// Traces go to the collector only; returning null keeps them out of Sentry.
+// Return null to send traces only to the collector, never to Sentry.
 export function exportTransaction(event: Event): null {
   const root = event.contexts?.trace;
   if (!root?.trace_id || !root.span_id) return null;

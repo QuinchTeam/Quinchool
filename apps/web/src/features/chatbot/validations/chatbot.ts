@@ -8,7 +8,7 @@ export const chatMessageSchema = z.object({
 });
 
 export const chatbotRequestSchema = z.object({
-  /** Absent for the first message of a new chat, which creates one. */
+  // Omitting chatId starts a new conversation.
   chatId: z.string().trim().min(1).optional(),
   content: z.string().trim().min(1).max(8_000),
   modelId: z.enum(TEXT_GENERATION_MODEL_IDS),

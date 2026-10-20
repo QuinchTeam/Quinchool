@@ -12,8 +12,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-// Node connections are edges. Set this as the edge type so every connection
-// carries its own remove button (see the canvas' onConnect).
 export const REMOVABLE_EDGE_TYPE = "removable";
 
 function RemovableEdge({
@@ -41,8 +39,7 @@ function RemovableEdge({
   return (
     <>
       <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style} />
-      {/* Transparent wide band over the thin line — the real hover target,
-          since BaseEdge only reports pointer events on the visible path. */}
+      {/* A wider invisible path makes thin edges easier to hover. */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: decorative mouse-only hover zone; deleting an edge stays keyboard-accessible via select + Delete */}
       <path
         d={edgePath}
@@ -56,11 +53,7 @@ function RemovableEdge({
       {hovered && (
         <EdgeLabelRenderer>
           <Button
-            // The edge layer ignores pointer events, so the button re-enables
-            // them; nodrag/nopan keep the click from panning the canvas. The
-            // inline transform pins it to the edge midpoint (dynamic — can't be
-            // a Tailwind class). Its own hover handlers keep the button alive
-            // while the cursor moves from the line onto it.
+            // Re-enable pointer events without letting the delete button drag or pan the canvas.
             className="nodrag nopan pointer-events-auto absolute"
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,

@@ -24,8 +24,7 @@ export function ResumeTailor() {
   );
   const { careerProfile, error, isLoading, refetch } = useCareerProfile();
   const { buildResume } = useResumeBuilder(careerProfile);
-  // Until a tailored result comes back this renders the personal details,
-  // education and skill-group labels only — bullets and skills stay empty.
+  // Before tailoring, show identity and education but leave bullets and skills empty.
   const resumeProfile = useMemo(
     () =>
       careerProfile

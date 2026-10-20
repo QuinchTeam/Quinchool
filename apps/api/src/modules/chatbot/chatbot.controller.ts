@@ -66,7 +66,6 @@ export class ChatbotController {
     return this.chats.remove(userId, id);
   }
 
-  /** Adds a message. Omitting `chatId` starts a new chat with it. */
   @Post("messages")
   async respond(
     @UserId() userId: string,
@@ -82,7 +81,6 @@ export class ChatbotController {
     }
   }
 
-  /** Runs a write the user confirmed in the chat. */
   @Post("action-confirmations")
   async runAction(
     @UserId() userId: string,
@@ -98,7 +96,6 @@ export class ChatbotController {
     }
   }
 
-  /** Records that the user declined a proposed write, so it stays declined. */
   @Post("action-dismissals")
   @HttpCode(204)
   dismissAction(

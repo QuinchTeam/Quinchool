@@ -9,7 +9,7 @@ function Card({
   ...props
 }: React.ComponentProps<"div"> & {
   size?: "default" | "sm";
-  // minimal: flat bordered panel for stats and form entries; no Card* slots.
+  // Minimal cards omit the Card slot layout.
   variant?: "default" | "minimal";
 }) {
   return (

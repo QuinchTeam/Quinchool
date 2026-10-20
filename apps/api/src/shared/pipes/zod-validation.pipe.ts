@@ -2,10 +2,6 @@ import { BadRequestException, type PipeTransform } from "@nestjs/common";
 import type { ZodType } from "zod";
 import type { ApiErrorPayload } from "../../core/http/api-response";
 
-/**
- * Validates a payload against a zod schema at the route boundary, so a
- * controller only ever receives data that already has its parsed type.
- */
 export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
   constructor(private readonly schema: ZodType<T>) {}
 

@@ -22,7 +22,6 @@ import { AppIcon } from "@/components/ui/icon";
 import { ApiError } from "@/lib/api";
 import { signOut } from "@/lib/auth-client";
 
-// No className on purpose, same as EmptyState.
 export function ErrorState({
   error,
   retry,
@@ -54,7 +53,6 @@ export function ErrorState({
     }
   }
 
-  // Anything that isn't an API response never reached the server.
   const offline = !(error instanceof ApiError);
   const title = expired
     ? "Session Expired"

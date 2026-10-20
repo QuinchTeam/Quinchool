@@ -1,9 +1,3 @@
-/**
- * Every database read and write the jobs scraper does. Ported from
- * apps/web/src/lib/jobs-scraper/storage.ts when the API took ownership of the
- * feature; the web app is a frontend for it now.
- */
-
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "../../core/database/prisma/prisma.service";
@@ -45,8 +39,7 @@ export class JobsScraperRepository {
   ): Promise<JobScraperState> {
     const config = await this.upsertConfigRow(userId);
     const [jobs, counts, newJobCount] = await Promise.all([
-      // ponytail: MATCH sorts before POTENTIAL before REJECTED, so the cap can
-      // only ever truncate the rejected tail. Paginate if a user outgrows it.
+      // shortcut: the cap drops rejected jobs first; paginate when users outgrow it.
       this.prisma.scrapedJob.findMany({
         where: { userId },
         orderBy: [
@@ -90,12 +83,7 @@ export class JobsScraperRepository {
     };
   }
 
-  /**
-   * Records the reviewer's own verdict. The flag keeps later scans from
-   * overwriting it, since the whole point of the review page is that the
-   * pipeline gets calls wrong. Returns false when the job belongs to someone
-   * else.
-   */
+  // Keep manual classifications from being overwritten by future scans.
   async updateClassification(
     userId: string,
     jobId: string,
@@ -120,7 +108,11 @@ export class JobsScraperRepository {
         const sourceJobId = getSourceJobId(job.url, job.source);
         const existing = await transaction.scrapedJob.findUnique({
           where: {
-            userId_source_sourceJobId: { userId, source: job.source, sourceJobId },
+            userId_source_sourceJobId: {
+              userId,
+              source: job.source,
+              sourceJobId,
+            },
           },
           select: { isManualClassification: true },
         });
@@ -147,7 +139,11 @@ export class JobsScraperRepository {
 
         await transaction.scrapedJob.upsert({
           where: {
-            userId_source_sourceJobId: { userId, source: job.source, sourceJobId },
+            userId_source_sourceJobId: {
+              userId,
+              source: job.source,
+              sourceJobId,
+            },
           },
           create: {
             userId,
@@ -177,7 +173,7 @@ export class JobsScraperRepository {
     });
   }
 
-  /** Reading the config creates it, so a new user has one without a write path. */
+  // Upsert on read so a new account has a config before its first save.
   private upsertConfigRow(userId: string) {
     return this.prisma.jobScraperConfig.upsert({
       where: { userId },

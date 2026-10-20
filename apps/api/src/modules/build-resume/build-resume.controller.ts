@@ -25,7 +25,7 @@ import {
 export class BuildResumeController {
   constructor(private readonly buildResume: BuildResumeService) {}
 
-  /** The tailored resume is returned, not stored, so this answers 200. */
+  // Tailoring creates no resource, so return 200.
   @Post("tailored-resumes")
   @HttpCode(200)
   async tailor(

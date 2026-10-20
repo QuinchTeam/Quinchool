@@ -1,11 +1,3 @@
-"""Langfuse tracing for LLM calls.
-
-Port of apps/api/src/common/langfuse.ts plus the observations that wrapped the
-Nest text-generation service. Entirely optional: without both keys — or without
-the package installed — this is a no-op, and a broken tracer never costs the
-caller its answer.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -22,8 +14,6 @@ ObservationType = Literal["chain", "generation", "span"]
 
 
 class Observation(Protocol):
-    """The slice of a Langfuse observation this service actually calls."""
-
     def update(self, **kwargs: Any) -> Any: ...
 
 
@@ -59,7 +49,7 @@ def _get_client() -> Any:
             public_key=public_key,
             secret_key=secret_key,
             host=settings.langfuse_host.strip() or None,
-            # Share trace context, but keep AI payloads out of infrastructure exports.
+            # Share trace context while keeping AI payloads out of infrastructure exports.
             tracer_provider=(
                 TracerProvider() if settings.otel_exporter_otlp_endpoint else None
             ),
@@ -106,7 +96,7 @@ def observe(
 def usage_details(
     input_tokens: int | None, output_tokens: int | None
 ) -> dict[str, int]:
-    """Langfuse counts integers only, and a provider may report neither."""
+    # Langfuse accepts integer token counts; providers can omit them.
     counts = {"input": input_tokens, "output": output_tokens}
 
     return {key: value for key, value in counts.items() if value is not None}

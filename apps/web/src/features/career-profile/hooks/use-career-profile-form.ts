@@ -23,7 +23,6 @@ export function useCareerProfileForm() {
   const form = useForm<CareerProfileValues>({
     resolver: zodResolver(careerProfileSchema),
     defaultValues: emptyCareerProfile(),
-    // Resets the form whenever the loaded or saved profile changes.
     values: careerProfile ?? undefined,
   });
 

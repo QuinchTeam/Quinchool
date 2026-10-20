@@ -10,10 +10,6 @@ interface Scripted {
   toolCall: { name: string; arguments: Record<string, unknown> } | null;
 }
 
-/**
- * Replays a fixed list of model replies so the chain can be exercised without
- * an AI service, and records what the chain asked for at each step.
- */
 class FakeChatbotService extends ChatbotService {
   readonly asked: number[] = [];
 
@@ -54,7 +50,9 @@ function readTool(name: string, result: unknown, ran: string[]): AnyTool {
     name,
     kind: "read",
     // biome-ignore lint/suspicious/noExplicitAny: minimal stand-in for a zod schema
-    arguments: { safeParse: (value: any) => ({ success: true, data: value }) } as any,
+    arguments: {
+      safeParse: (value: any) => ({ success: true, data: value }),
+    } as any,
     run: async () => {
       ran.push(name);
       return result;
@@ -99,7 +97,6 @@ test("chains several reads in one request before answering", async () => {
   assert.deepEqual(ran, ["a.get", "b.get"]);
   assert.equal(result.text, "Here is everything.");
   assert.equal(result.toolUsed, true);
-  // Each pass carries every result gathered so far.
   assert.deepEqual(service.asked, [0, 1, 2]);
 });
 
@@ -109,9 +106,13 @@ test("stops the chain at a write and returns a form instead of saving", async ()
     name: "a.add",
     kind: "write",
     // biome-ignore lint/suspicious/noExplicitAny: minimal stand-in for a zod schema
-    arguments: { safeParse: (value: any) => ({ success: true, data: value }) } as any,
+    arguments: {
+      safeParse: (value: any) => ({ success: true, data: value }),
+    } as any,
     // biome-ignore lint/suspicious/noExplicitAny: minimal stand-in for a zod schema
-    values: { safeParse: (value: any) => ({ success: true, data: value }) } as any,
+    values: {
+      safeParse: (value: any) => ({ success: true, data: value }),
+    } as any,
     prepare: async () => ({
       domain: "demo",
       title: "Add",

@@ -69,7 +69,6 @@ test("filters and orders session-only resume bullets and skills", () => {
     { label: "Frontend", skills: ["TypeScript", "React"] },
   ]);
   assert.equal(filtered.email, "");
-  // Contact number (4) then GitHub (3) first, the rest in default order.
   assert.deepEqual(filtered.contactOrder, [
     "contactNumber",
     "github",
@@ -140,7 +139,7 @@ test("reads the model reply out of code fences and chatter", () => {
 test("filters bullets to the profile but only reorders skills", () => {
   const tailored = reconcileTailoredResume(tailorProfile, {
     experiences: [
-      // Reordered, one invented, one duplicated, one reworded.
+      // Include invented, duplicated, and reworded picks to check reconciliation.
       {
         id: "exp-0",
         bullets: ["shipped b", "Invented bullet", "Shipped B", "Shipped A!"],
@@ -148,7 +147,7 @@ test("filters bullets to the profile but only reorders skills", () => {
       { id: "exp-1", bullets: [] },
       { id: "exp-9", bullets: ["Shipped A"] },
     ],
-    // The model dropped React and skipped the Backend group entirely.
+    // Skip a skill group to check that unselected skills are still preserved.
     skillGroups: [{ id: "skill-0", skills: ["next.js", "Invented skill"] }],
   });
 
@@ -157,7 +156,6 @@ test("filters bullets to the profile but only reorders skills", () => {
     { companyName: "Example", jobTitle: "Intern", bullets: [] },
   ]);
   assert.deepEqual(tailored.projects, []);
-  // No skill is ever lost: picks first, then the rest in their original order.
   assert.deepEqual(tailored.skillGroups, [
     { label: "Frontend", skills: ["Next.js", "React"] },
     { label: "Backend", skills: ["Node.js"] },

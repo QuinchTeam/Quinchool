@@ -1,9 +1,3 @@
-"""Job scraper request, response, and extraction contracts.
-
-Port of apps/web/src/lib/jobs-scraper/schema.ts. The persistence-facing types
-(SavedJob, JobScraperState) stay out: this service never touches the database.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -167,10 +161,7 @@ class JobScraperConfig(CamelModel):
         if not self.custom_start_date or not self.custom_end_date:
             raise ValueError("Choose both custom range dates.")
 
-        # ponytail: the web app also rejects a custom range outside the latest
-        # seven days. That is a config-save rule, not a scan rule — enforcing it
-        # here would fail scans for a config that was valid when it was stored.
-        # Nest owns it on write; only the ordering matters to build a window.
+        # Scan saved ranges even after they age out of the seven-day config-save window.
         if self.custom_start_date > self.custom_end_date:
             raise ValueError("Custom range must start on or before it ends.")
 
@@ -218,14 +209,7 @@ class JobBase(CamelModel):
     @field_validator("posted_at", mode="after")
     @classmethod
     def _offset_datetime(cls, value: str | None) -> str | None:
-        """Drops a postedAt the model did not express as an offset timestamp.
-
-        Gemini answers this field with the label it read often enough
-        ("21 hours ago") that raising here would fail an entire scan over one
-        listing's metadata. The visible label is already kept in postedText and
-        the day in postedDate, so an unusable timestamp is worth less than the
-        other nineteen jobs in the batch.
-        """
+        # Drop malformed postedAt values so one bad timestamp does not fail the entire scan.
         if value is None:
             return None
 
@@ -344,7 +328,5 @@ def _normalize_job[T: (DiscoveredJob, PotentialJob)](job: T) -> T:
 
 def _normalize_reviewed(job: PotentialJob) -> PotentialJob:
     return _normalize_job(job).model_copy(
-        update={
-            "review_reasons": [reason[:500] for reason in job.review_reasons[:4]]
-        }
+        update={"review_reasons": [reason[:500] for reason in job.review_reasons[:4]]}
     )

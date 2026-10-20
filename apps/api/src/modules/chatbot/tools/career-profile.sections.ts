@@ -1,12 +1,6 @@
 import type { ToolField } from "./tool.types";
 
-/**
- * Every addressable list in a career profile, flat.
- *
- * Nested lists — the bullets on one experience, the skills in one group — are
- * sections in their own right rather than special cases, so "delete the third
- * bullet from my PioneerDev role" costs an entry in this table and no new tool.
- */
+// Nested lists are addressable sections, so they need no separate tool implementations.
 export const LIST_SECTIONS = [
   "educations",
   "skillGroups",
@@ -21,19 +15,15 @@ export const LIST_SECTIONS = [
 
 export type ListSection = (typeof LIST_SECTIONS)[number];
 
-/** Where a nested section lives, and what one of its entries looks like. */
 export interface NestedSpec {
-  /** The section holding the parent entry. */
   parent: "skillGroups" | "experiences" | "projects";
-  /** The parent's field holding this list. */
   field: "skills" | "bullets";
-  /** `string` lists hold bare text; `text` lists hold `{ text }` objects. */
+  // string stores bare text; text stores objects shaped as { text }.
   kind: "string" | "text";
   parentLabel: string;
 }
 
 export interface SectionSpec {
-  /** Used in form titles and error messages. */
   label: string;
   fields: ToolField[];
   nested?: NestedSpec;
@@ -194,7 +184,6 @@ export const SECTIONS: Record<ListSection, SectionSpec> = {
   },
 };
 
-/** How an entry is named when a model refers to it in conversation. */
 export function labelOf(entry: unknown): string {
   if (typeof entry === "string") {
     return entry;

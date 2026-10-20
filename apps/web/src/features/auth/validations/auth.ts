@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Shared rules. better-auth's default minimum password length is 8.
 const email = z.email("Enter a valid email address");
 const password = z.string().min(8, "Password must be at least 8 characters");
 const name = z.string().trim().min(1, "Name is required").max(100);

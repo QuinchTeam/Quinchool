@@ -29,7 +29,7 @@ const LABELS: Record<string, string> = {
   personalWebsite: "Personal website",
 };
 
-/** "experiences.0.endDate" -> "Experience 1 › End date". */
+// Turn form paths into labels such as Experience 1 > End date.
 export function validationFieldLabel(path: string): string {
   const parts: string[] = [];
   for (const segment of path.split(".")) {

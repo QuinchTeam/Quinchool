@@ -11,13 +11,11 @@ test("HTTP requests propagate their trace through Node fetch", async () => {
   const exportPort = (reservation.address() as AddressInfo).port;
   await new Promise<void>((resolve) => reservation.close(() => resolve()));
   process.env.OTEL_EXPORTER_OTLP_ENDPOINT = `http://127.0.0.1:${exportPort}`;
-  const { telemetrySdk } = await import(
-    "../../../src/core/observability/instrumentation"
-  );
-  const { requestTelemetry } = await import(
-    "../../../src/core/observability/request"
-  );
-  // Load HTTP after instrumentation, just as main.ts loads Nest afterwards.
+  const { telemetrySdk } =
+    await import("../../../src/core/observability/instrumentation");
+  const { requestTelemetry } =
+    await import("../../../src/core/observability/request");
+  // Load HTTP after instrumentation so its requests are traced.
   const { createServer } = await import("node:http");
   let exports = 0;
   const signals = new Set<string>();
@@ -62,7 +60,7 @@ test("HTTP requests propagate their trace through Node fetch", async () => {
   api.listen(0, "127.0.0.1");
   await once(api, "listening");
   try {
-    // The uninstrumented test client must not replace the supplied parent.
+    // The uninstrumented client must not replace the supplied trace parent.
     const { execFile } = await import("node:child_process");
     await new Promise<void>((resolve, reject) => {
       execFile(

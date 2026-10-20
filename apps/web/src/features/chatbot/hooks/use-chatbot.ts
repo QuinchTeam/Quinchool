@@ -19,11 +19,7 @@ import type {
   PendingToolAction,
 } from "@/features/chatbot/lib/types";
 
-/**
- * Drives one conversation. History lives in the database now, so this holds
- * only what the server has not answered for yet: the optimistic user bubble and
- * the composer's text.
- */
+// Keep only optimistic state here; persisted history comes from the server.
 export function useChatbot(chatId?: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -40,8 +36,7 @@ export function useChatbot(chatId?: string) {
     enabled: Boolean(chatId),
   });
 
-  /** Server history wins; the optimistic bubble only fills the gap until the
-   * reply lands and the chat is refetched. */
+  // Show the optimistic bubble until server history includes the reply.
   const messages: DisplayMessage[] = [
     ...(chat.data?.messages ?? []),
     ...optimistic,
@@ -51,8 +46,7 @@ export function useChatbot(chatId?: string) {
     setOptimistic([]);
 
     if (!chatId) {
-      // The first message created the chat, so move to its own URL. The list
-      // refresh below is what puts the freshly generated title in the sidebar.
+      // Refresh the list before navigating so the generated title appears in the sidebar.
       await queryClient.invalidateQueries({ queryKey: CHATS_KEY });
       router.push(`/chatbot/${turn.chatId}`);
       return;

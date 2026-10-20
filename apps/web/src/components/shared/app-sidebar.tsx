@@ -34,11 +34,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "@/lib/auth-client";
 
-/**
- * `match` is the route prefix that lights the item up, which is not always the
- * href: Resume links at a tab, and the random tools are siblings of their hub
- * rather than children of it.
- */
+// Route matches can differ from href when a nav item owns sibling pages.
 type NavItem = {
   href: string;
   icon: AppIconProps["icon"];
@@ -88,9 +84,7 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   },
 ];
 
-/** True on the route itself and on anything nested under it, so a child page
- * keeps its parent lit. Home matches only itself, or it would match every
- * route. */
+// Home matches only itself; other items stay active on nested routes.
 function isRouteActive(pathname: string, href: string, match?: string[]) {
   if (pathname === href) return true;
 

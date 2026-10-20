@@ -1,10 +1,3 @@
-"""Crawl, extract with Gemini, then grade. No persistence lives here.
-
-Port of apps/web/src/lib/jobs-scraper/service.ts with every storage call
-removed: the caller (Nest) owns the config it passes in and the rows it writes
-out of the result.
-"""
-
 from __future__ import annotations
 
 import time
@@ -132,12 +125,8 @@ def classify_scanned_jobs(
     config: JobScraperConfig,
     scanned_at: datetime,
 ) -> list[tuple[JobClassification, DiscoveredJob | PotentialJob, list[str]]]:
-    """Grades every extracted listing against the configured criteria and
-    settles it into one bucket. A listing Gemini proposed as a match or a
-    potential match is demoted to REJECTED when the deterministic criteria
-    disagree, and it carries the reasons for that verdict so the scan stays
-    reviewable.
-    """
+    # Deterministic criteria can demote model matches into rejected jobs.
+    # Keep rejection reasons with each listing so the scan stays reviewable.
     candidates: list[tuple[DiscoveredJob | PotentialJob, JobClassification]] = [
         *((job, "MATCH") for job in result.jobs),
         *((job, "POTENTIAL") for job in result.potential_jobs),
@@ -171,8 +160,7 @@ def _to_scanned_job(
     descriptions: dict[str, str],
 ) -> ScannedJob:
     classification, job, review_reasons = entry
-    # A listing rejected for a bad URL can name a source its URL does not
-    # belong to; fall back to the model's own source so the id stays derivable.
+    # Bad URLs may disagree with the source; keep that source to derive a rejected-job ID.
     source = get_job_source_from_url(job.url) or job.source
 
     return ScannedJob(

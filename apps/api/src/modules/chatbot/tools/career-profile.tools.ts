@@ -27,21 +27,16 @@ type ListSection = (typeof LIST_SECTIONS)[number];
 
 const listSection = z.enum(LIST_SECTIONS);
 
-/**
- * Addresses one entry inside a list section. `match` is how a model refers to
- * something in conversation ("my Backend group"); `index` is the fallback when
- * two entries share a name.
- */
 const targetSchema = z.object({
   index: z.number().int().min(0).optional(),
   match: z.string().trim().min(1).optional(),
-  /** Only meaningful for the `skills` section. */
+  // Only skill targets use the group field.
   group: z.string().trim().min(1).optional(),
 });
 
 type Target = z.infer<typeof targetSchema>;
 
-/** Anything the model proposes is a suggestion; the user's form submission wins. */
+// The submitted confirmation overrides the model's suggested values.
 const looseValues = z.record(z.string(), z.unknown()).default({});
 
 const EMPTY_PROFILE: CareerProfileValues = {
@@ -152,8 +147,6 @@ export class CareerProfileTools {
     ];
   }
 
-  // --- read -----------------------------------------------------------------
-
   private get(): AnyTool {
     const sections = z
       .array(
@@ -198,7 +191,7 @@ export class CareerProfileTools {
           };
         }
 
-        // `skills` is a view over skillGroups rather than a stored list.
+        // skills is a view over skillGroups, not a separate stored list.
         if (wanted.has("skills") || wanted.has("skillGroups")) {
           slice.skillGroups = profile.skillGroups;
         }
@@ -214,8 +207,6 @@ export class CareerProfileTools {
     };
   }
 
-  // --- writes ---------------------------------------------------------------
-
   private updatePersonal(): AnyTool {
     return {
       name: "career_profile.update_personal",
@@ -230,8 +221,7 @@ export class CareerProfileTools {
           title: "Update personal details",
           description: "Check these before they are saved.",
           fields: PERSONAL_FIELDS,
-          // What the model heard wins over what is stored, so the user sees
-          // their requested change already typed in.
+          // Prefill the form with the requested changes over the stored values.
           values: {
             name: profile.name,
             email: profile.email,
@@ -361,18 +351,11 @@ export class CareerProfileTools {
     };
   }
 
-  // --- shared plumbing ------------------------------------------------------
-
   private async load(userId: string): Promise<CareerProfileValues> {
     return (await this.careerProfile.get(userId)) ?? EMPTY_PROFILE;
   }
 
-  /**
-   * Every write is read, patch, validate the whole document, save. The profile
-   * has cross-section rules — a skill on an experience must exist in a skill
-   * group — so a patch can only be checked against the finished profile, and
-   * the repository replaces it wholesale anyway.
-   */
+  // Validate the patched profile as a whole because skills have cross-section rules.
   private async apply(
     userId: string,
     patch: (profile: CareerProfileValues) => CareerProfileValues,
@@ -559,7 +542,6 @@ interface Located {
   values: Record<string, unknown>;
 }
 
-/** Keeps unknown keys out of the profile, whoever sent them. */
 function pick(
   values: Record<string, unknown>,
   fields: ToolField[],
@@ -614,7 +596,7 @@ function toStringList(value: unknown): string[] {
   );
 }
 
-/** The form speaks in plain strings; the profile schema wants its own shapes. */
+// Convert plain form strings into the profile schema's nested shapes.
 function shape(
   section: ListSection,
   values: Record<string, unknown>,

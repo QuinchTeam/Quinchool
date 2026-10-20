@@ -1,6 +1,6 @@
 import { exportLog } from "./telemetry";
 
-// Logs go to OpenTelemetry; Sentry only receives captured errors.
+// Logs go to the collector; Sentry receives captured errors only.
 export function logInfo(message: string) {
   exportLog("INFO", message);
   if (process.env.NODE_ENV !== "production") console.info(message);

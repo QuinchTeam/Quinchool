@@ -154,7 +154,6 @@ export function ResumePdfDocument({
     github: profile.github,
     contactNumber: profile.contactNumber && `tel:${profile.contactNumber}`,
   };
-  // Hidden contacts arrive blank from the builder, so blanks are skipped.
   const contacts = (profile.contactOrder ?? RESUME_CONTACT_FIELDS)
     .filter((field) => profile[field])
     .map((field) => ({
