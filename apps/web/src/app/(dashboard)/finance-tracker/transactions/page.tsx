@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { FinanceServerPage } from "@/features/finance-tracker/components/finance-server-page";
 
-export const metadata: Metadata = { title: "Transaction History - Quinchool" };
+import { FinanceTrackerTransactionsPage } from "@/features/finance-tracker/components/finance-tracker-transactions-page";
 
-export default function TransactionHistoryPage() {
-  return <FinanceServerPage history />;
+export const metadata: Metadata = {
+  title: "Finance Tracker Transactions - Quinchool",
+};
+
+export default function Page() {
+  return <FinanceTrackerTransactionsPage />;
 }

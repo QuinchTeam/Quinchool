@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
-export default function ResumePage() {
-  redirect("/resume/resume-tailor");
+import { ResumePage } from "@/features/resume-builder/components/resume-page";
+
+export const metadata: Metadata = { title: "Resume - Quinchool" };
+
+export default function Page() {
+  return <ResumePage />;
 }

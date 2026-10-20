@@ -33,7 +33,7 @@ import {
 } from "@/features/jobs-scraper/lib/schema";
 import { applyTailoredResume } from "@/features/resume-builder/lib/resume";
 
-export function JobsScraper() {
+export function JobsScraperPage() {
   const { error, isLoading, refetch, scan, state } = useJobsScraper();
   const { careerProfile, isLoading: isProfileLoading } = useCareerProfile();
   const { buildResume } = useResumeBuilder(careerProfile);

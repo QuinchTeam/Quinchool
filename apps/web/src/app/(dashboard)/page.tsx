@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
-import { DashboardGreeting } from "@/features/dashboard/components/dashboard-greeting";
-import {
-  DashboardHome,
-  DashboardSkeleton,
-} from "@/features/dashboard/components/dashboard-home";
+import { DashboardPage } from "@/features/dashboard/components/dashboard-page";
 
 export const metadata: Metadata = { title: "Dashboard - Quinchool" };
 
-export default function Home() {
-  return (
-    <div className="flex w-full min-w-0 flex-col gap-8 p-6">
-      <DashboardGreeting />
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardHome />
-      </Suspense>
-    </div>
-  );
+export default function Page() {
+  return <DashboardPage />;
 }

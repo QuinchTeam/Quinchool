@@ -1,5 +1,9 @@
-import { ResumeTailor } from "@/features/resume-builder/components/resume-tailor";
+import type { Metadata } from "next";
 
-export default function ResumeTailorPage() {
-  return <ResumeTailor />;
+import { ResumeTailorPage } from "@/features/resume-builder/components/resume-tailor-page";
+
+export const metadata: Metadata = { title: "Resume Tailor - Quinchool" };
+
+export default function Page() {
+  return <ResumeTailorPage />;
 }

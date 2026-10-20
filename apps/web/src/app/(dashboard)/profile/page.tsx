@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { ProfileView } from "@/features/profile/components/profile-view";
+
+import { ProfilePage } from "@/features/profile/components/profile-page";
 
 export const metadata: Metadata = { title: "Profile - Quinchool" };
 
-export default function ProfilePage() {
-  return <ProfileView />;
+export default function Page() {
+  return <ProfilePage />;
 }

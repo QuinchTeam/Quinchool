@@ -1,7 +1,9 @@
-import { LoginForm } from "@/features/auth/components/login-form";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Sign in" };
+import { LoginPage } from "@/features/auth/components/login-page";
 
-export default function LoginPage() {
-  return <LoginForm />;
+export const metadata: Metadata = { title: "Login - Quinchool" };
+
+export default function Page() {
+  return <LoginPage />;
 }

@@ -302,7 +302,7 @@ function CanvasContent() {
   );
 }
 
-export function Canvas() {
+export function NodeBasedFlowPage() {
   return (
     <ReactFlowProvider>
       <CanvasContent />

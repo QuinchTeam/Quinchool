@@ -47,7 +47,7 @@ const TIME_RANGE_LABELS: Record<JobScraperConfig["timeRange"], string> = {
   CUSTOM: "Custom range",
 };
 
-export function JobScraperSettings() {
+export function JobsScraperSettingsPage() {
   const { error, isLoading, refetch, saveConfig, state } = useJobsScraper();
   const [draft, setDraft] = useState<JobScraperConfig | null>(null);
   const [message, setMessage] = useState("");

@@ -11,41 +11,46 @@ import {
   AuthCard,
   AuthField,
   AuthFooter,
-  AuthLink,
 } from "@/features/auth/components/auth-form-parts";
 import {
-  type LoginValues,
-  loginSchema,
+  type RegisterValues,
+  registerSchema,
 } from "@/features/auth/validations/auth";
-import { signIn } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-client";
 
-export function LoginForm() {
+export function RegisterPage() {
   const router = useRouter();
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "" },
   });
 
-  async function onSubmit(values: LoginValues) {
-    const { error } = await signIn.email(values);
+  async function onSubmit(values: RegisterValues) {
+    const { error } = await signUp.email(values);
     if (error) {
-      toast.error(error.message ?? "Could not sign in");
+      toast.error(error.message ?? "Could not create account");
       return;
     }
-    toast.success("Signed in");
+    toast.success("Account created");
     router.push("/");
   }
 
   return (
     <AuthCard
-      title="Sign in"
-      description="Enter your email and password to continue."
+      title="Create an account"
+      description="Sign up with your email and password."
     >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
+          <AuthField
+            control={form.control}
+            name="name"
+            label="Name"
+            autoComplete="name"
+          />
           <AuthField
             control={form.control}
             name="email"
@@ -58,22 +63,19 @@ export function LoginForm() {
             name="password"
             label="Password"
             type="password"
-            autoComplete="current-password"
-            action={
-              <AuthLink href="/auth/forget-password">Forgot password?</AuthLink>
-            }
+            autoComplete="new-password"
           />
           <Button
             type="submit"
             className="w-full"
             disabled={form.formState.isSubmitting}
           >
-            Sign in
+            Create account
           </Button>
           <AuthFooter
-            text="Don't have an account?"
-            href="/auth/register"
-            linkLabel="Sign up"
+            text="Already have an account?"
+            href="/auth/login"
+            linkLabel="Sign in"
           />
         </form>
       </Form>

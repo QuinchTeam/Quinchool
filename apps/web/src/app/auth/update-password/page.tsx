@@ -1,13 +1,9 @@
-import { Suspense } from "react";
+import type { Metadata } from "next";
 
-import { UpdatePasswordForm } from "@/features/auth/components/update-password-form";
+import { UpdatePasswordPage } from "@/features/auth/components/update-password-page";
 
-export const metadata = { title: "Update password" };
+export const metadata: Metadata = { title: "Update Password - Quinchool" };
 
-export default function UpdatePasswordPage() {
-  return (
-    <Suspense>
-      <UpdatePasswordForm />
-    </Suspense>
-  );
+export default function Page() {
+  return <UpdatePasswordPage />;
 }

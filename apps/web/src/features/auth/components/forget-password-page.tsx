@@ -17,7 +17,7 @@ import {
 } from "@/features/auth/validations/auth";
 import { requestPasswordReset } from "@/lib/auth-client";
 
-export function ForgetPasswordForm() {
+export function ForgetPasswordPage() {
   const form = useForm<ForgetPasswordValues>({
     resolver: zodResolver(forgetPasswordSchema),
     defaultValues: { email: "" },

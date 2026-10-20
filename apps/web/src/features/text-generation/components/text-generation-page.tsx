@@ -1,0 +1,104 @@
+"use client";
+
+import { AppHeader } from "@/components/shared/app-header";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { TextModelSelector } from "@/components/shared/text-model-selector";
+import { Button } from "@/components/ui/button";
+import { useTextGeneration } from "@/hooks/use-text-generation";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
+import {
+  type TextGenerationValues,
+  textGenerationSchema,
+} from "@/lib/ai/text-generation/validations";
+
+export function TextGenerationPage() {
+  const [generatedText, setGeneratedText] = useState("");
+  const [generationError, setGenerationError] = useState("");
+  const generateText = useTextGeneration();
+  const form = useForm<TextGenerationValues>({
+    resolver: zodResolver(textGenerationSchema),
+    defaultValues: {
+      modelId: DEFAULT_TEXT_GENERATION_MODEL_ID,
+      prompt: "",
+    },
+  });
+
+  async function onSubmit(values: TextGenerationValues) {
+    setGeneratedText("");
+    setGenerationError("");
+
+    try {
+      const { text } = await generateText.mutateAsync(values);
+      setGeneratedText(text);
+    } catch (error) {
+      setGenerationError(
+        error instanceof Error ? error.message : "Failed to generate text",
+      );
+    }
+  }
+
+  return (
+    <div className="flex max-w-2xl flex-col gap-6 p-6">
+      <AppHeader title="Text Generation" />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField
+            control={form.control}
+            name="modelId"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <TextModelSelector
+                    label="Model"
+                    value={field.value}
+                    onValueChange={(modelId) => field.onChange(modelId)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+          <FormField
+            control={form.control}
+            name="prompt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prompt</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Write what you want to generate."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={generateText.isPending}>
+            Submit
+          </Button>
+        </form>
+      </Form>
+      {(generatedText || generationError) && (
+        <section className="grid gap-2 rounded-md border bg-muted/30 p-4">
+          <h2 className="text-sm font-medium">Result</h2>
+          <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+            {generationError || generatedText}
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}

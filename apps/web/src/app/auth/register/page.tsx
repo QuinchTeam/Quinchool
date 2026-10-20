@@ -1,7 +1,9 @@
-import { RegisterForm } from "@/features/auth/components/register-form";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Create an account" };
+import { RegisterPage } from "@/features/auth/components/register-page";
 
-export default function RegisterPage() {
-  return <RegisterForm />;
+export const metadata: Metadata = { title: "Register - Quinchool" };
+
+export default function Page() {
+  return <RegisterPage />;
 }

@@ -33,7 +33,7 @@ const memberSince = new Intl.DateTimeFormat("en-PH", {
   timeZone: "Asia/Manila",
 });
 
-export function ProfileView() {
+export function ProfilePage() {
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
   const user = session?.user;

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Canvas } from "@/features/node-based-builder/components/canvas";
 
-export const metadata: Metadata = {
-  title: "Node Based Flow — Quinchool",
-};
+import { NodeBasedFlowPage } from "@/features/node-based-builder/components/node-based-flow-page";
 
-export default function NodeBasedFlowPage() {
-  return <Canvas />;
+export const metadata: Metadata = { title: "Node Based Flow - Quinchool" };
+
+export default function Page() {
+  return <NodeBasedFlowPage />;
 }

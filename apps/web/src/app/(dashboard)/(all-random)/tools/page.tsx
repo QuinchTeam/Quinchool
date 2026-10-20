@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 
-import { ToolsHub } from "@/features/tools/components/tools-hub";
+import { ToolsPage } from "@/features/tools/components/tools-page";
 
-export const metadata: Metadata = {
-  title: "All Random Tools — Quinchool",
-};
+export const metadata: Metadata = { title: "Tools - Quinchool" };
 
-export default function ToolsPage() {
-  return <ToolsHub />;
+export default function Page() {
+  return <ToolsPage />;
 }

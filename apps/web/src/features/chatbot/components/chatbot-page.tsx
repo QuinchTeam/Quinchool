@@ -9,7 +9,7 @@ import { ChatListSidebar } from "@/features/chatbot/components/chat-list-sidebar
 import { ChatMessages } from "@/features/chatbot/components/chat-messages";
 import { useChatbot } from "@/features/chatbot/hooks/use-chatbot";
 
-export function Chatbot({ chatId }: { chatId?: string }) {
+export function ChatbotPage({ chatId }: { chatId?: string }) {
   const chat = useChatbot(chatId);
   const [isListOpen, setIsListOpen] = useState(false);
 

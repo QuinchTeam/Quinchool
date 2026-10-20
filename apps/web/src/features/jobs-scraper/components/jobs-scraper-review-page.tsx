@@ -26,7 +26,7 @@ type Filter = SavedJob["classification"] | "ALL";
 
 const FILTERS: Filter[] = ["REJECTED", "POTENTIAL", "MATCH", "ALL"];
 
-export function JobReview() {
+export function JobsScraperReviewPage() {
   const { error, isLoading, refetch, state, updateClassification } =
     useJobsScraper();
   const [filter, setFilter] = useState<Filter>("REJECTED");

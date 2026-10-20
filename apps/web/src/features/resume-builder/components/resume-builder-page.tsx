@@ -307,7 +307,7 @@ function ResumeContentToolbar({
   );
 }
 
-export function ResumePreview() {
+export function ResumeBuilderPage() {
   const { careerProfile, error, isLoading, refetch } = useCareerProfile();
   const resumeLayout = useResumeLayout();
 

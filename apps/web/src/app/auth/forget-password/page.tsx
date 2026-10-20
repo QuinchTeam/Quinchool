@@ -1,7 +1,9 @@
-import { ForgetPasswordForm } from "@/features/auth/components/forget-password-form";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Forgot password" };
+import { ForgetPasswordPage } from "@/features/auth/components/forget-password-page";
 
-export default function ForgetPasswordPage() {
-  return <ForgetPasswordForm />;
+export const metadata: Metadata = { title: "Forgot Password - Quinchool" };
+
+export default function Page() {
+  return <ForgetPasswordPage />;
 }

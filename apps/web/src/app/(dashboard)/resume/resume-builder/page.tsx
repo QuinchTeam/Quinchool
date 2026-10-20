@@ -1,5 +1,9 @@
-import { ResumePreview } from "@/features/resume-builder/components/resume-preview";
+import type { Metadata } from "next";
 
-export default function ResumeBuilderPage() {
-  return <ResumePreview />;
+import { ResumeBuilderPage } from "@/features/resume-builder/components/resume-builder-page";
+
+export const metadata: Metadata = { title: "Resume Builder - Quinchool" };
+
+export default function Page() {
+  return <ResumeBuilderPage />;
 }

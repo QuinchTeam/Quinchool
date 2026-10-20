@@ -8,7 +8,7 @@ import { FinanceScope } from "./shared/finance-scope";
 import { TransactionHistory } from "./transaction-history";
 
 // Fetch sections client-side so a slow endpoint does not block the whole page.
-export async function FinanceServerPage({
+export async function FinanceTrackerPage({
   history = false,
 }: {
   history?: boolean;

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
-import { JobScraperSettings } from "@/features/jobs-scraper/components/job-scraper-settings";
+import { JobsScraperSettingsPage } from "@/features/jobs-scraper/components/jobs-scraper-settings-page";
 
 export const metadata: Metadata = {
   title: "Jobs Scraper Settings - Quinchool",
 };
 
-export default function JobsScraperSettingsPage() {
-  return <JobScraperSettings />;
+export default function Page() {
+  return <JobsScraperSettingsPage />;
 }

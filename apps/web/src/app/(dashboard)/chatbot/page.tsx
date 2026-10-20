@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Chatbot } from "@/features/chatbot/components/chatbot";
 
-export const metadata: Metadata = { title: "Quinchbot - Quinchool" };
+import { ChatbotPage } from "@/features/chatbot/components/chatbot-page";
 
 // Visiting New chat creates no row until the first message is sent.
-export default function ChatbotPage() {
-  return <Chatbot />;
+export const metadata: Metadata = { title: "Chatbot - Quinchool" };
+
+export default function Page() {
+  return <ChatbotPage />;
 }

@@ -17,7 +17,7 @@ import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/model
 import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
 import { applyTailoredResume } from "@/features/resume-builder/lib/resume";
 
-export function ResumeTailor() {
+export function ResumeTailorPage() {
   const [jobRequirement, setJobRequirement] = useState("");
   const [modelId, setModelId] = useState<TextGenerationModelId>(
     DEFAULT_TEXT_GENERATION_MODEL_ID,

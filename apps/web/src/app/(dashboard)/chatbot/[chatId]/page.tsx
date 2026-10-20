@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Chatbot } from "@/features/chatbot/components/chatbot";
 
-export const metadata: Metadata = { title: "Quinchbot - Quinchool" };
+import { ChatbotPage } from "@/features/chatbot/components/chatbot-page";
 
-export default async function ChatPage({
+export const metadata: Metadata = { title: "Chatbot - Quinchool" };
+
+export default async function Page({
   params,
 }: {
   params: Promise<{ chatId: string }>;
 }) {
   const { chatId } = await params;
 
-  return <Chatbot chatId={chatId} />;
+  return <ChatbotPage chatId={chatId} />;
 }
