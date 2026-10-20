@@ -1,6 +1,6 @@
 import { defineConfig } from "vite-plus";
 
-// ponytail: Next owns dev/build; Vite+ only runs lint, fmt, check, test, staged.
+// Next.js owns dev and build.
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   lint: {
@@ -14,9 +14,5 @@ export default defineConfig({
   },
   test: {
     include: ["tests/**/*.test.{ts,tsx}", "scripts/**/*.test.mjs"],
-  },
-  staged: {
-    "*.{css,js,jsx,mjs,cjs,ts,tsx,mts,cts,mdx}":
-      "node scripts/check-tailwind-arbitrary.mjs",
   },
 });

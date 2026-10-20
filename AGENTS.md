@@ -1,14 +1,12 @@
-<!-- BEGIN:nextjs-agent-rules -->
 # Quinchool
 
-Quinchool is Quinch's personal toolkit. This monorepo has three apps:
+Quinchool is my personal toolkit app, I can build anything here that helps me on my life and work. This monorepo has three apps:
 
-- `apps/web`: Next.js UI
-- `apps/api`: NestJS auth, API, and database
-- `apps/ai`: FastAPI LLM, RAG, and scraping work
+- `apps/web`: Next.js, I keep this frontend only, and build the design here.
+- `apps/api`: NestJS, my central backend, I keep auth, APIs, database querying and, calling AI here.
+- `apps/ai`: FastAPI, this is my specialized service app, I commonly put AI, LLM, RAG, and Scraping works here.
 
-Requests flow `web -> api -> ai`. Production runs on Cloud Run.
-<!-- END:nextjs-agent-rules -->
+Visualization how my app flows: `web -> api -> ai`.
 
 ## App boundaries
 
@@ -21,14 +19,11 @@ Each app has its own `AGENTS.md` with its file/folder conventions — check `app
 ## Tooling
 
 - Use pnpm only. Install from the repo root; add app dependencies with `pnpm --filter @quinchool/<app> add <package>`.
-- `apps/web` uses Vite+ (`vp`) for lint, fmt, check, and test; Next.js still owns dev and build. Config lives in `apps/web/vite.config.ts`.
+- Vite+ (`vp`) config for shared lint, fmt, check, and staged checks lives in the root `vite.config.ts`; `apps/web/vite.config.ts` holds web-specific configuration. Next.js still owns web dev and build.
 - Never run `vp fmt` or `vp check --fix` without explicit file paths.
 
 ## Deployment
 
-- Deploys run from GitHub Actions to Cloud Run.
-- Store production secrets in Google Secret Manager. Store non-secret deploy settings in GitHub Actions variables. Local `.env` files are for local development only.
-
-## Git
-
-- Never push without the user's explicit request in the current chat.
+- Do not run formatting, lint, Tailwind conventions, secret scans, type checks, tests, or builds after every code change. Pre-commit handles staged formatting, lint, Tailwind conventions, and secret scans; run type checks, tests, and builds only when committing and pushing, or when explicitly requested.
+- Deploys run from GitHub Actions to Cloud Run. Production runs on Cloud Run, and Local uses Docker. We dont have staging or previews, we push straight to main as default, optionally creating PRs only for learning purposes or If I want/specify to.
+- Production secrets is in Google Secret Manager and Non-secret deploy settings is in GitHub Actions variables. The Local `.env` files are for local development only.

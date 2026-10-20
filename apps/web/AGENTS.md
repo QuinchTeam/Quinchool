@@ -4,7 +4,7 @@
 - Read relevant `node_modules/next/dist/docs/` guides before changing Next.js code.
 - Feature-based structure: each feature lives under `src/features/<feature>/`, with its own `components/`, `hooks/`, `lib/`, and `validations/` subfolders as needed. Keep `src/app/` for routes and Next.js conventions only. `src/components/`, `src/hooks/`, and `src/lib/` hold cross-feature shared code only.
 - Use Tailwind theme tokens. Do not add arbitrary values or properties. Arbitrary variants are allowed. Add missing tokens in `apps/web/src/app/globals.css`.
-- Run `pnpm lint:tailwind` after Tailwind changes. Use `tailwind-allow-arbitrary` only for a justified same-line exception.
+- Pre-commit checks staged web files for Tailwind conventions. Use `tailwind-allow-arbitrary` only for a justified same-line exception.
 
 Use Phosphor icons with individual imports from `@phosphor-icons/react/dist/ssr/<IconName>` and the shared `AppIcon` component in `src/components/ui/icon.tsx`. Icons must always use duotone; do not use regular, outline, filled, or other weights. Apply this rule to newly generated shadcn components too. Exceptions: the dialog close button in `src/components/ui/dialog.tsx` and the history "Clear filters" button use a regular-weight `XIcon`; the pagination ellipsis in `src/components/ui/pagination.tsx` uses a regular-weight `DotsThreeIcon`. The selected-model check in `src/components/shared/text-model-selector.tsx` and the checkbox tick in `src/components/ui/checkbox.tsx` use a regular-weight `CheckIcon`.
 

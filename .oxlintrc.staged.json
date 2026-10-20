@@ -1,0 +1,16 @@
+{
+  "plugins": ["typescript"],
+  "options": { "typeAware": false, "typeCheck": false },
+  "ignorePatterns": [
+    "**/.next/**",
+    "**/next-env.d.ts",
+    "**/dist/**",
+    "**/dist-test/**"
+  ],
+  "overrides": [
+    {
+      "files": ["apps/web/**"],
+      "plugins": ["react", "nextjs", "typescript"]
+    }
+  ]
+}

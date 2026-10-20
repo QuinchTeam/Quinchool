@@ -1,1 +1,1 @@
-cd apps/web && pnpm exec vp staged
+pnpm exec vp staged --concurrent false
