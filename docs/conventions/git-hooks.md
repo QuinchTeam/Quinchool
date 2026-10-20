@@ -16,6 +16,8 @@ Tasks run sequentially so formatters and scanners do not read or write the same 
 
 Use relative file paths to keep large staged file lists within Windows command-length limits.
 
+Staged tasks invoke Node CLI entry points directly so Windows `.cmd` wrappers do not expand large file lists past their command-length limit.
+
 ## Commit messages
 
 Husky's `commit-msg` hook requires `type(scope): message` or `type: message`. Scope is optional; when present, it must be non-empty and contain no whitespace or parentheses.

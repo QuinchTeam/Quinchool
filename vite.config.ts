@@ -26,16 +26,17 @@ export default defineConfig({
   },
   staged: {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
-      "vp lint --config .oxlintrc.staged.json --fix",
-      "vp fmt",
+      "node node_modules/vite-plus/bin/vp lint --config .oxlintrc.staged.json --fix",
+      "node node_modules/vite-plus/bin/vp fmt",
     ],
-    "*.{css,scss,html,json,jsonc,yaml,yml,md,mdx}": "vp fmt",
+    "*.{css,scss,html,json,jsonc,yaml,yml,md,mdx}":
+      "node node_modules/vite-plus/bin/vp fmt",
     "apps/web/**/*.{css,js,jsx,mjs,cjs,ts,tsx,mts,cts,mdx}":
       "node apps/web/scripts/check-tailwind-arbitrary.mjs",
     "*.py": [
       "node scripts/ruff.mjs check --fix",
       "node scripts/ruff.mjs format",
     ],
-    "*": "secretlint --no-glob --no-gitignore",
+    "*": "node node_modules/secretlint/bin/secretlint.js --no-glob --no-gitignore",
   },
 });
