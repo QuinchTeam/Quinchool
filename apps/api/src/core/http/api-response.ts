@@ -1,5 +1,5 @@
 /**
- * The response envelope from docs/conventions/api-responses.md. Controllers
+ * The response envelope from docs/conventions/backend/api-responses.md. Controllers
  * return plain values and the ResponseInterceptor wraps them in `{ data }`;
  * return an ApiResponse only when the response also carries `meta` or `links`.
  */

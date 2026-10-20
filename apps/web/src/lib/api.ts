@@ -19,7 +19,7 @@ export function apiUrl(path: string): string {
  */
 export const withCredentials = { credentials: "include" } as const;
 
-/** One failed API call, from the `{ error }` envelope in docs/conventions/api-responses.md. */
+/** One failed API call, from the `{ error }` envelope in docs/conventions/backend/api-responses.md. */
 export class ApiError extends Error {
   constructor(
     message: string,

@@ -1,4 +1,4 @@
-# Text Generation Backend Flow
+# Text Generation
 
 All simple text generation runs through `POST /text-generation` on the API. It
 accepts modelId and prompt, and returns the generated text result. The LLM work
@@ -6,7 +6,32 @@ itself happens in `apps/ai`: providers, fallback, and tracing live with the rest
 of the AI service, and the API keeps auth and the HTTP boundary the browser
 already talks to.
 
-## Runtime Path
+## Providers
+
+### Direct Providers
+
+1. Google (Google AI Studio) - for Gemini and Gemma
+
+### Third-party Providers
+
+1. Cloudflare Workers AI
+2. OpenRouter
+3. Groq
+
+## Models and Fallback Order
+
+Providers are listed in fallback order.
+
+1. Gemini 3.5 Flash : Google AI Studio
+2. Gemini 3.1 Flash-Lite : Google AI Studio
+3. Kimi K2.7 Code : Cloudflare Workers AI
+4. Kimi K2.6 : Cloudflare Workers AI
+5. Gemma 4 26B (A4B) : Google AI Studio → OpenRouter → Cloudflare Workers AI
+6. GPT-OSS 20B : Groq → OpenRouter → Cloudflare Workers AI
+
+## Architecture
+
+### Runtime Path
 
 ```txt
 POST /text-generation (apps/api controller, session guard)
@@ -20,25 +45,25 @@ POST /text-generation (apps/api controller, session guard)
 `/prompt-enhancer` is the same path with the prompt wrapped first; the wrapping
 is `build_enhanced_prompt()` in the AI service.
 
-## Pieces
+### Pieces
 
-| Piece | File | Job |
-| --- | --- | --- |
-| API route | `apps/api/src/text-generation/text-generation.controller.ts` | HTTP boundary: session guard, validate, call the client, return the result. |
-| API validation | `apps/api/src/text-generation/text-generation.contract.ts` | Transport validation for non-empty model ID and prompt. |
-| API client | `apps/api/src/common/ai-service.ts` | Shared HTTP hop to FastAPI, plus failure translation. |
-| API workflow | `apps/api/src/text-generation/service.ts` | Maps the public routes to their FastAPI routes. |
-| API errors | `apps/api/src/text-generation/errors.ts` | `TextGenerationError` and the response body the browser reads. |
-| AI route | `apps/ai/app/routes/text_generation.py` | HTTP boundary: parse, run the service, map failures to a status. |
-| AI validation | `apps/ai/app/validations/text_generation.py` | Model IDs, provider IDs, request and result contracts. |
-| AI service | `apps/ai/app/services/text_generation.py` | Orchestration: default model, provider fallback, Langfuse observations. |
-| Model config | `apps/ai/app/lib/llm/models.py` | Source of truth for which providers serve a model, in fallback order. |
-| Provider calls | `apps/ai/app/lib/llm/providers.py` | One function per provider: env key, client, API call, usage. |
-| Provider errors | `apps/ai/app/lib/llm/errors.py` | Turns a provider failure into a status and a readable sentence. |
-| Tracing | `apps/ai/app/core/tracing.py` | Optional Langfuse client and observation wrappers. |
-| UI model list | `apps/web/src/lib/ai/text-generation/models.ts` | Display names and descriptions for the model picker. |
+| Piece           | File                                                         | Job                                                                         |
+| --------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| API route       | `apps/api/src/text-generation/text-generation.controller.ts` | HTTP boundary: session guard, validate, call the client, return the result. |
+| API validation  | `apps/api/src/text-generation/text-generation.contract.ts`   | Transport validation for non-empty model ID and prompt.                     |
+| API client      | `apps/api/src/common/ai-service.ts`                          | Shared HTTP hop to FastAPI, plus failure translation.                       |
+| API workflow    | `apps/api/src/text-generation/service.ts`                    | Maps the public routes to their FastAPI routes.                             |
+| API errors      | `apps/api/src/text-generation/errors.ts`                     | `TextGenerationError` and the response body the browser reads.              |
+| AI route        | `apps/ai/app/routes/text_generation.py`                      | HTTP boundary: parse, run the service, map failures to a status.            |
+| AI validation   | `apps/ai/app/validations/text_generation.py`                 | Model IDs, provider IDs, request and result contracts.                      |
+| AI service      | `apps/ai/app/services/text_generation.py`                    | Orchestration: default model, provider fallback, Langfuse observations.     |
+| Model config    | `apps/ai/app/lib/llm/models.py`                              | Source of truth for which providers serve a model, in fallback order.       |
+| Provider calls  | `apps/ai/app/lib/llm/providers.py`                           | One function per provider: env key, client, API call, usage.                |
+| Provider errors | `apps/ai/app/lib/llm/errors.py`                              | Turns a provider failure into a status and a readable sentence.             |
+| Tracing         | `apps/ai/app/core/tracing.py`                                | Optional Langfuse client and observation wrappers.                          |
+| UI model list   | `apps/web/src/lib/ai/text-generation/models.ts`              | Display names and descriptions for the model picker.                        |
 
-## Ownership Rules
+### Ownership Rules
 
 - The API controller handles HTTP and auth only.
 - The API client handles the hop and failure translation only.
@@ -52,12 +77,7 @@ There is no adapter layer between the service and the providers: every provider
 function already returns the same `ProviderText`, so there was nothing left for
 one to translate.
 
-## Current Provider Order
-
-- Gemini 3.5 Flash, Gemini 3.1 Flash-Lite: Google AI Studio.
-- Kimi K2.7 Code, Kimi K2.6: Cloudflare Workers AI.
-- Gemma 4 26B A4B: Google AI Studio, OpenRouter, Cloudflare Workers AI.
-- GPT-OSS 20B: Groq, OpenRouter, Cloudflare Workers AI.
+## Provider Configuration
 
 Every provider key lives in `apps/ai/.env`: `GEMINI_API_KEY`,
 `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, `OPENROUTER_API_KEY`,

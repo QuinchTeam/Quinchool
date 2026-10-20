@@ -4,12 +4,12 @@ Each piece of input has one home, so both sides know where to send and read it.
 
 ## Where input goes
 
-| Location | Purpose | Example |
-|---|---|---|
-| Path params | Identify a resource | `/users/123` |
-| Query params | Search, filter, sort, paginate, pick fields | `?status=active` |
-| Request body | Create or modify resource data | `{ "name": "Alex" }` |
-| Headers | Auth, content type, conditional requests | `Authorization: Bearer ...` |
+| Location     | Purpose                                     | Example                     |
+| ------------ | ------------------------------------------- | --------------------------- |
+| Path params  | Identify a resource                         | `/users/123`                |
+| Query params | Search, filter, sort, paginate, pick fields | `?status=active`            |
+| Request body | Create or modify resource data              | `{ "name": "Alex" }`        |
+| Headers      | Auth, content type, conditional requests    | `Authorization: Bearer ...` |
 
 - Path params are IDs only. Nest at most one level: `/users/123/posts`, not `/users/123/posts/9/comments`.
 - `GET` and `DELETE` have no body. Put their input in the path or query.
@@ -36,10 +36,10 @@ GET /users?search=alex&status=active&role=admin&sortBy=createdAt&sortOrder=desc&
 
 ### Pagination styles
 
-| Style | Query | `meta` in the response | Use for |
-|---|---|---|---|
-| Offset | `page`, `pageSize` | `page`, `pageSize`, `total` | Small lists where users jump to page N. |
-| Cursor | `cursor`, `limit` | `nextCursor` (`null` on the last page) | Feeds that grow while you page (transactions, messages). |
+| Style  | Query              | `meta` in the response                 | Use for                                                  |
+| ------ | ------------------ | -------------------------------------- | -------------------------------------------------------- |
+| Offset | `page`, `pageSize` | `page`, `pageSize`, `total`            | Small lists where users jump to page N.                  |
+| Cursor | `cursor`, `limit`  | `nextCursor` (`null` on the last page) | Feeds that grow while you page (transactions, messages). |
 
 The cursor is opaque: clients pass back `meta.nextCursor` as-is and never build one. Example: `GET /finance-tracker/transactions?limit=20&cursor=eyJpZCI6...`.
 

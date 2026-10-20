@@ -77,8 +77,7 @@ every request will appear in a trace.
 The shared web logger (`logInfo`, `logWarn`, `logError`) writes OTLP log records
 directly, and prints to the console in development. Sentry logging is disabled
 in every runtime. Build-tool CLI diagnostics remain terminal
-output. See [the web logging audit](web-logging-audit.md) for existing coverage
-and handled-error behavior.
+output.
 
 Sentry's error hook mirrors a small summary of each error to the shared
 collector, next to the logger's records.
@@ -140,17 +139,17 @@ responses, validation and UI fallback handling remain in place.
 Instrumentation follows business/request boundaries, not every render,
 keystroke, pure helper or SQL query.
 
-| Domain | Web coverage | API / AI coverage |
-| --- | --- | --- |
-| Auth / profile | Better Auth custom fetch; profile updates labeled separately | Raw auth handler request lifecycle and safe library logs |
-| Dashboard | Aggregate loading and individual tile operations, including fallback failures | Underlying finance, jobs and career handlers |
-| Career profile | Load/save request and response parsing | All career handlers; chatbot tool reads/writes |
-| Resume builder | Tailoring loop, PDF rendering and PDF download | Resume handler; AI tailoring, generation and repair attempts |
-| Chatbot | Chat CRUD, messages and confirmed/dismissed actions | All handlers; tool read/prepare/write; AI respond, summary and title |
-| Finance tracker | Overview, history, wallets, transactions, transfers, labels and parsing | Every finance handler, including chatbot-triggered operations |
-| Jobs scraper | Config, scan, state and classification requests | All jobs handlers; AI scan, document collection, crawl and classification |
-| Node builder / text generation | Flow execution, each node, enhancement and generation | Generation/enhancement handlers; AI operations and provider attempts/fallbacks |
-| Tools hub / application | Navigation tracing; root and global render-error boundaries | No separate business operation in the link-only tools hub |
+| Domain                         | Web coverage                                                                  | API / AI coverage                                                              |
+| ------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Auth / profile                 | Better Auth custom fetch; profile updates labeled separately                  | Raw auth handler request lifecycle and safe library logs                       |
+| Dashboard                      | Aggregate loading and individual tile operations, including fallback failures | Underlying finance, jobs and career handlers                                   |
+| Career profile                 | Load/save request and response parsing                                        | All career handlers; chatbot tool reads/writes                                 |
+| Resume builder                 | Tailoring loop, PDF rendering and PDF download                                | Resume handler; AI tailoring, generation and repair attempts                   |
+| Chatbot                        | Chat CRUD, messages and confirmed/dismissed actions                           | All handlers; tool read/prepare/write; AI respond, summary and title           |
+| Finance tracker                | Overview, history, wallets, transactions, transfers, labels and parsing       | Every finance handler, including chatbot-triggered operations                  |
+| Jobs scraper                   | Config, scan, state and classification requests                               | All jobs handlers; AI scan, document collection, crawl and classification      |
+| Node builder / text generation | Flow execution, each node, enhancement and generation                         | Generation/enhancement handlers; AI operations and provider attempts/fallbacks |
+| Tools hub / application        | Navigation tracing; root and global render-error boundaries                   | No separate business operation in the link-only tools hub                      |
 
 Unexpected handled web failures produce a safe Sentry exception preserving
 the original stack frames, with raw error text removed. Reusing the same Error

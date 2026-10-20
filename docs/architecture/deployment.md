@@ -2,12 +2,12 @@
 
 Four services, all on Cloud Run:
 
-| Service              | Image                | Public? | Talks to             |
-| -------------------- | -------------------- | ------- | -------------------- |
-| `quinchool-web`      | `apps/web/Dockerfile`| yes     | the API, from the browser |
-| `quinchool-api`      | `apps/api/Dockerfile`| yes     | Cloud SQL, the AI service |
-| `quinchool-ai`       | `apps/ai/Dockerfile` | no      | crawl4ai, LLM providers |
-| `quinchool-crawl4ai` | `unclecode/crawl4ai` | no      | the open web         |
+| Service              | Image                 | Public? | Talks to                  |
+| -------------------- | --------------------- | ------- | ------------------------- |
+| `quinchool-web`      | `apps/web/Dockerfile` | yes     | the API, from the browser |
+| `quinchool-api`      | `apps/api/Dockerfile` | yes     | Cloud SQL, the AI service |
+| `quinchool-ai`       | `apps/ai/Dockerfile`  | no      | crawl4ai, LLM providers   |
+| `quinchool-crawl4ai` | `unclecode/crawl4ai`  | no      | the open web              |
 
 Only the two services the browser touches are public. The AI service and
 crawl4ai sit behind Cloud Run IAM, and their callers attach an ID token —
@@ -37,8 +37,7 @@ gcloud services enable \
 ```
 
 `iam`, `iamcredentials`, and `sts` are what federation runs on: without them
-step 6 fails at pool creation, or later at token exchange with a confusing
-403.
+step 6 fails at pool creation, or later at token exchange with a confusing 403.
 
 ## 2. Artifact Registry
 
@@ -77,9 +76,13 @@ Plus only and are rejected with `--edition=ENTERPRISE`.
 The API reaches it over the Cloud SQL unix socket attached by
 `--add-cloudsql-instances`, so `DATABASE_URL` uses the `host=` form:
 
+<!-- secretlint-disable @secretlint/secretlint-rule-database-connection-string -- Placeholder credentials. -->
+
 ```
 postgresql://quinchool:<password>@localhost/quinchool?host=/cloudsql/<PROJECT_ID>:<REGION>:quinchool
 ```
+
+<!-- secretlint-enable @secretlint/secretlint-rule-database-connection-string -->
 
 Migrations are not run from CI — the database has no public IP, so CI cannot
 reach it. The API container runs `prisma migrate deploy` at boot instead
@@ -197,28 +200,28 @@ Run this after the first deploy has created `quinchool-ai`.
 
 ## 9. GitHub repository variables
 
-`deploy.yml` reads everything from repository *variables* (Settings → Secrets
+`deploy.yml` reads everything from repository _variables_ (Settings → Secrets
 and variables → Actions → Variables). Nothing here is secret — the actual
 secrets live in Secret Manager and are mounted by Cloud Run.
 
-| Variable | Where the value comes from |
-| --- | --- |
-| `GCP_PROJECT_ID` | You chose it in step 1. `gcloud config get-value project` |
-| `GCP_REGION` | You chose it in step 1, e.g. `asia-southeast1`. `gcloud run regions list` |
-| `GCP_WIF_PROVIDER` | `gcloud iam workload-identity-pools providers describe github --location=global --workload-identity-pool=github --format='value(name)'` |
-| `GCP_DEPLOYER_SERVICE_ACCOUNT` | `quinchool-deployer@$PROJECT_ID.iam.gserviceaccount.com` |
-| `GCP_RUNTIME_SERVICE_ACCOUNT` | `quinchool-runtime@$PROJECT_ID.iam.gserviceaccount.com` |
-| `WEB_URL` | The domain you map in step 10, e.g. `https://quinchool.quinchy.dev` |
-| `API_URL` | The domain you map in step 10, e.g. `https://api.quinchool.quinchy.dev` |
-| `AI_SERVICE_URL` | Only exists after the first deploy: `gcloud run services describe quinchool-ai --region=$REGION --format='value(status.url)'` |
-| `CRAWL4AI_URL` | `gcloud run services describe quinchool-crawl4ai --region=$REGION --format='value(status.url)'` |
-| `COOKIE_DOMAIN` | `WEB_URL`'s host with a leading dot, e.g. `.quinchool.quinchy.dev` |
-| `GEMINI_MODEL` | `gemini-3.1-flash-lite` (the default in `apps/ai/app/core/config.py`) |
-| `LANGFUSE_HOST` | Copy from `apps/ai/.env` |
-| `SENTRY_DSN` | Copy from `apps/web/.env` |
-| `NEXT_PUBLIC_SENTRY_DSN` | Copy from `apps/web/.env` |
-| `SENTRY_ORG` | Copy from `apps/web/.env` |
-| `SENTRY_PROJECT` | Copy from `apps/web/.env` |
+| Variable                       | Where the value comes from                                                                                                              |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GCP_PROJECT_ID`               | You chose it in step 1. `gcloud config get-value project`                                                                               |
+| `GCP_REGION`                   | You chose it in step 1, e.g. `asia-southeast1`. `gcloud run regions list`                                                               |
+| `GCP_WIF_PROVIDER`             | `gcloud iam workload-identity-pools providers describe github --location=global --workload-identity-pool=github --format='value(name)'` |
+| `GCP_DEPLOYER_SERVICE_ACCOUNT` | `quinchool-deployer@$PROJECT_ID.iam.gserviceaccount.com`                                                                                |
+| `GCP_RUNTIME_SERVICE_ACCOUNT`  | `quinchool-runtime@$PROJECT_ID.iam.gserviceaccount.com`                                                                                 |
+| `WEB_URL`                      | The domain you map in step 10, e.g. `https://quinchool.quinchy.dev`                                                                     |
+| `API_URL`                      | The domain you map in step 10, e.g. `https://api.quinchool.quinchy.dev`                                                                 |
+| `AI_SERVICE_URL`               | Only exists after the first deploy: `gcloud run services describe quinchool-ai --region=$REGION --format='value(status.url)'`           |
+| `CRAWL4AI_URL`                 | `gcloud run services describe quinchool-crawl4ai --region=$REGION --format='value(status.url)'`                                         |
+| `COOKIE_DOMAIN`                | `WEB_URL`'s host with a leading dot, e.g. `.quinchool.quinchy.dev`                                                                      |
+| `GEMINI_MODEL`                 | `gemini-3.1-flash-lite` (the default in `apps/ai/app/core/config.py`)                                                                   |
+| `LANGFUSE_HOST`                | Copy from `apps/ai/.env`                                                                                                                |
+| `SENTRY_DSN`                   | Copy from `apps/web/.env`                                                                                                               |
+| `NEXT_PUBLIC_SENTRY_DSN`       | Copy from `apps/web/.env`                                                                                                               |
+| `SENTRY_ORG`                   | Copy from `apps/web/.env`                                                                                                               |
+| `SENTRY_PROJECT`               | Copy from `apps/web/.env`                                                                                                               |
 
 `SENTRY_AUTH_TOKEN` is stored as the `sentry-auth-token` Secret Manager secret.
 The deployer reads it only during the web build to upload source maps; BuildKit
@@ -257,7 +260,7 @@ region; where they are not, put a global external Application Load Balancer
 with a serverless NEG in front instead.
 
 The two subdomains share a registrable domain, so the session cookie is
-same-site and `SameSite=Lax` still sends it. What it does *not* do by default is
+same-site and `SameSite=Lax` still sends it. What it does _not_ do by default is
 reach the web app's middleware, which reads the cookie itself
 (`apps/web/src/proxy.ts`) — hence `COOKIE_DOMAIN`, which widens the cookie to
 the shared parent. Leave it unset locally.

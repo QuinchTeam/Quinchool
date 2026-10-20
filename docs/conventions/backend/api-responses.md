@@ -4,12 +4,12 @@ Every response uses the same envelope, so clients always know the shape to expec
 
 ## Top-level keys
 
-| Key | When | Contains |
-|---|---|---|
-| `data` | Success | The resource (object) or resources (array). |
-| `error` | Failure | `code`, `message`, optional `details`. |
-| `meta` | Optional | Info about the response, not the resource: pagination, totals, request id. |
-| `links` | Optional | URLs for related navigation: `self`, `next`, `prev`, `first`, `last`. |
+| Key     | When     | Contains                                                                   |
+| ------- | -------- | -------------------------------------------------------------------------- |
+| `data`  | Success  | The resource (object) or resources (array).                                |
+| `error` | Failure  | `code`, `message`, optional `details`.                                     |
+| `meta`  | Optional | Info about the response, not the resource: pagination, totals, request id. |
+| `links` | Optional | URLs for related navigation: `self`, `next`, `prev`, `first`, `last`.      |
 
 - A response has either `data` or `error`, never both.
 - `204 No Content` has no body at all.
@@ -84,7 +84,11 @@ Validation errors with several fields add `details`:
     "code": "VALIDATION_FAILED",
     "message": "Request has invalid fields",
     "details": [
-      { "field": "email", "code": "INVALID_EMAIL", "message": "Invalid email address" },
+      {
+        "field": "email",
+        "code": "INVALID_EMAIL",
+        "message": "Invalid email address"
+      },
       { "field": "name", "code": "REQUIRED", "message": "Name is required" }
     ]
   }
