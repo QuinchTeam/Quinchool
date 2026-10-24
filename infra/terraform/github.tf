@@ -15,6 +15,9 @@ locals {
     CRAWL4AI_URL   = google_cloud_run_v2_service.crawl4ai.uri
     GEMINI_MODEL   = "gemini-3.1-flash-lite"
     LANGFUSE_HOST  = "https://jp.cloud.langfuse.com"
+    S3_ENDPOINT   = "https://2b4ccec120d284d624dec0ebfddc9848.r2.cloudflarestorage.com"
+    S3_REGION     = "auto"
+    S3_BUCKET     = "quinchool-uploads"
     # Sentry DSNs are public; the client one ships to every browser.
     SENTRY_DSN             = "https://11948d72a55bc4b9e9e7ba45537d9b45@o4509361321082880.ingest.us.sentry.io/4509361326063616"
     NEXT_PUBLIC_SENTRY_DSN = "https://11948d72a55bc4b9e9e7ba45537d9b45@o4509361321082880.ingest.us.sentry.io/4509361326063616"

@@ -20,6 +20,8 @@ locals {
   secrets = toset([
     "database-url",
     "better-auth-secret",
+    "s3-access-key-id",
+    "s3-secret-access-key",
     "gemini-api-key",
     "cloudflare-account-id",
     "cloudflare-api-token",
