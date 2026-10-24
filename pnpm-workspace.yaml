@@ -12,3 +12,9 @@ onlyBuiltDependencies:
   - "@sentry/node-cpu-profiler"
   - prisma
   - sharp
+
+# Security floors for nested deps the parents haven't bumped yet. Drop each once
+# `pnpm audit` stays clean without it.
+overrides:
+  multer: ^2.5.0
+  mysql2: ^3.23.1
