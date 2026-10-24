@@ -21,12 +21,12 @@ import {
   useJobsScraper,
   useLatestScan,
 } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
-import {
-  getUnsetScanCriteria,
-  type JobScraperState,
-  type JobSourceIssue,
-  type SavedJob,
-} from "@/features/jobs-scraper/lib/schema";
+import { getUnsetScanCriteria } from "@/features/jobs-scraper/lib/criteria";
+import type {
+  JobScraperState,
+  JobSourceIssue,
+  SavedJob,
+} from "@/features/jobs-scraper/lib/types";
 import { useResumeBuilder } from "@/features/resume-builder/hooks/use-resume-builder";
 import { applyTailoredResume } from "@/features/resume-builder/lib/resume";
 import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";

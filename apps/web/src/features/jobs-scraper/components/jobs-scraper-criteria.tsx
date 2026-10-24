@@ -8,7 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
-import type { JobScraperConfig } from "@/features/jobs-scraper/lib/schema";
+import {
+  formatLocationModes,
+  formatTimeRange,
+} from "@/features/jobs-scraper/lib/criteria";
+import type { JobScraperConfig } from "@/features/jobs-scraper/validations/job-scraper-config";
 
 export function JobsScraperCriteria() {
   const { state } = useJobsScraper();
@@ -118,22 +122,4 @@ function CriteriaLoading() {
       ))}
     </div>
   );
-}
-
-function formatTimeRange(config: JobScraperConfig): string {
-  if (config.timeRange === "LAST_HOUR") return "Last hour";
-  if (config.timeRange === "TODAY") return "Today only";
-  if (config.timeRange === "THIS_WEEK") return "This week";
-  return `${config.customStartDate ?? "Custom"} to ${config.customEndDate ?? "range"}`;
-}
-
-function formatLocationModes(config: JobScraperConfig): string {
-  const worldwide = config.worldwideWorkModes.join(", ");
-  const philippines = config.philippinesWorkModes.join(", ");
-  return [
-    worldwide ? `Worldwide: ${worldwide}` : "",
-    philippines ? `Philippines: ${philippines}` : "",
-  ]
-    .filter(Boolean)
-    .join(" / ");
 }

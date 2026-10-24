@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SavedJob } from "@/features/jobs-scraper/lib/schema";
+import type { SavedJob } from "@/features/jobs-scraper/lib/types";
 import { cn } from "@/lib/utils";
 
 export function JobCard({

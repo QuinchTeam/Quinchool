@@ -7,10 +7,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type {
-  JobScraperConfig,
   JobScraperState,
   SavedJob,
-} from "@/features/jobs-scraper/lib/schema";
+} from "@/features/jobs-scraper/lib/types";
+import type { JobScraperConfig } from "@/features/jobs-scraper/validations/job-scraper-config";
 import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 

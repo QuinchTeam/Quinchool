@@ -14,7 +14,7 @@ import {
   useJobsScraper,
   useLatestScan,
 } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
-import { getUnsetScanCriteria } from "@/features/jobs-scraper/lib/schema";
+import { getUnsetScanCriteria } from "@/features/jobs-scraper/lib/criteria";
 
 export function JobsScraperHeader() {
   const { scan, state } = useJobsScraper();
