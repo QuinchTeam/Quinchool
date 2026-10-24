@@ -24,12 +24,14 @@ import { dropZoneClassName } from "@/lib/drop-zone";
 import { cn } from "@/lib/utils";
 
 export function SortableList({
+  autoScroll,
   children,
   className,
   ids,
   onMove,
   wrap = false,
 }: {
+  autoScroll?: boolean;
   children: ReactNode;
   className: string;
   ids: string[];
@@ -47,6 +49,7 @@ export function SortableList({
   return (
     <DndContext
       id={id}
+      autoScroll={autoScroll}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={({ active, over }) => {
@@ -84,7 +87,7 @@ export function DragHandle({
   );
 }
 
-export function useSortableItem(id: string) {
+export function useSortableItem(id: string, disabled?: boolean) {
   const {
     active,
     attributes,
@@ -94,7 +97,7 @@ export function useSortableItem(id: string) {
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   return {
     isDragging,

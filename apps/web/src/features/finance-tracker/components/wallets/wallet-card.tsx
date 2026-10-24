@@ -1,13 +1,12 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { BankIcon } from "@phosphor-icons/react/dist/ssr/Bank";
 import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/ssr/DotsSixVertical";
 import { MoneyIcon } from "@phosphor-icons/react/dist/ssr/Money";
 import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
 import { AppIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { useSortableItem } from "@/components/ui/sortable";
 import { useDeleteWallet } from "@/features/finance-tracker/hooks/use-wallets";
 import { formatMoney } from "@/features/finance-tracker/lib/format";
 import {
@@ -27,16 +26,10 @@ export function WalletCard({
   disabled: boolean;
 }) {
   const remove = useDeleteWallet();
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    setActivatorNodeRef,
-    transform,
-    transition,
-    isDragging,
-    active,
-  } = useSortable({ id: wallet.id, disabled });
+  const { dragClassName, handleProps, isDragging, itemProps } = useSortableItem(
+    wallet.id,
+    disabled,
+  );
   const icon =
     wallet.type === "CASH"
       ? MoneyIcon
@@ -50,20 +43,18 @@ export function WalletCard({
 
   return (
     <article
-      ref={setNodeRef}
+      {...itemProps}
       // lock freezes vertical scrolling while a lifted card scales beyond the grid.
       data-dragging={isDragging ? "lock" : undefined}
       className={cn(
-        "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4 transition-opacity",
+        "flex min-w-0 flex-col gap-4 rounded-md border border-t-4 bg-card p-4",
+        dragClassName,
         // Compose CSS scale/rotate with dnd-kit's inline translation.
-        isDragging &&
-          "relative z-10 -rotate-1 scale-105 cursor-grabbing shadow-2xl",
-        active && !isDragging && "opacity-60",
+        isDragging && "-rotate-1 scale-105",
       )}
       style={
         {
-          transform: CSS.Transform.toString(transform),
-          transition,
+          ...itemProps.style,
           "--wallet-color": wallet.color,
           borderTopColor: wallet.color,
           // Use border longhands to avoid React warnings when borderTopColor changes.
@@ -91,7 +82,6 @@ export function WalletCard({
           </p>
         </div>
         <Button
-          ref={setActivatorNodeRef}
           variant="ghost"
           size="icon-sm"
           disabled={disabled}
@@ -99,8 +89,7 @@ export function WalletCard({
           style={{
             color: `color-mix(in srgb, ${wallet.color} 60%, var(--foreground))`,
           }}
-          {...attributes}
-          {...listeners}
+          {...handleProps}
           title={`Reorder ${wallet.name}`}
           aria-label={`Reorder ${wallet.name}`}
         >
