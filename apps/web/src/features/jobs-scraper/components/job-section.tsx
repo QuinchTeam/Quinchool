@@ -1,21 +1,19 @@
 import { JobCard } from "@/features/jobs-scraper/components/shared/job-card";
+import { useGenerateResume } from "@/features/jobs-scraper/hooks/use-generate-resume";
 import type { SavedJob } from "@/features/jobs-scraper/lib/types";
 
 export function JobSection({
   description,
-  generatingJobId,
   jobs,
-  onGenerateResume,
-  resumeDisabled,
   title,
 }: {
   description?: string;
-  generatingJobId: string | null;
   jobs: SavedJob[];
-  onGenerateResume: (job: SavedJob) => void;
-  resumeDisabled: boolean;
   title: string;
 }) {
+  const { generateResume, generatingJobId, resumeDisabled } =
+    useGenerateResume();
+
   return (
     <section className="grid gap-3">
       <div>
@@ -33,7 +31,7 @@ export function JobSection({
             job={job}
             isGeneratingResume={generatingJobId === job.id}
             resumeDisabled={resumeDisabled}
-            onGenerateResume={() => onGenerateResume(job)}
+            onGenerateResume={() => generateResume(job)}
           />
         ))}
       </div>
