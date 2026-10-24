@@ -1,18 +1,12 @@
 "use client";
 
 import {
-  addEdge,
   Background,
   BackgroundVariant,
   type ColorMode,
-  type Connection,
-  type Edge,
-  type Node,
   Panel,
   ReactFlow,
   ReactFlowProvider,
-  useEdgesState,
-  useNodesState,
   useReactFlow,
 } from "@xyflow/react";
 import { useTheme } from "next-themes";
@@ -20,22 +14,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import "@xyflow/react/dist/style.css";
 
-import { useRunFlow } from "@/features/node-based-builder/hooks/use-run-flow";
+import { useFlowStore } from "@/features/node-based-builder/store/flow-store";
 import { CanvasMainToolbar } from "./canvas-main-toolbar";
 import { CanvasNodeToolbar } from "./canvas-node-toolbar";
-import { edgeTypes, REMOVABLE_EDGE_TYPE } from "./edges";
-import {
-  createNodeData,
-  NODE_DRAG_MIME,
-  type NodeCardType,
-  nodeTypes,
-} from "./nodes";
-
-let nodeCounter = 0;
-function nextNodeId() {
-  nodeCounter += 1;
-  return `node-${nodeCounter}`;
-}
+import { edgeTypes } from "./edges";
+import { NODE_DRAG_MIME, type NodeCardType, nodeTypes } from "./nodes";
 
 // Wait for hydration before React Flow reads the system color mode.
 function useSsrSafeColorMode(): ColorMode {
@@ -49,32 +32,14 @@ function useSsrSafeColorMode(): ColorMode {
 
 function CanvasContent() {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const nodes = useFlowStore((state) => state.nodes);
+  const edges = useFlowStore((state) => state.edges);
+  const onNodesChange = useFlowStore((state) => state.onNodesChange);
+  const onEdgesChange = useFlowStore((state) => state.onEdgesChange);
+  const onConnect = useFlowStore((state) => state.onConnect);
+  const spawnNode = useFlowStore((state) => state.spawnNode);
   const { screenToFlowPosition } = useReactFlow();
   const colorMode = useSsrSafeColorMode();
-
-  const spawnNode = useCallback(
-    (type: NodeCardType, position: { x: number; y: number }) => {
-      const node = {
-        id: nextNodeId(),
-        type,
-        position,
-        data: createNodeData(type),
-      };
-
-      setNodes((current) => [...current, node]);
-    },
-    [setNodes],
-  );
-
-  const onConnect = useCallback(
-    (connection: Connection) =>
-      setEdges((current) =>
-        addEdge({ ...connection, type: REMOVABLE_EDGE_TYPE }, current),
-      ),
-    [setEdges],
-  );
 
   const handleSpawnAtCenter = useCallback(
     (type: NodeCardType) => {
@@ -109,18 +74,6 @@ function CanvasContent() {
     [screenToFlowPosition, spawnNode],
   );
 
-  const clearCanvas = useCallback(() => {
-    setNodes([]);
-    setEdges([]);
-  }, [setEdges, setNodes]);
-
-  const { isRunning, runFlow } = useRunFlow({
-    edges,
-    nodes,
-    setEdges,
-    setNodes,
-  });
-
   return (
     <div ref={wrapperRef} className="h-full w-full">
       <ReactFlow
@@ -141,11 +94,7 @@ function CanvasContent() {
           <CanvasNodeToolbar onSpawn={handleSpawnAtCenter} />
         </Panel>
         <Panel position="bottom-center">
-          <CanvasMainToolbar
-            isRunning={isRunning}
-            onClear={clearCanvas}
-            onRun={runFlow}
-          />
+          <CanvasMainToolbar />
         </Panel>
         <Background
           variant={BackgroundVariant.Dots}

@@ -3,16 +3,14 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { AppIcon } from "@/components/ui/icon";
 
 import { Button } from "@/components/ui/button";
+import { useRunFlow } from "@/features/node-based-builder/hooks/use-run-flow";
+import { useFlowStore } from "@/features/node-based-builder/store/flow-store";
 
-export function CanvasMainToolbar({
-  isRunning,
-  onClear,
-  onRun,
-}: {
-  isRunning: boolean;
-  onClear: () => void;
-  onRun: () => void;
-}) {
+export function CanvasMainToolbar() {
+  const isRunning = useFlowStore((state) => state.isRunning);
+  const onClear = useFlowStore((state) => state.clear);
+  const onRun = useRunFlow();
+
   return (
     <div className="flex items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
       <Button disabled={isRunning} onClick={onRun} size="sm" type="button">

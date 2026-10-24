@@ -1,84 +1,45 @@
 "use client";
 
-import type { Edge, Node } from "@xyflow/react";
-import {
-  type Dispatch,
-  type SetStateAction,
-  useCallback,
-  useState,
-} from "react";
+import { useCallback } from "react";
 
 import type { EnhancerNodeData } from "@/features/node-based-builder/components/nodes/enhancer-node";
 import type { PromptNodeData } from "@/features/node-based-builder/components/nodes/prompt-node";
 import type { TextGeneratorNodeData } from "@/features/node-based-builder/components/nodes/text-generator-node";
 import { usePromptEnhancer } from "@/features/node-based-builder/hooks/use-prompt-enhancer";
+import { useFlowStore } from "@/features/node-based-builder/store/flow-store";
 import { useTextGeneration } from "@/hooks/use-text-generation";
 import { logWarn } from "@/lib/observability/logger";
 import { observeOperation } from "@/lib/observability/operation";
 
 // Runs every start node, then walks edges depth-first, piping each node's output into its targets.
-export function useRunFlow({
-  edges,
-  nodes,
-  setEdges,
-  setNodes,
-}: {
-  edges: Edge[];
-  nodes: Node[];
-  setEdges: Dispatch<SetStateAction<Edge[]>>;
-  setNodes: Dispatch<SetStateAction<Node[]>>;
-}) {
-  const [isRunning, setIsRunning] = useState(false);
+export function useRunFlow() {
   const enhancePrompt = usePromptEnhancer();
   const generateText = useTextGeneration();
 
   const runFlow = useCallback(async () => {
+    const { edges, isRunning, nodes, setActiveEdge, updateNode } =
+      useFlowStore.getState();
     if (!nodes.length || isRunning) {
       return;
     }
 
-    setIsRunning(true);
+    useFlowStore.setState({ isRunning: true });
+    for (const node of nodes)
+      updateNode(node.id, {
+        executionError: undefined,
+        executionState: undefined,
+      });
 
-    const flowNodes = new Map(
-      nodes.map((node) => [
-        node.id,
-        {
-          ...node,
-          data: {
-            ...node.data,
-            executionError: undefined,
-            executionState: undefined,
-          },
-        },
-      ]),
-    );
     const visited = new Set<string>();
-
-    const updateNode = (id: string, data: Record<string, unknown>) => {
-      const current = flowNodes.get(id);
-      if (!current) {
-        return;
-      }
-
-      const updated = { ...current, data: { ...current.data, ...data } };
-      flowNodes.set(id, updated);
-      setNodes((currentNodes) =>
-        currentNodes.map((node) => (node.id === id ? updated : node)),
-      );
-    };
-
-    const setActiveEdge = (id?: string) => {
-      setEdges((currentEdges) =>
-        currentEdges.map((edge) => ({ ...edge, animated: edge.id === id })),
-      );
-    };
+    const findNode = (id: string) =>
+      useFlowStore.getState().nodes.find((node) => node.id === id);
 
     const runNode = async (id: string, input?: string): Promise<void> => {
       if (visited.has(id)) {
         return;
       }
 
-      const node = flowNodes.get(id);
+      const node = findNode(id);
       if (!node) {
         return;
       }
@@ -158,22 +119,16 @@ export function useRunFlow({
       await observeOperation("node-based-builder.run", async () => {
         for (const node of startNodes.length ? startNodes : nodes)
           await runNode(node.id);
-        if ([...flowNodes.values()].some((node) => node.data.executionError))
+        if (
+          useFlowStore.getState().nodes.some((node) => node.data.executionError)
+        )
           logWarn("node-based-builder.run.partial-failure");
       });
     } finally {
       setActiveEdge();
-      setIsRunning(false);
+      useFlowStore.setState({ isRunning: false });
     }
-  }, [
-    edges,
-    enhancePrompt,
-    generateText,
-    isRunning,
-    nodes,
-    setEdges,
-    setNodes,
-  ]);
+  }, [enhancePrompt, generateText]);
 
-  return { isRunning, runFlow };
+  return runFlow;
 }
