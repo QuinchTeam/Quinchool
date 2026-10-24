@@ -1,15 +1,13 @@
 "use client";
 
-import { initialsOf } from "@/lib/utils";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { SentryFeedbackButton } from "@/components/shared/sentry-feedback-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "@/lib/auth-client";
+import { AvatarUploader } from "@/features/profile/components/avatar-uploader";
 import { NameEditor } from "@/features/profile/components/name-editor";
 
 const memberSince = new Intl.DateTimeFormat("en-PH", {
@@ -35,24 +33,11 @@ export function ProfilePage() {
       ) : user ? (
         <>
           <section className="flex min-w-0 flex-wrap items-center gap-4 rounded-md border bg-card p-5">
-            <Avatar size="lg" className="size-16">
-              {user.image && (
-                <AvatarImage
-                  render={
-                    <Image
-                      src={user.image}
-                      alt=""
-                      width={64}
-                      height={64}
-                      unoptimized
-                    />
-                  }
-                />
-              )}
-              <AvatarFallback className="text-lg">
-                {initialsOf(user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarUploader
+              image={user.image}
+              name={user.name}
+              onUploaded={() => refetch()}
+            />
             <NameEditor
               email={user.email}
               name={user.name}

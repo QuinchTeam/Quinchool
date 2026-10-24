@@ -13,6 +13,7 @@ import { ChatbotModule } from "./modules/chatbot/chatbot.module";
 import { FinanceTrackerModule } from "./modules/finance-tracker/finance-tracker.module";
 import { JobsScraperModule } from "./modules/jobs-scraper/jobs-scraper.module";
 import { PrismaModule } from "./core/database/prisma/prisma.module";
+import { ProfileModule } from "./modules/profile/profile.module";
 import { TextGenerationModule } from "./modules/text-generation/text-generation.module";
 import { ObservabilityModule } from "./modules/observability/observability.module";
 
@@ -30,6 +31,7 @@ import { ObservabilityModule } from "./modules/observability/observability.modul
     ChatbotModule,
     FinanceTrackerModule,
     JobsScraperModule,
+    ProfileModule,
     TextGenerationModule,
     ObservabilityModule,
   ],

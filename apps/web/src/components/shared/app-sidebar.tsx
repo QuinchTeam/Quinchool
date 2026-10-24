@@ -193,6 +193,8 @@ export function AppSidebar() {
                         alt={user.name ?? ""}
                         width={40}
                         height={40}
+                        // Avatars are served by our API; Next's optimizer has no remote host configured.
+                        unoptimized
                       />
                     }
                   />
