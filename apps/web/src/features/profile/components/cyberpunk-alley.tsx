@@ -20,7 +20,12 @@ function randomSource() {
   };
 }
 
-function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
+function paintCity(
+  ctx: CanvasRenderingContext2D,
+  palette: string[],
+  sky: CanvasRenderingContext2D,
+  skyline: CanvasRenderingContext2D,
+) {
   const random = randomSource();
   const rect = (x: number, y: number, w: number, h: number, shade: number) => {
     ctx.fillStyle = palette[shade];
@@ -99,6 +104,18 @@ function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
   for (let i = 0; i < 150; i++) {
     rect(random() * WIDTH, random() * 300, 1, 1, 9 + Math.floor(random() * 10));
   }
+  const starRandom = randomSource();
+  for (let i = 0; i < 1100; i++) {
+    const x = Math.floor(starRandom() * WIDTH);
+    const y = Math.floor(starRandom() * HEIGHT);
+    const brightness = starRandom();
+    rect(x, y, 1, 1, 12 + Math.floor(brightness * 17));
+    if (brightness > 0.985) {
+      rect(x - 1, y, 3, 1, 20);
+      rect(x, y - 1, 1, 3, 20);
+      rect(x, y, 1, 1, 30);
+    }
+  }
   for (let y = -25; y <= 25; y++) {
     const radius = Math.floor(Math.sqrt(625 - y * y));
     const innerEdge = Math.floor(radius * 0.43);
@@ -107,6 +124,9 @@ function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
       rect(303 + x, 95 + y, 1, 1, crater > 0.6 ? 20 : (x + y) % 3 ? 24 : 26);
     }
   }
+
+  sky.drawImage(ctx.canvas, 0, 0);
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
   // Rasterize system Japanese glyphs into hard pixels to match the canvas art.
   const lettering = document.createElement("canvas");
@@ -357,6 +377,9 @@ function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
   }
   ctx.restore();
 
+  skyline.drawImage(ctx.canvas, 0, 0);
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
   // Nearby upper floors frame the distant city as front-facing facades.
   for (const [left, width] of [
     [0, 104],
@@ -433,6 +456,12 @@ function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
         random() > 0.5 ? 4 : 12,
       );
     }
+  }
+
+  for (const left of [0, 376]) {
+    rect(left, 0, 104, 7, 3);
+    rect(left, 0, 104, 2, 18);
+    rect(left + 3, 3, 98, 1, 10);
   }
 
   // Exposed conduits, pipe clamps and narrow maintenance platforms.
@@ -551,6 +580,60 @@ function paintCity(ctx: CanvasRenderingContext2D, palette: string[]) {
   }
 }
 
+function paintRooftops(ctx: CanvasRenderingContext2D, palette: string[]) {
+  const rect = (x: number, y: number, w: number, h: number, shade: number) => {
+    ctx.fillStyle = palette[shade];
+    ctx.fillRect(x, y, w, h);
+  };
+  for (const left of [0, 376]) {
+    rect(left, 49, 104, 2, 18);
+    rect(left, 57, 104, 1, 10);
+    for (let x = left + 3; x < left + 104; x += 10) {
+      rect(x, 49, 1, 15, 14);
+    }
+  }
+  rect(407, 41, 3, 23, 8);
+  rect(441, 41, 3, 23, 8);
+  rect(407, 54, 37, 2, 12);
+  rect(402, 17, 47, 27, 8);
+  rect(407, 14, 37, 3, 13);
+  rect(413, 11, 25, 3, 16);
+  rect(410, 19, 3, 23, 13);
+  rect(402, 23, 47, 2, 15);
+  rect(402, 37, 47, 2, 15);
+  rect(406, 44, 39, 2, 3);
+}
+
+function paintSkyMotion(
+  ctx: CanvasRenderingContext2D,
+  time: number,
+  palette: string[],
+  stars: { x: number; y: number; phase: number }[],
+) {
+  ctx.save();
+  for (const { x, y, phase } of stars) {
+    const sparkle = Math.max(0, Math.sin(time * 2 + phase)) ** 8;
+    ctx.globalAlpha = sparkle;
+    ctx.fillStyle = palette[30];
+    ctx.fillRect(x, y, 1, 1);
+    ctx.globalAlpha = sparkle * 0.45;
+    ctx.fillRect(x - 1, y, 3, 1);
+    ctx.fillRect(x, y - 1, 1, 3);
+  }
+  for (let comet = 0; comet < 2; comet++) {
+    const progress = (time + comet * 3.5) % 9;
+    if (progress > 1.4) continue;
+    const x = 65 + comet * 95 + progress * 150;
+    const y = 45 + comet * 120 + progress * 65;
+    for (let trail = 20; trail >= 0; trail--) {
+      ctx.globalAlpha = (1 - trail / 21) * Math.sin((progress / 1.4) * Math.PI);
+      ctx.fillStyle = palette[trail === 0 ? 31 : 23];
+      ctx.fillRect(Math.round(x - trail * 2), Math.round(y - trail), 1, 1);
+    }
+  }
+  ctx.restore();
+}
+
 function paintMotion(
   ctx: CanvasRenderingContext2D,
   time: number,
@@ -585,6 +668,8 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
   const columnRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ascent = useRef(0);
+  const targetAscent = useRef(0);
   const [paused, setPaused] = useState(false);
 
   useLayoutEffect(() => {
@@ -629,6 +714,13 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
     backdrop.height = canvas.height = HEIGHT;
     const background = backdrop.getContext("2d");
     if (!background) return;
+    const skyCanvas = document.createElement("canvas");
+    const skylineCanvas = document.createElement("canvas");
+    skyCanvas.width = skylineCanvas.width = WIDTH;
+    skyCanvas.height = skylineCanvas.height = HEIGHT;
+    const sky = skyCanvas.getContext("2d");
+    const skyline = skylineCanvas.getContext("2d");
+    if (!sky || !skyline) return;
     background.fillStyle = getComputedStyle(canvas).color;
     background.fillRect(0, 0, 1, 1);
     const [red, green, blue] = background.getImageData(0, 0, 1, 1).data;
@@ -643,27 +735,111 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
       );
       return `rgb(${channels.join(",")})`;
     });
-    paintCity(background, palette);
+    paintCity(background, palette, sky, skyline);
+    const roofCanvas = document.createElement("canvas");
+    roofCanvas.width = WIDTH;
+    roofCanvas.height = 64;
+    const roof = roofCanvas.getContext("2d");
+    if (roof) paintRooftops(roof, palette);
+    const starRandom = randomSource();
+    const sparklingStars = [];
+    for (let i = 0; i < 1100; i++) {
+      const x = Math.floor(starRandom() * WIDTH);
+      const y = Math.floor(starRandom() * HEIGHT);
+      const brightness = starRandom();
+      if (brightness > 0.95 && y < 430) {
+        sparklingStars.push({ x, y, phase: brightness * 1000 });
+      }
+    }
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let visible = true;
     let frame = 0;
     let last = -Infinity;
+    let previousTick = 0;
+    let topStarted: number | null = null;
     const draw = (time: number) => {
+      const height = Math.round(ascent.current);
+      ctx.drawImage(skyCanvas, 0, 0);
+      if (height === 500 && !motion.matches) {
+        topStarted ??= time;
+        paintSkyMotion(
+          ctx,
+          Math.max(0, time - topStarted),
+          palette,
+          sparklingStars,
+        );
+      } else {
+        topStarted = null;
+      }
+      ctx.drawImage(skylineCanvas, 0, Math.round(height * 1.05));
+      ctx.drawImage(roofCanvas, 0, height - roofCanvas.height);
+      ctx.save();
+      ctx.translate(0, height);
       ctx.drawImage(backdrop, 0, 0);
       paintMotion(ctx, time, palette);
+      ctx.restore();
     };
     const tick = (now: number) => {
-      if (visible && !document.hidden && now - last > 1000 / 12) {
-        draw(now / 1000);
+      const elapsed = previousTick ? Math.min(now - previousTick, 64) : 16;
+      previousTick = now;
+      const moving = ascent.current !== targetAscent.current;
+      if (visible && !document.hidden && (moving || now - last > 1000 / 12)) {
+        const remaining = targetAscent.current - ascent.current;
+        ascent.current =
+          Math.abs(remaining) < 0.5
+            ? targetAscent.current
+            : ascent.current + remaining * (1 - Math.exp(-elapsed / 90));
+        draw(paused ? 4 : Math.floor(now / (1000 / 12)) / 12);
         last = now;
       }
-      frame = requestAnimationFrame(tick);
+      frame =
+        !motion.matches && (!paused || ascent.current !== targetAscent.current)
+          ? requestAnimationFrame(tick)
+          : 0;
     };
     const update = () => {
       cancelAnimationFrame(frame);
+      frame = 0;
+      previousTick = 0;
+      if (motion.matches) ascent.current = targetAscent.current;
       draw(4);
-      if (!paused && !motion.matches) frame = requestAnimationFrame(tick);
+      if (
+        !motion.matches &&
+        (!paused || ascent.current !== targetAscent.current)
+      ) {
+        frame = requestAnimationFrame(tick);
+      }
     };
+    const move = (delta: number) => {
+      targetAscent.current = Math.max(
+        0,
+        Math.min(500, targetAscent.current + delta),
+      );
+      if (motion.matches) {
+        ascent.current = targetAscent.current;
+        draw(4);
+      } else if (!frame) {
+        frame = requestAnimationFrame(tick);
+      }
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || !event.deltaY) return;
+      event.preventDefault();
+      const unit =
+        event.deltaMode === 1
+          ? 16
+          : event.deltaMode === 2
+            ? canvas.clientHeight
+            : 1;
+      move(-event.deltaY * unit * 0.35);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+      event.preventDefault();
+      move(event.key === "ArrowUp" ? 60 : -60);
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    canvas.addEventListener("keydown", onKeyDown);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
     });
@@ -672,6 +848,8 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
     update();
     return () => {
       cancelAnimationFrame(frame);
+      canvas.removeEventListener("wheel", onWheel);
+      canvas.removeEventListener("keydown", onKeyDown);
       observer.disconnect();
       motion.removeEventListener("change", update);
     };
@@ -690,8 +868,9 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
             <canvas
               ref={canvasRef}
               role="img"
-              aria-label="Pixel city viewed straight out from the 50th floor beneath a half moon and static dithered clouds. Varied high-rise facades, Japanese neon signs, antennas and distant air traffic in shades of the primary color. No street is visible."
-              className="pixelated absolute inset-0 size-full text-primary"
+              tabIndex={0}
+              aria-label="Interactive pixel city beneath a fixed half moon. Scroll up or press Arrow Up to rise to the rooftops; scroll down or press Arrow Down to descend."
+              className="pixelated absolute inset-0 size-full text-primary outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring"
             />
             <Button
               type="button"
