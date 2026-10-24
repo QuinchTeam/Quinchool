@@ -15,12 +15,13 @@ essential tools Quinch needs every day.
 handles stateless LLM, RAG, and scraping work. The request path is
 `web -> api -> ai`.
 
-| File            | Variable              | Purpose        |
-| --------------- | --------------------- | -------------- |
-| `apps/web/.env` | `NEXT_PUBLIC_API_URL` | API URL        |
-| `apps/api/.env` | `AI_SERVICE_URL`      | AI service URL |
-| `apps/api/.env` | `WEB_ORIGIN`          | CORS origin    |
-| `apps/ai/.env`  | `GEMINI_API_KEY`      | Gemini API key |
+| File            | Variable                                   | Purpose                                                               |
+| --------------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| `apps/web/.env` | `NEXT_PUBLIC_API_URL`                      | API URL                                                               |
+| `apps/api/.env` | `AI_SERVICE_URL`                           | AI service URL                                                        |
+| `apps/api/.env` | `WEB_ORIGIN`                               | CORS origin                                                           |
+| `apps/api/.env` | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Upload storage key (local Garage key is in `scripts/garage-init.mjs`) |
+| `apps/ai/.env`  | `GEMINI_API_KEY`                           | Gemini API key                                                        |
 
 ## Run
 
@@ -29,6 +30,8 @@ pnpm install
 pnpm infra
 pnpm dev
 ```
+
+`pnpm infra` starts the Docker services and sets up Garage (bucket and local key); it is safe to rerun.
 
 Run one app with `pnpm dev:web`, `pnpm dev:api`, or `pnpm dev:ai`.
 
@@ -52,9 +55,10 @@ On macOS or Linux, change `dev:ai` to use `.venv/bin/python`.
 | Hosting         | **Google Cloud Run**, one Docker image per app                                                           |
 | IaC             | **Terraform** (`infra/terraform`): GCP + GitHub Actions variables, see `docs/architecture/deployment.md` |
 | Database        | **Neon** (serverless Postgres)                                                                           |
+| File storage    | **Cloudflare R2** (private bucket `quinchool-uploads`, served through `apps/api`)                        |
 | CI/CD           | **GitHub Actions** (`ci.yml`, `deploy.yml`)                                                              |
 | Secrets         | **Google Secret Manager**; GitHub Actions variables for config                                           |
-| Local services  | Docker Compose: **pgvector** (Postgres 17), **Crawl4AI**, OTel Collector                                 |
+| Local services  | Docker Compose: **pgvector** (Postgres 17), **Crawl4AI**, **Garage** (local R2), OTel Collector          |
 | Observability   | **OpenTelemetry** to the OTel Collector (`infra/otel-collector`)                                         |
 | Git hooks       | **Husky**                                                                                                |
 
@@ -80,6 +84,7 @@ On macOS or Linux, change `dev:ai` to use `.venv/bin/python`.
 | Framework  | **NestJS 11** on Express 5                             |
 | Database   | **Neon** (Postgres) + **Prisma 7** (`packages/prisma`) |
 | Auth       | **Better Auth**                                        |
+| Storage    | **AWS S3 SDK** to R2 / Garage                          |
 | Validation | **Zod**                                                |
 | Tests      | `node:test`                                            |
 

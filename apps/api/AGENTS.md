@@ -10,6 +10,8 @@
 - Follow [HTTP status code conventions](../../docs/conventions/backend/http-status-codes.md).
 - Follow [API response conventions](../../docs/conventions/backend/api-responses.md).
 - Follow [API request conventions](../../docs/conventions/backend/api-requests.md).
+- Long-running work (e.g. job scans) runs as a background task in this app: claim a status row, start the work without awaiting it, return `202`, and let clients poll the status from the database. No queue yet; see `modules/jobs-scraper`.
+- Files go through `shared/clients/storage/storage-client.ts` (S3 API: R2 in production, Garage locally). Keep the bucket private and serve files through our own routes, as `modules/profile` does for avatars.
 
 ## Adding Tests
 
