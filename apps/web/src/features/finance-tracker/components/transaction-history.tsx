@@ -4,10 +4,9 @@ import { AppHeader } from "@/components/shared/app-header";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTransactions } from "@/features/finance-tracker/hooks/use-transactions";
-import type { TransactionFilters } from "@/features/finance-tracker/lib/types";
+import { useFinanceTrackerStore } from "@/features/finance-tracker/store/finance-tracker-store";
 import { ErrorState } from "@/components/shared/error-state";
 import { HistoryFilters } from "./transactions/history-filters";
 import { HistoryPagination } from "./transactions/history-pagination";
@@ -16,11 +15,10 @@ import { TransactionsLoading } from "./shared/finance-loading";
 import { TransactionList } from "./transactions/transaction-list";
 
 export function TransactionHistory() {
-  const [state, setState] = useState<{
-    filters: TransactionFilters;
-    page: number;
-  }>({ filters: {}, page: 1 });
-  const query = useTransactions(state.filters, state.page);
+  const filters = useFinanceTrackerStore((state) => state.filters);
+  const page = useFinanceTrackerStore((state) => state.page);
+  const setPage = useFinanceTrackerStore((state) => state.setPage);
+  const query = useTransactions(filters, page);
   const data = query.data;
 
   return (
@@ -36,10 +34,7 @@ export function TransactionHistory() {
         </Button>
         <TransactionDialog />
       </AppHeader>
-      <HistoryFilters
-        filters={state.filters}
-        onChange={(filters) => setState({ filters, page: 1 })}
-      />
+      <HistoryFilters />
       <section
         aria-label="Transaction history"
         aria-busy={query.isFetching}
@@ -66,7 +61,7 @@ export function TransactionHistory() {
           total={data.total}
           pageCount={data.pageCount}
           busy={query.isFetching}
-          onPage={(page) => setState((previous) => ({ ...previous, page }))}
+          onPage={setPage}
         />
       )}
     </div>

@@ -29,9 +29,9 @@ import {
 import { useFinanceOverview } from "@/features/finance-tracker/hooks/use-wallets";
 import type {
   HistoryPeriod,
-  TransactionFilters,
   TransactionSort,
 } from "@/features/finance-tracker/lib/types";
+import { useFinanceTrackerStore } from "@/features/finance-tracker/store/finance-tracker-store";
 
 const TYPES = { ALL: "All types", INCOME: "Income", EXPENSE: "Expense" };
 const PERIODS: Record<HistoryPeriod | "ALL", string> = {
@@ -82,13 +82,9 @@ function FilterSelect<T extends string>({
   );
 }
 
-export function HistoryFilters({
-  filters,
-  onChange,
-}: {
-  filters: TransactionFilters;
-  onChange: (filters: TransactionFilters) => void;
-}) {
+export function HistoryFilters() {
+  const filters = useFinanceTrackerStore((state) => state.filters);
+  const onChange = useFinanceTrackerStore((state) => state.setFilters);
   const prefix = useId();
   const overview = useFinanceOverview();
   const wallets: Record<string, string> = { ALL: "All wallets" };
