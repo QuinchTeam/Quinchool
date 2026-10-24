@@ -9,6 +9,11 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { JOB_CLASSIFICATION_LABELS } from "@/features/jobs-scraper/lib/constants";
+import {
+  formatDateTime,
+  formatPostedDate,
+} from "@/features/jobs-scraper/lib/date";
 import type { SavedJob } from "@/features/jobs-scraper/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +46,7 @@ export function JobCard({
                     : "secondary"
                 }
               >
-                {CLASSIFICATION_LABELS[job.classification]}
+                {JOB_CLASSIFICATION_LABELS[job.classification]}
               </Badge>
             ) : null}
             {job.isManualClassification ? (
@@ -119,27 +124,4 @@ export function JobCard({
       </CardContent>
     </Card>
   );
-}
-
-export const CLASSIFICATION_LABELS: Record<SavedJob["classification"], string> =
-  {
-    MATCH: "Match",
-    POTENTIAL: "Potential",
-    REJECTED: "Rejected",
-  };
-
-export function formatPostedDate(date: string | null): string {
-  if (!date) return "Date unconfirmed";
-  return new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "medium",
-    timeZone: "Asia/Manila",
-  }).format(new Date(`${date}T00:00:00+08:00`));
-}
-
-export function formatDateTime(date: string): string {
-  return new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Manila",
-  }).format(new Date(date));
 }

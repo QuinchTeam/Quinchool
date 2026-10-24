@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/icon";
 
-export function SettingsSection({
+export function SectionCard({
   children,
   description,
   icon,

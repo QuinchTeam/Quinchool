@@ -16,3 +16,11 @@ export const JOB_TIME_RANGE_LABELS: Record<
   CUSTOM: "Custom range",
 };
 export const JOB_CLASSIFICATIONS = ["MATCH", "POTENTIAL", "REJECTED"] as const;
+export const JOB_CLASSIFICATION_LABELS: Record<
+  (typeof JOB_CLASSIFICATIONS)[number],
+  string
+> = {
+  MATCH: "Match",
+  POTENTIAL: "Potential",
+  REJECTED: "Rejected",
+};

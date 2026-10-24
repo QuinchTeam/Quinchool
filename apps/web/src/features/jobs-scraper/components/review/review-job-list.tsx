@@ -4,10 +4,9 @@ import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { JobCard } from "@/features/jobs-scraper/components/job-card";
 import { MoveJobActions } from "@/features/jobs-scraper/components/review/move-job-actions";
+import { JobCard } from "@/features/jobs-scraper/components/shared/job-card";
+import { JobCardSkeleton } from "@/features/jobs-scraper/components/shared/job-card-skeleton";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
 import { useReviewFilter } from "@/features/jobs-scraper/hooks/use-review-filter";
 
@@ -59,16 +58,7 @@ function ReviewLoading() {
       aria-label="Loading scanned jobs"
     >
       {[0, 1, 2, 3].map((item) => (
-        <Card key={item}>
-          <CardContent className="grid gap-4">
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-16" />
-              <Skeleton className="h-5 w-20" />
-            </div>
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-16 w-full" />
-          </CardContent>
-        </Card>
+        <JobCardSkeleton key={item} />
       ))}
     </output>
   );

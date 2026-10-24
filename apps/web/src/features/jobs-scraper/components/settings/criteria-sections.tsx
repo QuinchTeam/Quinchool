@@ -12,12 +12,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { StringListInput } from "@/features/career-profile/components/string-list-input";
-import { SettingsSection } from "@/features/jobs-scraper/components/settings/settings-section";
+import { SectionCard } from "@/features/jobs-scraper/components/shared/section-card";
 import type { JobScraperConfig } from "@/features/jobs-scraper/validations/job-scraper-config";
 
 export function RolesSection() {
   return (
-    <SettingsSection
+    <SectionCard
       icon={BriefcaseIcon}
       title="Roles"
       description="Job titles to look for."
@@ -27,13 +27,13 @@ export function RolesSection() {
         label="Roles"
         placeholder="Frontend Developer"
       />
-    </SettingsSection>
+    </SectionCard>
   );
 }
 
 export function LevelsSection() {
   return (
-    <SettingsSection
+    <SectionCard
       icon={ChartLineUpIcon}
       title="Levels"
       description="Seniority to keep or skip."
@@ -48,13 +48,13 @@ export function LevelsSection() {
         label="Excluded"
         placeholder="Senior, Lead"
       />
-    </SettingsSection>
+    </SectionCard>
   );
 }
 
 export function TechnologiesSection() {
   return (
-    <SettingsSection
+    <SectionCard
       icon={CodeIcon}
       title="Technologies"
       description="Stack a listing must mention, or must not."
@@ -69,7 +69,7 @@ export function TechnologiesSection() {
         label="Excluded"
         placeholder="PHP"
       />
-    </SettingsSection>
+    </SectionCard>
   );
 }
 

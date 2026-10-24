@@ -2,9 +2,11 @@
 
 import { useFormContext } from "react-hook-form";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  CheckboxGroup,
+  CheckboxGroupItem,
+} from "@/components/ui/checkbox-group";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Label } from "@/components/ui/label";
 import type { JobScraperConfig } from "@/features/jobs-scraper/validations/job-scraper-config";
 
 export function CheckboxGroupField({
@@ -22,35 +24,26 @@ export function CheckboxGroupField({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => {
-        const values: string[] = field.value;
-
-        return (
-          <FormItem>
-            <fieldset className="grid gap-3">
-              {label ? (
-                <legend className="mb-3 text-sm font-medium">{label}</legend>
-              ) : null}
+      render={({ field }) => (
+        <FormItem>
+          <fieldset>
+            {label ? (
+              <legend className="mb-3 text-sm font-medium">{label}</legend>
+            ) : null}
+            <CheckboxGroup
+              value={field.value}
+              onValueChange={(value) => field.onChange(value)}
+            >
               {options.map((option) => (
-                <Label key={option}>
-                  <Checkbox
-                    checked={values.includes(option)}
-                    onCheckedChange={(checked) =>
-                      field.onChange(
-                        checked
-                          ? [...values, option]
-                          : values.filter((value) => value !== option),
-                      )
-                    }
-                  />
+                <CheckboxGroupItem key={option} value={option}>
                   {option}
-                </Label>
+                </CheckboxGroupItem>
               ))}
-            </fieldset>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
+            </CheckboxGroup>
+          </fieldset>
+          <FormMessage />
+        </FormItem>
+      )}
     />
   );
 }

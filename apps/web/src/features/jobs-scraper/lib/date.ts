@@ -16,3 +16,19 @@ export function shiftDate(date: string, days: number): string {
   shifted.setUTCDate(shifted.getUTCDate() + days);
   return shifted.toISOString().slice(0, 10);
 }
+
+export function formatPostedDate(date: string | null): string {
+  if (!date) return "Date unconfirmed";
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeZone: "Asia/Manila",
+  }).format(new Date(`${date}T00:00:00+08:00`));
+}
+
+export function formatDateTime(date: string): string {
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Manila",
+  }).format(new Date(date));
+}

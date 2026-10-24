@@ -4,9 +4,9 @@ import { FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ProhibitIcon } from "@phosphor-icons/react/dist/ssr/Prohibit";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionCard } from "@/features/jobs-scraper/components/shared/section-card";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
 import {
   formatLocationModes,
@@ -18,24 +18,9 @@ export function JobsScraperCriteria() {
   const { state } = useJobsScraper();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AppIcon
-            icon={FunnelIcon}
-            className="size-6 shrink-0 -translate-y-px text-muted-foreground"
-          />
-          Search criteria
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-6">
-        {state ? (
-          <CriteriaSummary config={state.config} />
-        ) : (
-          <CriteriaLoading />
-        )}
-      </CardContent>
-    </Card>
+    <SectionCard icon={FunnelIcon} title="Search criteria">
+      {state ? <CriteriaSummary config={state.config} /> : <CriteriaLoading />}
+    </SectionCard>
   );
 }
 

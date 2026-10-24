@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CLASSIFICATION_LABELS } from "@/features/jobs-scraper/components/job-card";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
-import { JOB_CLASSIFICATIONS } from "@/features/jobs-scraper/lib/constants";
+import {
+  JOB_CLASSIFICATION_LABELS,
+  JOB_CLASSIFICATIONS,
+} from "@/features/jobs-scraper/lib/constants";
 import type { SavedJob } from "@/features/jobs-scraper/lib/types";
 
 export function MoveJobActions({ job }: { job: SavedJob }) {
@@ -28,7 +30,7 @@ export function MoveJobActions({ job }: { job: SavedJob }) {
               })
             }
           >
-            {CLASSIFICATION_LABELS[option]}
+            {JOB_CLASSIFICATION_LABELS[option]}
           </Button>
         ))}
       </div>

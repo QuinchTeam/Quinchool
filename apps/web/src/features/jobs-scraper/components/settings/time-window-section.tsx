@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SettingsSection } from "@/features/jobs-scraper/components/settings/settings-section";
+import { SectionCard } from "@/features/jobs-scraper/components/shared/section-card";
 import {
   JOB_TIME_RANGE_LABELS,
   JOB_TIME_RANGES,
@@ -33,7 +33,7 @@ export function TimeWindowSection() {
   const earliestDate = shiftDate(today, -6);
 
   return (
-    <SettingsSection
+    <SectionCard
       icon={ClockIcon}
       title="Time window"
       description="Custom ranges can include at most seven calendar days."
@@ -100,6 +100,6 @@ export function TimeWindowSection() {
           ))}
         </div>
       ) : null}
-    </SettingsSection>
+    </SectionCard>
   );
 }
