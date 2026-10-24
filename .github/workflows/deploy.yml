@@ -48,10 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check unnamed-container migration
-        run: |
-          { printf 'def migrate: '; cat .github/scripts/name-cloud-run-container.jq; printf ';'; cat .github/scripts/name-cloud-run-container.test.jq; } | jq -n -f /dev/stdin
-
       - uses: google-github-actions/auth@v2
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
@@ -88,14 +84,7 @@ jobs:
           SERVICE_CONFIG="$(mktemp)"
           gcloud run services describe quinchool-${{ matrix.service }} \
             --region ${{ vars.GCP_REGION }} --format=json > "$SERVICE_CONFIG"
-          APP_CONTAINER="$(jq -er '[.spec.template.spec.containers[] | select((.ports // []) | length > 0)] | if length == 1 then .[0].name // "" else error("Expected exactly one ingress container") end' "$SERVICE_CONFIG")"
-          if [ -z "$APP_CONTAINER" ]; then
-            # Name the existing single container in place before adding a sidecar.
-            jq -e -f .github/scripts/name-cloud-run-container.jq "$SERVICE_CONFIG" > "$SERVICE_CONFIG.named"
-            gcloud run services replace "$SERVICE_CONFIG.named" \
-              --region ${{ vars.GCP_REGION }} --quiet
-            APP_CONTAINER=app
-          fi
+          APP_CONTAINER="$(jq -er '[.spec.template.spec.containers[] | select((.ports // []) | length > 0)] | if length == 1 then .[0].name else error("Expected exactly one ingress container") end' "$SERVICE_CONFIG")"
           gcloud run deploy quinchool-${{ matrix.service }} \
             --no-cpu-throttling \
             --region ${{ vars.GCP_REGION }} \
