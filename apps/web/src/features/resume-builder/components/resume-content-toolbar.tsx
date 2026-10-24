@@ -6,7 +6,7 @@ import { FolderSimpleIcon } from "@phosphor-icons/react/dist/ssr/FolderSimple";
 import { GraduationCapIcon } from "@phosphor-icons/react/dist/ssr/GraduationCap";
 import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
 import { WrenchIcon } from "@phosphor-icons/react/dist/ssr/Wrench";
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { SortableCheckboxGroup } from "@/components/ui/checkbox-group";
@@ -14,11 +14,11 @@ import { AppIcon } from "@/components/ui/icon";
 import type { CareerProfileValues } from "@/features/career-profile/validations/career-profile";
 import { EntryHeader } from "@/features/resume-builder/components/entry-header";
 import { PanelSection } from "@/features/resume-builder/components/panel-section";
-import type { ResumeLayout } from "@/features/resume-builder/hooks/use-resume-layout";
 import {
   getResumeItemOrder,
   RESUME_CONTACT_FIELDS,
 } from "@/features/resume-builder/lib/resume";
+import { useResumeBuilderStore } from "@/features/resume-builder/store/resume-builder-store";
 import { cn } from "@/lib/utils";
 
 const CONTACT_LABELS: Record<(typeof RESUME_CONTACT_FIELDS)[number], string> = {
@@ -29,32 +29,17 @@ const CONTACT_LABELS: Record<(typeof RESUME_CONTACT_FIELDS)[number], string> = {
   personalWebsite: "Personal website",
 };
 
-type Order = ResumeLayout["order"];
-
 export function ResumeContentToolbar({
-  excluded,
-  order,
   profile,
-  setExcluded,
-  setOrder,
 }: {
-  excluded: Set<string>;
-  order: Order;
   profile: CareerProfileValues;
-  setExcluded: Dispatch<SetStateAction<Set<string>>>;
-  setOrder: Dispatch<SetStateAction<Order>>;
 }) {
-  const toggle = (id: string, included: boolean) =>
-    setExcluded((current) => {
-      const next = new Set(current);
-      if (included) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const { excluded, order, reorder, reset, setIncluded, toggle } =
+    useResumeBuilderStore();
 
   const visibility = (id: string) => ({
     hidden: excluded.has(id),
-    onToggle: () => toggle(id, excluded.has(id)),
+    onToggle: () => toggle(id),
   });
   const section = (key: string) => visibility(`section:${key}`);
   const entry = visibility;
@@ -82,21 +67,12 @@ export function ResumeContentToolbar({
             .map((item) => item.value)
             .filter((id) => !excluded.has(id))}
           onValueChange={(checked) =>
-            setExcluded((current) => {
-              const next = new Set(current);
-              for (const { value } of items) {
-                if (checked.includes(value)) next.delete(value);
-                else next.add(value);
-              }
-              return next;
-            })
+            setIncluded(
+              items.map((item) => item.value),
+              checked,
+            )
           }
-          onReorder={(ids) =>
-            setOrder((current) => ({
-              ...current,
-              [prefix]: ids.map((id) => Number(id.split(":").at(-1))),
-            }))
-          }
+          onReorder={(ids) => reorder(prefix, ids)}
         />
       </div>
     );
@@ -118,10 +94,7 @@ export function ResumeContentToolbar({
           variant="ghost"
           size="sm"
           disabled={!excluded.size && !Object.keys(order).length}
-          onClick={() => {
-            setExcluded(new Set());
-            setOrder({});
-          }}
+          onClick={reset}
         >
           <AppIcon icon={ArrowClockwiseIcon} />
           Reset

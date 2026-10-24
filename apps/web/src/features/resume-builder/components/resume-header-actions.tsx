@@ -1,38 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-  useContext,
-  useState,
-} from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
+import { useResumeBuilderStore } from "@/features/resume-builder/store/resume-builder-store";
+
 // Tabs portal actions here because the shared header sits outside their PDF state.
-const SlotContext = createContext<
-  [HTMLElement | null, Dispatch<SetStateAction<HTMLElement | null>>] | null
->(null);
-
-export function ResumeHeaderActionsProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return (
-    <SlotContext value={useState<HTMLElement | null>(null)}>
-      {children}
-    </SlotContext>
-  );
-}
-
 export function ResumeHeaderActionsSlot() {
-  const slot = useContext(SlotContext);
-  return <div ref={slot?.[1]} className="contents" />;
+  const setHeaderSlot = useResumeBuilderStore((state) => state.setHeaderSlot);
+  return <div ref={setHeaderSlot} className="contents" />;
 }
 
 export function ResumeHeaderActions({ children }: { children: ReactNode }) {
-  const element = useContext(SlotContext)?.[0];
+  const element = useResumeBuilderStore((state) => state.headerSlot);
   return element ? createPortal(children, element) : null;
 }

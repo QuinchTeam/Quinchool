@@ -1,10 +1,7 @@
 import { NotepadIcon } from "@phosphor-icons/react/dist/ssr/Notepad";
 
 import { AppHeader } from "@/components/shared/app-header";
-import {
-  ResumeHeaderActionsProvider,
-  ResumeHeaderActionsSlot,
-} from "@/features/resume-builder/components/resume-header-actions";
+import { ResumeHeaderActionsSlot } from "@/features/resume-builder/components/resume-header-actions";
 import { ResumeTabs } from "@/features/resume-builder/components/resume-tabs";
 
 export default function ResumeLayout({
@@ -13,7 +10,7 @@ export default function ResumeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ResumeHeaderActionsProvider>
+    <>
       {/* On xl screens, only the PDF scrolls; smaller screens scroll the whole page. */}
       <div className="flex w-full min-w-0 flex-col gap-8 p-6 xl:h-full">
         <AppHeader
@@ -26,6 +23,6 @@ export default function ResumeLayout({
         <ResumeTabs />
         {children}
       </div>
-    </ResumeHeaderActionsProvider>
+    </>
   );
 }
