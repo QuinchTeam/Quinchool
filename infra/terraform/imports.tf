@@ -55,6 +55,16 @@ import {
 }
 
 import {
+  to = github_repository.quinchool
+  id = local.github_repo
+}
+
+import {
+  to = github_repository_ruleset.protect_main
+  id = "${local.github_repo}:17655589"
+}
+
+import {
   for_each = local.github_variables
   to       = github_actions_variable.deploy[each.key]
   id       = "${local.github_repo}:${each.key}"

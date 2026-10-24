@@ -23,9 +23,56 @@ locals {
   }
 }
 
+resource "github_repository" "quinchool" {
+  name         = local.github_repo
+  description  = "All-in-one Toolkit"
+  homepage_url = "http://quinchool.quinchy.dev/"
+  visibility   = "public"
+  topics       = ["fastapi", "google-cloud-platform", "neondb", "nestjs", "nextjs", "prisma"]
+
+  has_issues      = true
+  has_projects    = true
+  has_wiki        = false
+  has_discussions = false
+
+  allow_merge_commit          = true
+  allow_squash_merge          = true
+  allow_rebase_merge          = true
+  allow_auto_merge            = false
+  allow_update_branch         = false
+  delete_branch_on_merge      = false
+  squash_merge_commit_title   = "COMMIT_OR_PR_TITLE"
+  squash_merge_commit_message = "COMMIT_MESSAGES"
+
+  archive_on_destroy = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Direct pushes to main stay allowed; main just can't be deleted.
+resource "github_repository_ruleset" "protect_main" {
+  name        = "Protect main"
+  repository  = github_repository.quinchool.name
+  target      = "branch"
+  enforcement = "active"
+
+  conditions {
+    ref_name {
+      include = ["~DEFAULT_BRANCH"]
+      exclude = []
+    }
+  }
+
+  rules {
+    deletion = true
+  }
+}
+
 resource "github_actions_variable" "deploy" {
   for_each      = local.github_variables
-  repository    = local.github_repo
+  repository    = github_repository.quinchool.name
   variable_name = each.key
   value         = each.value
 }
