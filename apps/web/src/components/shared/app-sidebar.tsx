@@ -187,6 +187,7 @@ export function AppSidebar() {
               <Avatar className="group-data-[collapsible=icon]:size-8">
                 {user?.image && (
                   <AvatarImage
+                    src={user.image}
                     render={
                       <Image
                         src={user.image}

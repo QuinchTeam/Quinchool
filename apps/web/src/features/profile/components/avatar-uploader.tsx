@@ -40,6 +40,7 @@ export function AvatarUploader({
       <Avatar size="lg" className="size-16">
         {image && (
           <AvatarImage
+            src={image}
             render={
               <Image src={image} alt="" width={64} height={64} unoptimized />
             }
