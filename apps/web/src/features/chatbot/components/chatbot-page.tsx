@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { ChatComposer } from "@/features/chatbot/components/chat-composer";
 import { ChatEmptyState } from "@/features/chatbot/components/chat-empty-state";
 import { ChatHeader } from "@/features/chatbot/components/chat-header";
@@ -11,18 +9,11 @@ import { useChatbot } from "@/features/chatbot/hooks/use-chatbot";
 
 export function ChatbotPage({ chatId }: { chatId?: string }) {
   const chat = useChatbot(chatId);
-  const [isListOpen, setIsListOpen] = useState(false);
 
   return (
     <div className="flex h-full min-h-0">
       <div className="flex min-w-0 flex-1 flex-col">
-        <ChatHeader
-          isListOpen={isListOpen}
-          modelId={chat.modelId}
-          onModelChange={chat.setModelId}
-          onToggleList={() => setIsListOpen((open) => !open)}
-          title={chat.title}
-        />
+        <ChatHeader title={chat.title} />
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           {chat.messages.length === 0 && !chat.isLoading ? (
@@ -38,15 +29,10 @@ export function ChatbotPage({ chatId }: { chatId?: string }) {
           )}
         </main>
 
-        <ChatComposer
-          isPending={chat.isPending}
-          onChange={chat.setInput}
-          onSend={chat.sendMessage}
-          value={chat.input}
-        />
+        <ChatComposer isPending={chat.isPending} onSend={chat.sendMessage} />
       </div>
 
-      <ChatListSidebar activeChatId={chatId} isOpen={isListOpen} />
+      <ChatListSidebar activeChatId={chatId} />
     </div>
   );
 }

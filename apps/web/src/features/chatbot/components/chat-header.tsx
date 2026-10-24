@@ -7,21 +7,11 @@ import Link from "next/link";
 
 import { TextModelSelector } from "@/components/shared/text-model-selector";
 import { Button } from "@/components/ui/button";
-import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { useChatbotStore } from "@/features/chatbot/store/chatbot-store";
 
-export function ChatHeader({
-  isListOpen,
-  modelId,
-  onModelChange,
-  onToggleList,
-  title,
-}: {
-  isListOpen: boolean;
-  modelId: TextGenerationModelId;
-  onModelChange: (modelId: TextGenerationModelId) => void;
-  onToggleList: () => void;
-  title: string | null;
-}) {
+export function ChatHeader({ title }: { title: string | null }) {
+  const { isListOpen, modelId, setModelId, toggleList } = useChatbotStore();
+
   return (
     <header className="border-b px-6 py-3">
       <div className="flex w-full items-end justify-between gap-3">
@@ -30,7 +20,7 @@ export function ChatHeader({
             <TextModelSelector
               label="Model"
               value={modelId}
-              onValueChange={onModelChange}
+              onValueChange={setModelId}
             />
           </div>
           {title ? (
@@ -55,7 +45,7 @@ export function ChatHeader({
             size="icon"
             aria-label="Toggle chat list"
             aria-expanded={isListOpen}
-            onClick={onToggleList}
+            onClick={toggleList}
           >
             <AppIcon icon={SidebarIcon} />
           </Button>

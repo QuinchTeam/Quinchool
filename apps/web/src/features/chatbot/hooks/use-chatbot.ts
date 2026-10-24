@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { CHATS_KEY } from "@/features/chatbot/hooks/use-chats";
-import { DEFAULT_TEXT_GENERATION_MODEL_ID } from "@/lib/ai/text-generation/models";
-import type { TextGenerationModelId } from "@/lib/ai/text-generation/types";
+import { useChatbotStore } from "@/features/chatbot/store/chatbot-store";
 import {
   dismissToolAction,
   getChat,
@@ -23,10 +22,8 @@ import type {
 export function useChatbot(chatId?: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [modelId, setModelId] = useState<TextGenerationModelId>(
-    DEFAULT_TEXT_GENERATION_MODEL_ID,
-  );
-  const [input, setInput] = useState("");
+  const modelId = useChatbotStore((state) => state.modelId);
+  const setInput = useChatbotStore((state) => state.setInput);
   const [optimistic, setOptimistic] = useState<DisplayMessage[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -121,14 +118,10 @@ export function useChatbot(chatId?: string) {
     },
     endRef,
     error: reply.error?.message ?? "",
-    input,
     isLoading: chat.isLoading,
     isPending: reply.isPending || action.isPending,
     messages,
-    modelId,
     sendMessage,
-    setInput,
-    setModelId,
     title: chat.data?.title ?? null,
   };
 }

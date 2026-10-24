@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChats } from "@/features/chatbot/hooks/use-chats";
+import { useChatbotStore } from "@/features/chatbot/store/chatbot-store";
 import type { ChatSummary } from "@/features/chatbot/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +21,8 @@ const updated = new Intl.DateTimeFormat("en-PH", {
 });
 
 // Use a flex sibling; another SidebarProvider would share the nav cookie and shortcut.
-export function ChatListSidebar({
-  activeChatId,
-  isOpen,
-}: {
-  activeChatId?: string;
-  isOpen: boolean;
-}) {
+export function ChatListSidebar({ activeChatId }: { activeChatId?: string }) {
+  const isOpen = useChatbotStore((state) => state.isListOpen);
   const { chats, isError, isLoading, remove, rename } = useChats();
 
   return (

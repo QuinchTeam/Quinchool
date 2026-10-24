@@ -10,18 +10,18 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
+import { useChatbotStore } from "@/features/chatbot/store/chatbot-store";
 
 export function ChatComposer({
   isPending,
-  onChange,
   onSend,
-  value,
 }: {
   isPending: boolean;
-  onChange: (value: string) => void;
   onSend: (content: string) => void;
-  value: string;
 }) {
+  const value = useChatbotStore((state) => state.input);
+  const onChange = useChatbotStore((state) => state.setInput);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     onSend(value);
