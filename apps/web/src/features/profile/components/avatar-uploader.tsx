@@ -37,22 +37,22 @@ export function AvatarUploader({
       aria-label="Change profile picture"
       className="group relative shrink-0 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <Avatar size="lg" className="size-16">
+      <Avatar size="lg" className="data-[size=lg]:size-24">
         {image && (
           <AvatarImage
             src={image}
             render={
-              <Image src={image} alt="" width={64} height={64} unoptimized />
+              <Image src={image} alt="" width={96} height={96} unoptimized />
             }
           />
         )}
-        <AvatarFallback className="text-lg">{initialsOf(name)}</AvatarFallback>
+        <AvatarFallback className="text-2xl">{initialsOf(name)}</AvatarFallback>
       </Avatar>
-      <span className="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground transition-transform group-hover:scale-110">
+      <span className="absolute -right-0.5 -bottom-0.5 flex size-8 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground transition-transform group-hover:scale-110">
         {upload.isPending ? (
-          <Spinner className="size-3.5" />
+          <Spinner className="size-4" />
         ) : (
-          <AppIcon icon={CameraIcon} className="size-3.5" />
+          <AppIcon icon={CameraIcon} className="size-4" />
         )}
       </span>
       <input
