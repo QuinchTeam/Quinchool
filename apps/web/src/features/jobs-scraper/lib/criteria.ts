@@ -20,13 +20,11 @@ export function formatTimeRange(config: JobScraperConfig): string {
   return `${config.customStartDate ?? "Custom"} to ${config.customEndDate ?? "range"}`;
 }
 
-export function formatLocationModes(config: JobScraperConfig): string {
+export function formatLocationModes(config: JobScraperConfig): string[] {
   const worldwide = config.worldwideWorkModes.join(", ");
   const philippines = config.philippinesWorkModes.join(", ");
   return [
     worldwide ? `Worldwide: ${worldwide}` : "",
     philippines ? `Philippines: ${philippines}` : "",
-  ]
-    .filter(Boolean)
-    .join(" / ");
+  ].filter(Boolean);
 }

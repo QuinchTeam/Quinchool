@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -72,7 +73,9 @@ export class JobsScraperController {
     return this.repository.getState(userId);
   }
 
+  // 202: the scan keeps running after this returns; clients poll GET until scan.status leaves RUNNING.
   @Post("scans")
+  @HttpCode(202)
   async scan(@UserId() userId: string): Promise<JobScraperState> {
     const config = await this.repository.getConfig(userId);
     const unset = getUnsetScanCriteria(config);
@@ -84,18 +87,11 @@ export class JobsScraperController {
       });
     }
 
-    const result = await this.jobsScraper.scan({
-      config,
-      scannedAt: new Date().toISOString(),
-    });
+    // A second click while a scan runs just returns the running state.
+    if (await this.repository.startScan(userId)) {
+      void this.jobsScraper.runInBackground(userId, config);
+    }
 
-    await this.repository.persistScan(
-      userId,
-      result.scanId,
-      new Date(result.scannedAt),
-      result.jobs,
-    );
-
-    return this.repository.getState(userId, result.sourceIssues);
+    return this.repository.getState(userId);
   }
 }

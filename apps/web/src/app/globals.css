@@ -193,6 +193,10 @@
   background-color: color-mix(in srgb, var(--wallet-color) 15%, transparent);
 }
 
+@utility pixelated {
+  image-rendering: pixelated;
+}
+
 @utility scrollbar-gutter-stable {
   scrollbar-gutter: stable;
 }

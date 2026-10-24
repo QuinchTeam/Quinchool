@@ -10,15 +10,16 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shared/app-header";
 import { Button } from "@/components/ui/button";
 import { AppIcon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import {
   useJobsScraper,
-  useLatestScan,
+  useScanStatus,
 } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
 import { getUnsetScanCriteria } from "@/features/jobs-scraper/lib/criteria";
 
 export function JobsScraperHeader() {
   const { scan, state } = useJobsScraper();
-  const { isPending } = useLatestScan();
+  const { isScanning } = useScanStatus();
   const unsetCriteria = state ? getUnsetScanCriteria(state.config) : [];
 
   return (
@@ -46,12 +47,18 @@ export function JobsScraperHeader() {
       </Button>
       <Button
         onClick={() => scan.mutate()}
-        disabled={isPending || !state || unsetCriteria.length > 0}
+        disabled={isScanning || !state || unsetCriteria.length > 0}
       >
-        <AppIcon
-          icon={state?.lastScannedAt ? ArrowClockwiseIcon : MagnifyingGlassIcon}
-        />
-        {isPending
+        {isScanning ? (
+          <Spinner />
+        ) : (
+          <AppIcon
+            icon={
+              state?.lastScannedAt ? ArrowClockwiseIcon : MagnifyingGlassIcon
+            }
+          />
+        )}
+        {isScanning
           ? "Scanning job boards"
           : state?.lastScannedAt
             ? "Scan again"

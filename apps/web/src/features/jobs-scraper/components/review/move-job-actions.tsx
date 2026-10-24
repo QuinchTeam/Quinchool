@@ -12,7 +12,7 @@ export function MoveJobActions({ job }: { job: SavedJob }) {
   const { updateClassification } = useJobsScraper();
 
   return (
-    <div className="grid gap-2 border-t pt-3">
+    <div className="grid gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground">Move to</span>
         {JOB_CLASSIFICATIONS.filter(

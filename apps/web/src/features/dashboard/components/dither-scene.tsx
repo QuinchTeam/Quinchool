@@ -1,34 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
+import {
+  DitherCanvas,
+  type DitherSceneFn,
+} from "@/components/shared/dither-canvas";
 import type { DayPeriod } from "@/features/dashboard/lib/greeting";
-
-const FPS = 12;
-// Quantize brightness to six levels instead of a binary on/off pattern.
-const LEVELS = 6;
-
-// Center Bayer thresholds within each of the 64 brightness intervals.
-const BAYER_SIZE = 8;
-const BAYER = (() => {
-  let matrix = [
-    [0, 2],
-    [3, 1],
-  ];
-  while (matrix.length < BAYER_SIZE) {
-    const n = matrix.length;
-    const prev = matrix;
-    matrix = Array.from({ length: n * 2 }, (_, y) =>
-      Array.from(
-        { length: n * 2 },
-        (_, x) =>
-          4 * (prev[y % n]?.[x % n] ?? 0) +
-          ([0, 2, 3, 1][Math.floor(y / n) * 2 + Math.floor(x / n)] ?? 0),
-      ),
-    );
-  }
-  return matrix.flat().map((v) => (v + 0.5) / (BAYER_SIZE * BAYER_SIZE));
-})();
 
 const dist = (x: number, y: number, cx: number, cy: number) =>
   Math.hypot(x - cx, y - cy);
@@ -71,7 +47,7 @@ const STARS = [
 ] as const;
 
 // Scenes return brightness from 0 to 1 at normalized (x, y) and time in seconds.
-const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
+const SCENES: Record<DayPeriod, DitherSceneFn> = {
   // Layer the rising sun behind rolling hills and drifting clouds.
   morning: (x, y, t) => {
     const sunY = 0.6 - 0.04 * Math.sin(t * 0.7);
@@ -166,72 +142,11 @@ const SCENES: Record<DayPeriod, (x: number, y: number, t: number) => number> = {
   },
 };
 
-/* Sample the scene into six brightness levels using Bayer thresholds.
-   Paint alpha in the text color; reduced-motion users get one frame.
-   A low frame rate keeps the animation's stepped motion. */
 export function DitherScene({ period }: { period: DayPeriod }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-
-    const size = Math.round(canvas.clientWidth * window.devicePixelRatio);
-    canvas.width = size;
-    canvas.height = size;
-    const scene = SCENES[period];
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const image = context.createImageData(size, size);
-    // Convert any CSS text color to RGB through the canvas context.
-    context.fillStyle = getComputedStyle(canvas).color;
-    context.fillRect(0, 0, 1, 1);
-    const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
-
-    const draw = (t: number) => {
-      const data = image.data;
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-          const value = Math.min(
-            1,
-            Math.max(0, scene((x + 0.5) / size, (y + 0.5) / size, t)),
-          );
-          const scaled = value * (LEVELS - 1);
-          const base = Math.floor(scaled);
-          const threshold =
-            BAYER[(y % BAYER_SIZE) * BAYER_SIZE + (x % BAYER_SIZE)] ?? 1;
-          const level = base + (scaled - base > threshold ? 1 : 0);
-          const i = (y * size + x) * 4;
-          data[i] = red ?? 0;
-          data[i + 1] = green ?? 0;
-          data[i + 2] = blue ?? 0;
-          data[i + 3] = (level / (LEVELS - 1)) * 255;
-        }
-      }
-      context.putImageData(image, 0, 0);
-    };
-
-    if (still) {
-      draw(0);
-      return;
-    }
-    let frame = 0;
-    let last = 0;
-    const tick = (now: number) => {
-      if (now - last > 1000 / FPS) {
-        last = now;
-        draw(now / 1000);
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [period]);
-
   return (
     <div className="size-20 shrink-0 rounded-xl border-2 p-1">
       <div className="size-full overflow-hidden rounded-lg bg-muted text-primary">
-        <canvas ref={canvasRef} aria-hidden className="size-full" />
+        <DitherCanvas scene={SCENES[period]} className="size-full" />
       </div>
     </div>
   );

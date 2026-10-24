@@ -25,12 +25,10 @@ export function JobsScraperCriteria() {
 }
 
 function CriteriaSummary({ config }: { config: JobScraperConfig }) {
-  const location = formatLocationModes(config);
-
   return (
     <>
       <CriteriaGroup label="Posted" items={[formatTimeRange(config)]} />
-      <CriteriaGroup label="Location" items={location ? [location] : []} />
+      <CriteriaGroup label="Location" items={formatLocationModes(config)} />
       <CriteriaGroup label="Roles" items={config.roles} />
       <CriteriaGroup label="Levels" items={config.includedLevels} />
       <CriteriaGroup

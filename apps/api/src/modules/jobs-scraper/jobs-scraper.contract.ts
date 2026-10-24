@@ -188,7 +188,17 @@ export interface JobScraperState {
   lastScannedAt: string | null;
   newJobCount: number;
   savedJobCount: number;
+  scan: ScanStatus;
   sourceIssues: JobSourceIssue[];
+}
+
+export interface ScanStatus {
+  error: string | null;
+  startedAt: string | null;
+  status: "IDLE" | "RUNNING" | "FAILED";
+  // SEARCHING, READING and ANALYZING come from apps/ai; SAVING is ours. Null before the first report.
+  step: "SEARCHING" | "READING" | "ANALYZING" | "SAVING" | null;
+  stepCount: number | null;
 }
 
 // Use the source's numeric job ID, falling back to the lowercase URL path.

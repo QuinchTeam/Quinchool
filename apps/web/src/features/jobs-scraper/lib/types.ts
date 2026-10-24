@@ -35,6 +35,13 @@ export interface JobScraperState {
   lastScannedAt: string | null;
   newJobCount: number;
   savedJobCount: number;
+  scan: {
+    error: string | null;
+    startedAt: string | null;
+    status: "IDLE" | "RUNNING" | "FAILED";
+    step: "SEARCHING" | "READING" | "ANALYZING" | "SAVING" | null;
+    stepCount: number | null;
+  };
   sourceIssues: JobSourceIssue[];
 }
 

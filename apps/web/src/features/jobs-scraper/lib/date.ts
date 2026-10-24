@@ -17,12 +17,25 @@ export function shiftDate(date: string, days: number): string {
   return shifted.toISOString().slice(0, 10);
 }
 
-export function formatPostedDate(date: string | null): string {
-  if (!date) return "Date unconfirmed";
+const relativeTime = new Intl.RelativeTimeFormat("en");
+
+// Computed at render time; the site's own "20h ago" text is only true on scan day.
+export function formatAge(date: string, dateOnly = false): string {
+  const minutes = Math.floor((Date.now() - new Date(date).getTime()) / 60_000);
+  const days = Math.floor(minutes / 1440);
+  if (dateOnly) return days < 1 ? "today" : relativeTime.format(-days, "day");
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return relativeTime.format(-minutes, "minute");
+  if (minutes < 1440)
+    return relativeTime.format(-Math.floor(minutes / 60), "hour");
+  return relativeTime.format(-days, "day");
+}
+
+export function formatDate(date: string): string {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
     timeZone: "Asia/Manila",
-  }).format(new Date(`${date}T00:00:00+08:00`));
+  }).format(new Date(date));
 }
 
 export function formatDateTime(date: string): string {

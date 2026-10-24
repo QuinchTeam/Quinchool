@@ -10,7 +10,7 @@ export function JobsScraperPage() {
       </div>
 
       <div className="grid w-full gap-8 px-6 py-6 lg:grid-cols-4">
-        <aside className="content-start lg:col-span-1">
+        <aside className="min-w-0 content-start lg:col-span-1">
           <JobsScraperCriteria />
         </aside>
 

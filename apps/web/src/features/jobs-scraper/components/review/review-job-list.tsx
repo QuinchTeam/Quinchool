@@ -37,7 +37,7 @@ export function ReviewJobList() {
   }
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-2">
+    <div className="gap-4 *:mb-4 *:break-inside-avoid lg:columns-2">
       {jobs.map((job) => (
         <JobCard
           key={job.id}
@@ -53,7 +53,7 @@ export function ReviewJobList() {
 function ReviewLoading() {
   return (
     <output
-      className="grid items-start gap-4 lg:grid-cols-2"
+      className="gap-4 *:mb-4 *:break-inside-avoid lg:columns-2"
       aria-busy="true"
       aria-label="Loading scanned jobs"
     >

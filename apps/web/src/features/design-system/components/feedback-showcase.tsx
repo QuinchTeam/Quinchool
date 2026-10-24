@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { ScanProgressShowcase } from "@/features/design-system/components/scan-progress-showcase";
 import { ShowcaseSection } from "@/features/design-system/components/showcase-section";
 
 export function FeedbackShowcase() {
@@ -53,6 +54,10 @@ export function FeedbackShowcase() {
           ),
         )}
       </ShowcaseSection>
+
+      <Separator />
+
+      <ScanProgressShowcase />
 
       <Separator />
 

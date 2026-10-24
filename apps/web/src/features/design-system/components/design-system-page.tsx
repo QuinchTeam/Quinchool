@@ -24,6 +24,7 @@ const sections = [
   { id: "toast", label: "Sonner" },
   { id: "feedback", label: "Feedback" },
   { id: "dither", label: "Dither" },
+  { id: "scan-progress", label: "Scan Progress" },
   { id: "sidebar", label: "Sidebar" },
 ];
 

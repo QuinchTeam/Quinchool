@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "../../core/database/prisma/prisma.service";
+import type { Prisma } from "../../generated/prisma/client";
 import {
   DEFAULT_JOB_SCRAPER_CONFIG,
   getSourceJobId,
@@ -10,7 +11,45 @@ import {
   type JobSourceIssue,
   type SavedJob,
   type ScannedJob,
+  type ScanStatus,
 } from "./jobs-scraper.contract";
+
+const STALE_AFTER_MS = 14 * 24 * 60 * 60 * 1000;
+// Longer than the 5-minute AI call, so only a scan killed mid-run (e.g. by a deploy) times out.
+const SCAN_TIMEOUT_MS = 10 * 60 * 1000;
+
+function toScanStatus(config: {
+  scanError: string | null;
+  scanStartedAt: Date | null;
+  scanStatus: string | null;
+  scanStep: string | null;
+  scanStepCount: number | null;
+}): ScanStatus {
+  const startedAt = config.scanStartedAt?.toISOString() ?? null;
+  const progress = {
+    step: (config.scanStep as ScanStatus["step"]) ?? null,
+    stepCount: config.scanStepCount,
+  };
+
+  if (config.scanStatus === "RUNNING") {
+    const timedOut =
+      !config.scanStartedAt ||
+      Date.now() - config.scanStartedAt.getTime() > SCAN_TIMEOUT_MS;
+
+    return timedOut
+      ? {
+          status: "FAILED",
+          error: "The scan was interrupted. Try again.",
+          startedAt,
+          ...progress,
+        }
+      : { status: "RUNNING", error: null, startedAt, ...progress };
+  }
+
+  return config.scanStatus === "FAILED"
+    ? { status: "FAILED", error: config.scanError, startedAt, ...progress }
+    : { status: "IDLE", error: null, startedAt, step: null, stepCount: null };
+}
 
 @Injectable()
 export class JobsScraperRepository {
@@ -33,15 +72,17 @@ export class JobsScraperRepository {
     return toJobScraperConfig(saved);
   }
 
-  async getState(
-    userId: string,
-    sourceIssues: JobSourceIssue[] = [],
-  ): Promise<JobScraperState> {
+  async getState(userId: string): Promise<JobScraperState> {
     const config = await this.upsertConfigRow(userId);
+    // Listings no scan has seen recently are most likely filled or taken down.
+    const fresh = {
+      userId,
+      lastSeenAt: { gte: new Date(Date.now() - STALE_AFTER_MS) },
+    };
     const [jobs, counts, newJobCount] = await Promise.all([
       // shortcut: the cap drops rejected jobs first; paginate when users outgrow it.
       this.prisma.scrapedJob.findMany({
-        where: { userId },
+        where: fresh,
         orderBy: [
           { classification: "asc" },
           { lastSeenAt: "desc" },
@@ -51,7 +92,7 @@ export class JobsScraperRepository {
       }),
       this.prisma.scrapedJob.groupBy({
         by: ["classification"],
-        where: { userId },
+        where: fresh,
         _count: { _all: true },
       }),
       config.lastScanId
@@ -79,8 +120,50 @@ export class JobsScraperRepository {
         (total, count) => total + count,
         0,
       ),
-      sourceIssues,
+      scan: toScanStatus(config),
+      sourceIssues: config.scanSourceIssues as unknown as JobSourceIssue[],
     };
+  }
+
+  // Claims the scan slot atomically; false means a fresh scan is already running.
+  async startScan(userId: string): Promise<boolean> {
+    const { count } = await this.prisma.jobScraperConfig.updateMany({
+      where: {
+        userId,
+        OR: [
+          { scanStatus: { not: "RUNNING" } },
+          { scanStatus: null },
+          { scanStartedAt: { lt: new Date(Date.now() - SCAN_TIMEOUT_MS) } },
+        ],
+      },
+      data: {
+        scanStatus: "RUNNING",
+        scanStartedAt: new Date(),
+        scanError: null,
+        scanStep: null,
+        scanStepCount: null,
+      },
+    });
+
+    return count > 0;
+  }
+
+  async setScanStep(
+    userId: string,
+    step: string,
+    count: number | null,
+  ): Promise<void> {
+    await this.prisma.jobScraperConfig.update({
+      where: { userId },
+      data: { scanStep: step, scanStepCount: count },
+    });
+  }
+
+  async failScan(userId: string, message: string): Promise<void> {
+    await this.prisma.jobScraperConfig.update({
+      where: { userId },
+      data: { scanStatus: "FAILED", scanError: message },
+    });
   }
 
   // Keep manual classifications from being overwritten by future scans.
@@ -102,6 +185,7 @@ export class JobsScraperRepository {
     scanId: string,
     scannedAt: Date,
     jobs: ScannedJob[],
+    sourceIssues: JobSourceIssue[],
   ): Promise<void> {
     await this.prisma.$transaction(async (transaction) => {
       for (const job of jobs) {
@@ -127,7 +211,8 @@ export class JobsScraperRepository {
           postedDate: job.postedDate
             ? new Date(`${job.postedDate}T00:00:00Z`)
             : null,
-          postedAt: job.postedAt ? new Date(job.postedAt) : null,
+          // undefined keeps an earlier exact time once the label coarsens to "1d ago".
+          postedAt: job.postedAt ? new Date(job.postedAt) : undefined,
           postedText: job.postedText,
           summary: job.summary,
           description: job.description,
@@ -160,15 +245,24 @@ export class JobsScraperRepository {
         });
       }
 
+      const scanData = {
+        lastScannedAt: scannedAt,
+        lastScanId: scanId,
+        scanStatus: null,
+        scanError: null,
+        scanStep: null,
+        scanStepCount: null,
+        scanSourceIssues: sourceIssues as unknown as Prisma.InputJsonValue,
+      };
+
       await transaction.jobScraperConfig.upsert({
         where: { userId },
         create: {
           userId,
           ...toConfigData(DEFAULT_JOB_SCRAPER_CONFIG),
-          lastScannedAt: scannedAt,
-          lastScanId: scanId,
+          ...scanData,
         },
-        update: { lastScannedAt: scannedAt, lastScanId: scanId },
+        update: scanData,
       });
     });
   }

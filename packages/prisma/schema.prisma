@@ -353,6 +353,14 @@ model JobScraperConfig {
   philippinesWorkModes String[]
   lastScannedAt        DateTime?
   lastScanId           String?
+  // Scans run in the background; null status means idle.
+  scanStatus           String?
+  scanStartedAt        DateTime?
+  scanError            String?
+  // Latest progress step reported while RUNNING, with its listing count.
+  scanStep             String?
+  scanStepCount        Int?
+  scanSourceIssues     Json      @default("[]")
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 

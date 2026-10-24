@@ -40,6 +40,9 @@ export function useJobsScraper() {
   const query = useQuery({
     queryKey: JOBS_SCRAPER_KEY,
     queryFn: () => requestJobsScraper(),
+    // Scans run in the background on the API; poll until it finishes.
+    refetchInterval: (current) =>
+      current.state.data?.scan.status === "RUNNING" ? 3000 : false,
   });
   const scan = useMutation({
     mutationKey: SCAN_KEY,
@@ -81,16 +84,23 @@ export function useJobsScraper() {
   };
 }
 
-// Latest scan state across every component, so the header can scan while the results react.
-export function useLatestScan() {
-  const scans = useMutationState({
-    filters: { mutationKey: SCAN_KEY },
-    select: (mutation) => mutation.state,
+// Read from the server state, so a refreshed page still knows a scan is running or failed.
+export function useScanStatus() {
+  const { state } = useJobsScraper();
+  const starting = useMutationState({
+    filters: { mutationKey: SCAN_KEY, status: "pending" },
   });
-  const latest = scans.at(-1);
+  const failedStart = useMutationState({
+    filters: { mutationKey: SCAN_KEY },
+    select: (mutation) => mutation.state.error,
+  }).at(-1);
 
   return {
-    error: latest?.error,
-    isPending: latest?.status === "pending",
+    error:
+      failedStart ??
+      (state?.scan.status === "FAILED"
+        ? new Error(state.scan.error ?? "The job scan failed.")
+        : null),
+    isScanning: starting.length > 0 || state?.scan.status === "RUNNING",
   };
 }
