@@ -37,6 +37,6 @@ COPY --from=build --chown=api:nodejs /workspace/prisma.config.ts ./prisma.config
 COPY --from=build --chown=api:nodejs /workspace/packages/prisma ./packages/prisma
 USER api
 EXPOSE 8080
-# Run migrations at boot because only Cloud Run can reach Cloud SQL.
+# Run migrations at boot; migrate deploy takes an advisory lock, so concurrent instances are safe.
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --config prisma.config.ts && exec node dist/main.js"]
 
