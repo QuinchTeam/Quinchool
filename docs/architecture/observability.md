@@ -159,15 +159,8 @@ does not create a new Sentry issue. Automatic Sentry capture remains enabled.
 
 ### Production prerequisites
 
-Before deploying this workflow, enable the APIs and grant the runtime service
-account the Telemetry writer and quota-consumer roles. Use the existing
-`GCP_PROJECT_ID` and `GCP_RUNTIME_SERVICE_ACCOUNT` GitHub variables:
-
-```sh
-gcloud services enable telemetry.googleapis.com logging.googleapis.com monitoring.googleapis.com cloudtrace.googleapis.com --project PROJECT_ID
-gcloud projects add-iam-policy-binding PROJECT_ID --member serviceAccount:RUNTIME_SERVICE_ACCOUNT --role roles/telemetry.writer
-gcloud projects add-iam-policy-binding PROJECT_ID --member serviceAccount:RUNTIME_SERVICE_ACCOUNT --role roles/serviceusage.serviceUsageConsumer
-```
+The observability APIs and the runtime account's Telemetry writer and
+quota-consumer roles are in `infra/terraform/gcp.tf`.
 
 Cloud Run uses instance-based CPU allocation (`--no-cpu-throttling`) so batched
 exports can finish outside request handling. Each sidecar reserves 1 CPU and

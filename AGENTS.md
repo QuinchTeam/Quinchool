@@ -19,6 +19,7 @@ Each app has its own `AGENTS.md` which contains all info you need when working i
 
 ## Infrastructure, Outside, and Deployment
 
+- Infrastructure is code in `infra/terraform/` (GCP + GitHub Actions variables). Change infra there, never by hand; see `docs/architecture/deployment.md`.
 - Deploys run from GitHub Actions to Cloud Run. Production runs on Cloud Run; local apps run through `pnpm dev`, and local infrastructure runs in Docker. We don't have staging or previews; we push straight to main by default, creating PRs only for learning or when requested.
 - Production secrets is in Google Secret Manager and Non-secret deploy settings is in GitHub Actions variables. The Local `.env` files are for local development only.
 - Production datas are stored on our production NeonDB and Cache data on Redis Upstash (TBA). For file uploads, it is store on Cloudflare R2 (TBA). Locally we use Docker PostgreSQL, Redis (TBA) and Garage (TBA).
