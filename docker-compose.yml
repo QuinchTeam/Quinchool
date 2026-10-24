@@ -39,5 +39,21 @@ services:
       timeout: 5s
       retries: 10
 
+  # Local S3 for uploads (production uses Cloudflare R2). scripts/garage-init.mjs,
+  # run by `pnpm infra`, creates the layout, bucket and the fixed local key.
+  garage:
+    image: dxflrs/garage:v2.1.0
+    container_name: quinchool-garage
+    restart: unless-stopped
+    environment:
+      # Local-only cluster secret; nothing outside this machine talks to it.
+      GARAGE_RPC_SECRET: 6c6f63616c2d6f6e6c792d6761726167652d7270632d7365637265742d303031
+    ports:
+      - "127.0.0.1:3900:3900"
+    volumes:
+      - ./infra/garage/garage.toml:/etc/garage.toml:ro
+      - quinchool-garage-data:/var/lib/garage
+
 volumes:
   quinchool-postgres-data:
+  quinchool-garage-data:

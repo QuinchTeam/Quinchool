@@ -11,7 +11,7 @@
     "dev:web": "pnpm --filter @quinchool/web dev",
     "dev:api": "pnpm --filter @quinchool/api dev",
     "dev:ai": "cd apps/ai && .venv\\Scripts\\python -m uvicorn app.main:app --reload --port 8000",
-    "infra": "docker compose up -d",
+    "infra": "docker compose up -d && node scripts/garage-init.mjs",
     "infra:down": "docker compose down",
     "lint": "pnpm --filter @quinchool/web lint",
     "lint:tailwind": "pnpm --filter @quinchool/web lint:tailwind",
