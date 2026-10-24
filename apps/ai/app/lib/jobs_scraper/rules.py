@@ -16,6 +16,24 @@ from app.modules.jobs_scraper.schemas import (
 
 MANILA = timezone(timedelta(hours=8), "Asia/Manila")
 
+_RELATIVE_POSTED = re.compile(
+    r"(\d+)\s*(m|mins?|minutes?|h|hrs?|hours?)\s+ago", re.IGNORECASE
+)
+
+
+def infer_posted_at(posted_text: str | None, scanned_at: datetime) -> str | None:
+    # ponytail: minutes/hours only; "2d ago" has no real time, so it stays date-only.
+    match = _RELATIVE_POSTED.search(posted_text or "")
+    if not match:
+        return None
+
+    amount = int(match.group(1))
+    unit = match.group(2).lower()
+    delta = (
+        timedelta(minutes=amount) if unit.startswith("m") else timedelta(hours=amount)
+    )
+    return (scanned_at - delta).isoformat()
+
 
 def get_job_rejection_reasons(
     job: DiscoveredJob | PotentialJob,

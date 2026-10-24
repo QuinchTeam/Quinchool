@@ -26,7 +26,9 @@ from app.modules.jobs_scraper.schemas import (
     JobScraperConfig,
     JobSource,
     JobSourceIssue,
+    OnScanStep,
     WorkMode,
+    ignore_scan_step,
 )
 
 MAX_JOBS_PER_SOURCE = 10
@@ -75,7 +77,7 @@ class CrawlResponse(BaseModel):
 
 @domain_operation("jobs-scraper.collect-documents")
 async def collect_job_documents(
-    scan_id: str, config: JobScraperConfig
+    scan_id: str, config: JobScraperConfig, on_step: OnScanStep = ignore_scan_step
 ) -> tuple[list[JobDocument], list[JobSourceIssue]]:
     search_urls = build_search_urls(config)
     search_started_at = time.monotonic()
@@ -128,6 +130,7 @@ async def collect_job_documents(
     )
 
     selected_detail_urls = [url for urls in detail_urls.values() for url in urls]
+    await on_step("READING", len(selected_detail_urls))
     details_started_at = time.monotonic()
     detail_results = await crawl_urls(selected_detail_urls)
     documents: list[JobDocument] = []

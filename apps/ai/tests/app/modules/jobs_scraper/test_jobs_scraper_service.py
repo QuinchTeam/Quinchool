@@ -1,5 +1,6 @@
+import json
 from datetime import datetime
-from typing import final, override
+from typing import cast, final, override
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch
 
@@ -13,6 +14,7 @@ from app.modules.jobs_scraper.schemas import (
     DEFAULT_JOB_SCRAPER_CONFIG,
     DiscoveredJob,
     JobExtraction,
+    OnScanStep,
     ScanResult,
 )
 from app.modules.jobs_scraper.service import classify_scanned_jobs
@@ -41,18 +43,14 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
         )
 
     def test_grades_and_normalizes_jobs(self) -> None:
-        self.assertEqual(
-            get_job_rejection_reasons(self.job, self.config, self.now), []
-        )
+        self.assertEqual(get_job_rejection_reasons(self.job, self.config, self.now), [])
         java_job = self.job.model_copy(
             update={"summary": f"{self.job.summary} Requires Java."}
         )
         self.assertTrue(
             any(
                 'excluded technology "Java"' in reason
-                for reason in get_job_rejection_reasons(
-                    java_job, self.config, self.now
-                )
+                for reason in get_job_rejection_reasons(java_job, self.config, self.now)
             )
         )
         classified = classify_scanned_jobs(
@@ -69,7 +67,21 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
             "https://www.linkedin.com/jobs/view/123",
         )
 
-    async def test_scan_endpoint_returns_camel_case_json(self) -> None:
+    def test_infers_posted_at_from_relative_label(self) -> None:
+        def classify(posted_text: str) -> str | None:
+            job = self.job.model_copy(update={"posted_text": posted_text})
+            return classify_scanned_jobs(
+                JobExtraction(jobs=[job], potential_jobs=[], rejected_jobs=[]),
+                self.config,
+                self.now,
+            )[0][1].posted_at
+
+        self.assertEqual(classify("2 hours ago"), "2026-08-02T12:00:00+08:00")
+        self.assertEqual(classify("22h ago"), "2026-08-01T16:00:00+08:00")
+        self.assertEqual(classify("35 mins ago"), "2026-08-02T13:25:00+08:00")
+        self.assertIsNone(classify("2d ago"))
+
+    async def test_scan_endpoint_streams_steps_then_camel_case_result(self) -> None:
         result = ScanResult(
             scan_id="scan-1",
             scanned_at=self.now,
@@ -78,10 +90,13 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
             source_issues=[],
         )
 
-        with patch(
-            "app.modules.jobs_scraper.router.scan_jobs",
-            new=AsyncMock(return_value=result),
-        ):
+        async def fake_scan(*args: object) -> ScanResult:
+            on_step = cast(OnScanStep, args[3])
+            await on_step("SEARCHING", None)
+            await on_step("READING", 3)
+            return result
+
+        with patch("app.modules.jobs_scraper.router.scan_jobs", new=fake_scan):
             async with httpx.AsyncClient(
                 transport=httpx.ASGITransport(app=app),
                 base_url="http://test",
@@ -95,10 +110,19 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
                     },
                 )
 
+        events = [json.loads(line) for line in response.text.splitlines()]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["X-Jobs-Scan-Id"], "scan-1")
-        self.assertEqual(response.json()["scanId"], "scan-1")
-        self.assertEqual(response.json()["documentCount"], 0)
+        self.assertEqual(
+            events[:2],
+            [
+                {"type": "step", "step": "SEARCHING", "count": None},
+                {"type": "step", "step": "READING", "count": 3},
+            ],
+        )
+        self.assertEqual(events[2]["type"], "result")
+        self.assertEqual(events[2]["result"]["scanId"], "scan-1")
+        self.assertEqual(events[2]["result"]["documentCount"], 0)
 
     async def test_scan_endpoint_maps_crawl4ai_failure(self) -> None:
         with patch(
@@ -117,11 +141,16 @@ class JobsScraperTest(IsolatedAsyncioTestCase):
                     },
                 )
 
-        self.assertEqual(response.status_code, 503)
+        # The stream has already started, so the failure arrives as the last line.
+        event = json.loads(response.text.splitlines()[-1])
         self.assertEqual(response.headers["X-Jobs-Scan-Id"], "scan-2")
         self.assertEqual(
-            response.json()["error"],
-            "Crawl4AI is offline. Start the crawl4ai Docker service.",
+            event,
+            {
+                "type": "error",
+                "error": "Crawl4AI is offline. Start the crawl4ai Docker service.",
+                "status": 503,
+            },
         )
 
     async def test_scan_endpoint_does_not_hide_unexpected_failure(self) -> None:

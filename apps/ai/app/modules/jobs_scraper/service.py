@@ -11,6 +11,7 @@ from app.lib.jobs_scraper.rules import (
     get_job_rejection_reasons,
     get_job_source_from_url,
     get_source_job_id,
+    infer_posted_at,
 )
 from app.lib.llm.gemini import extract_jobs
 from app.lib.scraping.crawl4ai import collect_job_documents
@@ -21,15 +22,20 @@ from app.modules.jobs_scraper.schemas import (
     JobExtraction,
     JobScraperConfig,
     JobSourceIssue,
+    OnScanStep,
     PotentialJob,
     ScannedJob,
     ScanResult,
+    ignore_scan_step,
 )
 
 
 @domain_operation("jobs-scraper.scan")
 async def scan_jobs(
-    scan_id: str, config: JobScraperConfig, scanned_at: datetime
+    scan_id: str,
+    config: JobScraperConfig,
+    scanned_at: datetime,
+    on_step: OnScanStep = ignore_scan_step,
 ) -> ScanResult:
     scan_started_at = time.monotonic()
     from_date, to_date = get_job_date_window(config, scanned_at)
@@ -50,7 +56,8 @@ async def scan_jobs(
         },
     )
 
-    documents, source_issues = await collect_job_documents(scan_id, config)
+    await on_step("SEARCHING", None)
+    documents, source_issues = await collect_job_documents(scan_id, config, on_step)
 
     log_jobs_scraper(
         "info",
@@ -73,6 +80,7 @@ async def scan_jobs(
 
     settings = get_settings()
     gemini_started_at = time.monotonic()
+    await on_step("ANALYZING", len(documents))
     result = await extract_jobs(scanned_at, config, documents)
 
     log_jobs_scraper(
@@ -144,6 +152,11 @@ def classify_scanned_jobs(
             continue
 
         seen.add(dedupe_key)
+        # The model often leaves postedAt empty even when the label says "22h ago".
+        if job.posted_at is None:
+            inferred = infer_posted_at(job.posted_text, scanned_at)
+            if inferred:
+                job = job.model_copy(update={"posted_at": inferred})
         failures = get_job_rejection_reasons(job, config, scanned_at)
         classification: JobClassification = (
             "REJECTED" if proposed == "REJECTED" or failures else proposed

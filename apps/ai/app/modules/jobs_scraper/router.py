@@ -1,52 +1,98 @@
 from __future__ import annotations
 
+import asyncio
+import json
+from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from google.genai import errors as genai_errors
 
 from app.core.exceptions import Crawl4AiUnavailableError
 from app.core.logging import log_jobs_scraper
 from app.lib.llm.errors import read_provider_error_message
-from app.modules.jobs_scraper.schemas import ScanRequest, ScanResult
+from app.modules.jobs_scraper.schemas import ScanRequest, ScanStep
 from app.modules.jobs_scraper.service import scan_jobs
 
 router = APIRouter(prefix="/jobs-scraper", tags=["jobs-scraper"])
 
 
-@router.post("/scan", response_model=ScanResult, response_model_by_alias=True)
-async def scan(request: ScanRequest, response: Response):
+# Streams NDJSON so the API can show progress: {"type":"step",...} lines, then exactly one
+# {"type":"result"} or {"type":"error"} line. Failures arrive in-band because the 200 is already sent.
+@router.post("/scan")
+async def scan(request: ScanRequest) -> StreamingResponse:
     scanned_at = request.scanned_at or datetime.now(timezone.utc)
 
     if scanned_at.tzinfo is None:
         scanned_at = scanned_at.replace(tzinfo=timezone.utc)
 
-    response.headers["X-Jobs-Scan-Id"] = request.scan_id
+    return StreamingResponse(
+        _stream_scan(request, scanned_at),
+        media_type="application/x-ndjson",
+        headers={"X-Jobs-Scan-Id": request.scan_id},
+    )
+
+
+async def _stream_scan(
+    request: ScanRequest, scanned_at: datetime
+) -> AsyncIterator[str]:
+    queue: asyncio.Queue[dict[str, object] | None] = asyncio.Queue()
+
+    async def on_step(step: ScanStep, count: int | None) -> None:
+        await queue.put({"type": "step", "step": step, "count": count})
+
+    task = asyncio.create_task(
+        scan_jobs(request.scan_id, request.config, scanned_at, on_step)
+    )
+    task.add_done_callback(lambda _: queue.put_nowait(None))
 
     try:
-        return await scan_jobs(request.scan_id, request.config, scanned_at)
-    except (Crawl4AiUnavailableError, genai_errors.APIError) as error:
-        message, status = get_scan_failure(error)
+        while (event := await queue.get()) is not None:
+            yield _line(event)
 
-        log_jobs_scraper(
-            "error",
-            "scan.failed",
-            request.scan_id,
-            {
-                "cause": str(getattr(error, "cause", None) or "") or None,
-                "errorMessage": message,
-                "errorName": type(error).__name__,
-                "providerStatus": getattr(error, "code", None),
-                "status": status,
-            },
-        )
+        try:
+            result = task.result()
+        except (Crawl4AiUnavailableError, genai_errors.APIError) as error:
+            message, status = get_scan_failure(error)
+            log_jobs_scraper(
+                "error",
+                "scan.failed",
+                request.scan_id,
+                {
+                    "cause": str(getattr(error, "cause", None) or "") or None,
+                    "errorMessage": message,
+                    "errorName": type(error).__name__,
+                    "providerStatus": getattr(error, "code", None),
+                    "status": status,
+                },
+            )
+            yield _line({"type": "error", "error": message, "status": status})
+            return
+        except Exception as error:
+            log_jobs_scraper(
+                "error",
+                "scan.failed",
+                request.scan_id,
+                {"errorName": type(error).__name__, "status": 500},
+            )
+            yield _line(
+                {"type": "error", "error": "The job scan failed.", "status": 500}
+            )
+            # Re-raise so unexpected bugs still reach error reporting.
+            raise
 
-        return JSONResponse(
-            {"error": message, "scanId": request.scan_id},
-            status_code=status,
-            headers={"X-Jobs-Scan-Id": request.scan_id},
+        yield _line(
+            {"type": "result", "result": result.model_dump(by_alias=True, mode="json")}
         )
+    finally:
+        # The API hung up (timeout or shutdown): stop crawling and Gemini work.
+        if not task.done():
+            task.cancel()
+
+
+def _line(event: dict[str, object]) -> str:
+    return json.dumps(event) + "\n"
 
 
 def get_scan_failure(

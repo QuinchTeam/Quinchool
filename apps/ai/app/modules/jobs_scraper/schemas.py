@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from datetime import date, datetime
 from typing import Annotated, ClassVar, Literal
 from urllib.parse import urlparse
@@ -15,6 +15,15 @@ from pydantic import (
     model_validator,
 )
 from pydantic.alias_generators import to_camel
+
+# Progress the API shows while a scan runs; count is the number of listings at that step.
+ScanStep = Literal["SEARCHING", "READING", "ANALYZING"]
+OnScanStep = Callable[[ScanStep, int | None], Awaitable[None]]
+
+
+async def ignore_scan_step(_step: ScanStep, _count: int | None) -> None:
+    return None
+
 
 JOB_ROLES = (
     "Software Developer",
