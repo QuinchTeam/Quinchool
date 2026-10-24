@@ -742,7 +742,7 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
     const roof = roofCanvas.getContext("2d");
     if (roof) paintRooftops(roof, palette);
     const starRandom = randomSource();
-    const sparklingStars = [];
+    const sparklingStars: { x: number; y: number; phase: number }[] = [];
     for (let i = 0; i < 1100; i++) {
       const x = Math.floor(starRandom() * WIDTH);
       const y = Math.floor(starRandom() * HEIGHT);
