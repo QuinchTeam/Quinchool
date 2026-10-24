@@ -6,9 +6,8 @@ import { AppIcon } from "@/components/ui/icon";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { useId, useState } from "react";
 import { toast } from "sonner";
-import { SortableList } from "@/features/career-profile/components/sortable-list";
+import { SortableList, useSortableItem } from "@/components/ui/sortable";
 import { chipBackspace } from "@/features/career-profile/lib/chip-backspace";
-import { useSortableItem } from "@/features/career-profile/hooks/use-sortable-item";
 import { cn } from "@/lib/utils";
 
 function Chip({

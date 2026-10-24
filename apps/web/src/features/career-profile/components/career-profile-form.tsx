@@ -9,13 +9,11 @@ import { AppIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  EducationEditor,
-  EntryList,
-  ExperienceEditor,
-  ProjectEditor,
-  SkillGroupEditor,
-} from "@/features/career-profile/components/career-profile-entries";
+import { EducationEditor } from "@/features/career-profile/components/education-editor";
+import { EntryList } from "@/features/career-profile/components/entry-list";
+import { ExperienceEditor } from "@/features/career-profile/components/experience-editor";
+import { ProjectEditor } from "@/features/career-profile/components/project-editor";
+import { SkillGroupEditor } from "@/features/career-profile/components/skill-group-editor";
 import { CareerProfileField as Field } from "@/features/career-profile/components/career-profile-field";
 import { useCareerProfileForm } from "@/features/career-profile/hooks/use-career-profile-form";
 import {
