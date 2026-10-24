@@ -61,7 +61,7 @@ export function useResumeBuilder(careerProfile?: CareerProfileValues | null) {
           if (!careerProfile) return tailored;
 
           const { renderResumePdf } =
-            await import("@/features/resume-builder/components/resume-pdf-preview");
+            await import("@/features/resume-builder/lib/resume-pdf");
           const { fillRatio, pageCount } = await renderResumePdf(
             applyTailoredResume(careerProfile, tailored),
           );

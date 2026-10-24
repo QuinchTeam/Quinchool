@@ -3,7 +3,7 @@ import { test } from "vite-plus/test";
 import { renderToBuffer } from "@react-pdf/renderer";
 
 import { ResumePdfDocument } from "@/features/resume-builder/components/resume-pdf-document";
-import { renderResumePdf } from "@/features/resume-builder/components/resume-pdf-preview";
+import { renderResumePdf } from "@/features/resume-builder/lib/resume-pdf";
 
 const profile = {
   name: "Cyril James De Guzman",
