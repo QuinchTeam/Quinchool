@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useMutationState,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type {
   JobScraperConfig,
   JobScraperState,
@@ -10,6 +15,7 @@ import { apiUrl, readApiData, withCredentials } from "@/lib/api";
 import { apiFetch, observeOperation } from "@/lib/observability/operation";
 
 const JOBS_SCRAPER_KEY = ["jobs-scraper"] as const;
+const SCAN_KEY = [...JOBS_SCRAPER_KEY, "scan"] as const;
 
 async function requestJobsScraper(
   path = "",
@@ -36,6 +42,7 @@ export function useJobsScraper() {
     queryFn: () => requestJobsScraper(),
   });
   const scan = useMutation({
+    mutationKey: SCAN_KEY,
     mutationFn: () => requestJobsScraper("/scans", { method: "POST" }),
     onSuccess: (state) => queryClient.setQueryData(JOBS_SCRAPER_KEY, state),
   });
@@ -71,5 +78,19 @@ export function useJobsScraper() {
     scan,
     state: query.data,
     updateClassification,
+  };
+}
+
+// Latest scan state across every component, so the header can scan while the results react.
+export function useLatestScan() {
+  const scans = useMutationState({
+    filters: { mutationKey: SCAN_KEY },
+    select: (mutation) => mutation.state,
+  });
+  const latest = scans.at(-1);
+
+  return {
+    error: latest?.error,
+    isPending: latest?.status === "pending",
   };
 }
