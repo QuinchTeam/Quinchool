@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.7"
 
-  # Bootstrap: this bucket is created by hand once, then imported (imports.tf).
+  # Bootstrap: on a fresh project, create this bucket by hand before `terraform init`.
   backend "gcs" {
     bucket = "quinchool-tfstate"
     prefix = "terraform"

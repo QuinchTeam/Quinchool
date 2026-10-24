@@ -193,12 +193,18 @@ resource "google_cloud_run_v2_service" "crawl4ai" {
       }
 
       resources {
+        cpu_idle          = true
+        startup_cpu_boost = true
         limits = {
           cpu    = "2"
           memory = "4Gi"
         }
       }
     }
+  }
+
+  lifecycle {
+    ignore_changes = [client, client_version]
   }
 }
 
@@ -241,5 +247,7 @@ resource "google_cloud_run_domain_mapping" "domains" {
 
   lifecycle {
     prevent_destroy = true
+    # Import leaves this empty, and any change forces a replace.
+    ignore_changes = [spec[0].certificate_mode]
   }
 }
