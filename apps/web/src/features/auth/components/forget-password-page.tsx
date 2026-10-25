@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -10,6 +11,7 @@ import {
   AuthCard,
   AuthField,
   AuthFooter,
+  withEmail,
 } from "@/features/auth/components/auth-form-parts";
 import {
   type ForgetPasswordValues,
@@ -18,10 +20,12 @@ import {
 import { requestPasswordReset } from "@/lib/auth-client";
 
 export function ForgetPasswordPage() {
+  const initialEmail = useSearchParams().get("email") ?? "";
   const form = useForm<ForgetPasswordValues>({
     resolver: zodResolver(forgetPasswordSchema),
-    defaultValues: { email: "" },
+    defaultValues: { email: initialEmail },
   });
+  const email = form.watch("email");
 
   async function onSubmit(values: ForgetPasswordValues) {
     const { error } = await requestPasswordReset({
@@ -38,7 +42,15 @@ export function ForgetPasswordPage() {
   return (
     <AuthCard
       title="Forgot password"
+      scene="forget"
       description="Enter your email and we'll send you a reset link."
+      footer={
+        <AuthFooter
+          text="Remembered it?"
+          href={withEmail("/auth/login", email)}
+          linkLabel="Sign in"
+        />
+      }
     >
       <Form {...form}>
         <form
@@ -51,19 +63,16 @@ export function ForgetPasswordPage() {
             label="Email"
             type="email"
             autoComplete="email"
+            placeholder="you@example.com"
           />
           <Button
             type="submit"
             className="w-full"
-            disabled={form.formState.isSubmitting}
+            loading={form.formState.isSubmitting}
+            loadingText="Sending..."
           >
             Send reset link
           </Button>
-          <AuthFooter
-            text="Remembered it?"
-            href="/auth/login"
-            linkLabel="Sign in"
-          />
         </form>
       </Form>
     </AuthCard>

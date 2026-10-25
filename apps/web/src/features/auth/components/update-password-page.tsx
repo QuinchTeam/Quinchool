@@ -46,7 +46,11 @@ export function UpdatePasswordPage() {
   return (
     <AuthCard
       title="Update password"
+      scene="update"
       description="Choose a new password for your account."
+      footer={
+        <AuthFooter text="Back to" href="/auth/login" linkLabel="Sign in" />
+      }
     >
       <Form {...form}>
         <form
@@ -59,15 +63,17 @@ export function UpdatePasswordPage() {
             label="New password"
             type="password"
             autoComplete="new-password"
+            placeholder="At least 8 characters"
           />
           <Button
             type="submit"
             className="w-full"
-            disabled={form.formState.isSubmitting || !token}
+            disabled={!token}
+            loading={form.formState.isSubmitting}
+            loadingText="Updating..."
           >
             Update password
           </Button>
-          <AuthFooter text="Back to" href="/auth/login" linkLabel="Sign in" />
         </form>
       </Form>
     </AuthCard>

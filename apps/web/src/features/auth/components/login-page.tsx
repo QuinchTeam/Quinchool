@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import {
   AuthField,
   AuthFooter,
   AuthLink,
+  withEmail,
 } from "@/features/auth/components/auth-form-parts";
 import {
   type LoginValues,
@@ -21,10 +22,12 @@ import { signIn } from "@/lib/auth-client";
 
 export function LoginPage() {
   const router = useRouter();
+  const initialEmail = useSearchParams().get("email") ?? "";
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: initialEmail, password: "" },
   });
+  const email = form.watch("email");
 
   async function onSubmit(values: LoginValues) {
     const { error } = await signIn.email(values);
@@ -39,7 +42,15 @@ export function LoginPage() {
   return (
     <AuthCard
       title="Sign in"
+      scene="login"
       description="Enter your email and password to continue."
+      footer={
+        <AuthFooter
+          text="Don't have an account?"
+          href={withEmail("/auth/register", email)}
+          linkLabel="Sign up"
+        />
+      }
     >
       <Form {...form}>
         <form
@@ -52,6 +63,7 @@ export function LoginPage() {
             label="Email"
             type="email"
             autoComplete="email"
+            placeholder="you@example.com"
           />
           <AuthField
             control={form.control}
@@ -59,22 +71,21 @@ export function LoginPage() {
             label="Password"
             type="password"
             autoComplete="current-password"
+            placeholder="Enter your password"
             action={
-              <AuthLink href="/auth/forget-password">Forgot password?</AuthLink>
+              <AuthLink href={withEmail("/auth/forget-password", email)}>
+                Forgot password?
+              </AuthLink>
             }
           />
           <Button
             type="submit"
             className="w-full"
-            disabled={form.formState.isSubmitting}
+            loading={form.formState.isSubmitting}
+            loadingText="Signing in..."
           >
             Sign in
           </Button>
-          <AuthFooter
-            text="Don't have an account?"
-            href="/auth/register"
-            linkLabel="Sign up"
-          />
         </form>
       </Form>
     </AuthCard>

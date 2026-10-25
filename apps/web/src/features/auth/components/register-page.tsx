@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ import {
   AuthCard,
   AuthField,
   AuthFooter,
+  withEmail,
 } from "@/features/auth/components/auth-form-parts";
 import {
   type RegisterValues,
@@ -20,10 +21,12 @@ import { signUp } from "@/lib/auth-client";
 
 export function RegisterPage() {
   const router = useRouter();
+  const initialEmail = useSearchParams().get("email") ?? "";
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { name: "", email: initialEmail, password: "" },
   });
+  const email = form.watch("email");
 
   async function onSubmit(values: RegisterValues) {
     const { error } = await signUp.email(values);
@@ -38,7 +41,15 @@ export function RegisterPage() {
   return (
     <AuthCard
       title="Create an account"
+      scene="register"
       description="Sign up with your email and password."
+      footer={
+        <AuthFooter
+          text="Already have an account?"
+          href={withEmail("/auth/login", email)}
+          linkLabel="Sign in"
+        />
+      }
     >
       <Form {...form}>
         <form
@@ -50,6 +61,7 @@ export function RegisterPage() {
             name="name"
             label="Name"
             autoComplete="name"
+            placeholder="Your name"
           />
           <AuthField
             control={form.control}
@@ -57,6 +69,7 @@ export function RegisterPage() {
             label="Email"
             type="email"
             autoComplete="email"
+            placeholder="you@example.com"
           />
           <AuthField
             control={form.control}
@@ -64,19 +77,16 @@ export function RegisterPage() {
             label="Password"
             type="password"
             autoComplete="new-password"
+            placeholder="At least 8 characters"
           />
           <Button
             type="submit"
             className="w-full"
-            disabled={form.formState.isSubmitting}
+            loading={form.formState.isSubmitting}
+            loadingText="Creating account..."
           >
             Create account
           </Button>
-          <AuthFooter
-            text="Already have an account?"
-            href="/auth/login"
-            linkLabel="Sign in"
-          />
         </form>
       </Form>
     </AuthCard>
