@@ -86,7 +86,7 @@ export function TransactionSourceFields() {
                 {wallets.map((wallet) => (
                   <SelectItem key={wallet.id} value={wallet.id}>
                     <span className="truncate">{wallet.name}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="font-mono text-xs text-muted-foreground">
                       {formatMoney(wallet.balance)}
                     </span>
                   </SelectItem>

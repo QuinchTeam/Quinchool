@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -74,16 +75,16 @@ export function CashFlowChart({ summary }: { summary: FinanceSummary }) {
   const percent = (value: number) => `${(value / top) * 100}%`;
 
   return (
-    <figure className="flex h-72 min-w-0 flex-col gap-3 rounded-md border bg-card p-5">
-      <figcaption className="flex items-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
+    <figure className="flex h-72 min-w-0 flex-col gap-3 rounded-md bg-card p-5 font-mono">
+      <figcaption className="flex items-center gap-2">
+        <Badge variant="outline">
           <span className={`size-2.5 rounded-xs ${INCOME_FILL}`} />
           Income
-        </span>
-        <span className="flex items-center gap-1.5">
+        </Badge>
+        <Badge variant="outline">
           <span className={`size-2.5 rounded-xs ${EXPENSE_FILL}`} />
           Expense
-        </span>
+        </Badge>
       </figcaption>
       <div className="flex min-h-0 flex-1 gap-3 pt-3">
         <div
@@ -107,7 +108,7 @@ export function CashFlowChart({ summary }: { summary: FinanceSummary }) {
               aria-hidden
               className={cn(
                 "absolute inset-x-0 border-t",
-                tick === 0 ? "border-border" : "border-border/50",
+                tick === 0 ? "border-border" : "border-dashed border-border/50",
               )}
               style={{ bottom: percent(tick) }}
             />
@@ -131,11 +132,11 @@ export function CashFlowChart({ summary }: { summary: FinanceSummary }) {
                     )}
                   >
                     <span
-                      className={`w-full max-w-6 rounded-t-sm ${INCOME_FILL}`}
+                      className={`dither w-full max-w-6 ${INCOME_FILL}`}
                       style={{ height: percent(income) }}
                     />
                     <span
-                      className={`w-full max-w-6 rounded-t-sm ${EXPENSE_FILL}`}
+                      className={`dither w-full max-w-6 ${EXPENSE_FILL}`}
                       style={{ height: percent(expense) }}
                     />
                   </TooltipTrigger>

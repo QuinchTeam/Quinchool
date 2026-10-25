@@ -123,7 +123,7 @@ export function WalletForm({
         </FinanceField>
         <FinanceField
           id={`${prefix}-balance`}
-          label="Opening balance (PHP)"
+          label="Opening balance (₱)"
           error={errors.openingBalance?.message}
         >
           <Input

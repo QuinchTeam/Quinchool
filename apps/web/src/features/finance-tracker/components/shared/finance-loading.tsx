@@ -23,10 +23,12 @@ function TextSkeleton({
 
 export function BalanceSkeleton() {
   return (
-    <Card variant="minimal" className="gap-3">
-      <TextSkeleton className="text-sm" text="Total Balance ··" />
-      <TextSkeleton className="text-3xl font-semibold" text="PHP 00,000.00" />
-      <TextSkeleton className="text-xs" text="2 wallets" />
+    <Card>
+      <CardContent className="grid gap-3">
+        <TextSkeleton className="text-sm" text="Total Balance ··" />
+        <TextSkeleton className="text-3xl font-semibold" text="₱00,000.00" />
+        <TextSkeleton className="text-xs" text="2 wallets" />
+      </CardContent>
     </Card>
   );
 }
@@ -47,7 +49,7 @@ export function WalletsSkeleton() {
             </div>
             <Skeleton className="size-12 shrink-0" />
           </div>
-          <TextSkeleton className="text-xl font-semibold" text="PHP 0,000.00" />
+          <TextSkeleton className="text-xl font-semibold" text="₱0,000.00" />
           <div className="mt-auto flex items-center justify-between gap-2">
             <TextSkeleton className="text-xs" text="0 transactions" />
             <div className="flex items-center gap-1">
@@ -71,10 +73,7 @@ export function CashFlowSkeleton() {
         {[1, 2].map((id) => (
           <Card key={id} variant="minimal" className="gap-2">
             <TextSkeleton className="text-sm" text="Earned This Month" />
-            <TextSkeleton
-              className="text-2xl font-semibold"
-              text="PHP 0,000.00"
-            />
+            <TextSkeleton className="text-2xl font-semibold" text="₱0,000.00" />
           </Card>
         ))}
       </div>
@@ -117,7 +116,7 @@ export function TransactionsLoading() {
           <div className="flex shrink-0 flex-col items-end">
             <TextSkeleton
               className="text-base font-semibold"
-              text="+PHP 0,000.00"
+              text="+₱0,000.00"
             />
             <TextSkeleton
               className="mt-1 text-xs"

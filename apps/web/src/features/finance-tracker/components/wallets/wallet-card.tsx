@@ -96,7 +96,7 @@ export function WalletCard({
           <AppIcon icon={DotsSixVerticalIcon} className="size-5" />
         </Button>
       </div>
-      <p className="break-all text-xl font-semibold tabular-nums">
+      <p className="break-all font-mono text-xl font-semibold tabular-nums">
         {formatMoney(wallet.balance)}
       </p>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2">

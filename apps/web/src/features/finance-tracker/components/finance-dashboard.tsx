@@ -1,9 +1,8 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { AppHeader } from "@/components/shared/app-header";
 import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
-import { AppIcon } from "@/components/ui/icon";
 import { useFinanceOverview } from "@/features/finance-tracker/hooks/use-wallets";
 import { formatMoney } from "@/features/finance-tracker/lib/format";
 import { BalanceSkeleton, WalletsSkeleton } from "./shared/finance-loading";
@@ -49,23 +48,19 @@ export function FinanceDashboard() {
       )}
       {data && (
         <>
-          <Card
-            variant="minimal"
-            role="region"
-            aria-label="Total balance"
-            className="gap-3"
-          >
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <AppIcon icon={WalletIcon} className="size-4" />
-              Total Balance
-            </div>
-            <p className="break-all text-3xl font-semibold tabular-nums">
-              {formatMoney(data.totalBalance)}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {data.wallets.length}{" "}
-              {data.wallets.length === 1 ? "wallet" : "wallets"}
-            </p>
+          <Card role="region" aria-label="Total balance">
+            <CardContent className="grid gap-3">
+              <p className="font-mono text-sm text-muted-foreground uppercase">
+                Total Balance
+              </p>
+              <p className="break-all font-mono text-3xl font-semibold tabular-nums">
+                {formatMoney(data.totalBalance)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {data.wallets.length}{" "}
+                {data.wallets.length === 1 ? "wallet" : "wallets"}
+              </p>
+            </CardContent>
           </Card>
           <section
             aria-labelledby="finance-wallets"

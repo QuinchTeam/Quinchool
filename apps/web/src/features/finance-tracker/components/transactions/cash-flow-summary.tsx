@@ -1,8 +1,8 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { ArrowDownIcon } from "@phosphor-icons/react/dist/ssr/ArrowDown";
-import { ArrowUpIcon } from "@phosphor-icons/react/dist/ssr/ArrowUp";
+import { ArrowDownLeftIcon } from "@phosphor-icons/react/dist/ssr/ArrowDownLeft";
+import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
 import { useSyncExternalStore } from "react";
 import { AppIcon } from "@/components/ui/icon";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -114,11 +114,11 @@ function Total({
   amount: string;
 }) {
   return (
-    <Card variant="minimal" className="gap-2">
+    <Card variant="minimal" className="gap-2 font-mono">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <AppIcon
-          icon={type === "INCOME" ? ArrowDownIcon : ArrowUpIcon}
-          className={`size-4 ${amountClassName(type)}`}
+          icon={type === "INCOME" ? ArrowUpRightIcon : ArrowDownLeftIcon}
+          className={`dither animate-dither size-7 motion-reduce:animate-none ${amountClassName(type)}`}
         />
         {title}
       </div>

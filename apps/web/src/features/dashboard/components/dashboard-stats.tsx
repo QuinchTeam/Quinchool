@@ -139,7 +139,7 @@ function Stat({
               </Badge>
             )}
           </div>
-          <p className="truncate text-xl font-semibold">{value}</p>
+          <p className="truncate font-mono text-xl font-semibold">{value}</p>
           <p className="truncate text-xs text-muted-foreground">{hint}</p>
         </CardContent>
       </Card>

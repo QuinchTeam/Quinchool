@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { DateTimePicker } from "@/components/shared/date-time-picker";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -127,7 +128,7 @@ export function TransferForm({
           </FinanceField>
           <FinanceField
             id={`${prefix}-amount`}
-            label="Amount (PHP)"
+            label="Amount (₱)"
             error={errors.amount?.message}
           >
             <Input
@@ -145,15 +146,21 @@ export function TransferForm({
             label="Date and time"
             error={errors.occurredAt?.message}
           >
-            <Input
-              id={`${prefix}-date`}
-              type="datetime-local"
-              max={toLocalDateTime()}
-              aria-invalid={!!errors.occurredAt}
-              aria-describedby={
-                errors.occurredAt ? `${prefix}-date-error` : undefined
-              }
-              {...register("occurredAt")}
+            <Controller
+              control={control}
+              name="occurredAt"
+              render={({ field }) => (
+                <DateTimePicker
+                  id={`${prefix}-date`}
+                  value={field.value}
+                  onChange={field.onChange}
+                  max={new Date()}
+                  invalid={!!errors.occurredAt}
+                  describedBy={
+                    errors.occurredAt ? `${prefix}-date-error` : undefined
+                  }
+                />
+              )}
             />
           </FinanceField>
           <FinanceField

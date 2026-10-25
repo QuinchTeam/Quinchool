@@ -56,7 +56,7 @@ async function TransactionsPanel() {
             </div>
             <span
               className={cn(
-                "shrink-0 text-sm font-medium",
+                "shrink-0 font-mono text-sm font-medium",
                 amountClassName(transaction.type),
               )}
             >

@@ -1,7 +1,7 @@
 export function formatMoney(amount: string) {
   const negative = amount.startsWith("-");
   const [whole, fraction = ""] = amount.replace(/^-/, "").split(".");
-  return `${negative ? "-" : ""}PHP ${BigInt(whole).toLocaleString("en-PH")}.${fraction.padEnd(2, "0")}`;
+  return `${negative ? "-" : ""}₱${BigInt(whole).toLocaleString("en-PH")}.${fraction.padEnd(2, "0")}`;
 }
 
 const transactionDate = new Intl.DateTimeFormat("en-PH", {

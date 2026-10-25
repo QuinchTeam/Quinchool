@@ -40,7 +40,7 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
                 ? ArrowDownLeftIcon
                 : ArrowUpRightIcon
           }
-          className="size-6"
+          className="dither animate-dither size-7 motion-reduce:animate-none"
         />
         <span className="sr-only">
           {transfer ? "Transfer" : income ? "Income" : "Expense"}
@@ -67,7 +67,7 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
       <div className="shrink-0 text-right">
         <p
           className={cn(
-            "text-base font-semibold tabular-nums",
+            "font-mono text-base font-semibold tabular-nums",
             amountClassName(transaction.type),
           )}
         >
