@@ -22,6 +22,6 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Leave framework assets and metadata images public.
   matcher: [
-    "/((?!api|_next/static|_next/image|icon|apple-icon|opengraph-image|quinchool-icon-v2.webp).*)",
+    "/((?!api|_next/static|_next/image|icon|apple-icon|opengraph-image|quinchool-icon-v2.webp|textures).*)",
   ],
 };
