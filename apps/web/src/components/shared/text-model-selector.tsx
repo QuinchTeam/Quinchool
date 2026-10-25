@@ -88,18 +88,19 @@ export function TextModelSelector({
 
               return (
                 <ComboboxItem key={model.id} value={model}>
-                  <div className="rounded-lg bg-background p-2">
+                  <div className="shrink-0 self-start rounded-lg bg-background p-2">
                     <ModelIcon modelId={model.id} />
                   </div>
                   <span className="grid min-w-0 gap-1">
-                    <span className="flex items-center gap-2">
+                    {/* The provider count drops under the name instead of squeezing it on narrow screens. */}
+                    <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                       <span className="font-bold">{model.name}</span>
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="font-mono text-xs whitespace-nowrap text-muted-foreground">
                         ({providerCount} Provider
                         {providerCount === 1 ? "" : "s"})
                       </span>
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground max-md:line-clamp-2">
                       {model.description}
                     </span>
                   </span>

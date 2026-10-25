@@ -10,6 +10,7 @@ interface ChatbotState {
   setModelId: (modelId: TextGenerationModelId) => void;
   setInput: (input: string) => void;
   toggleList: () => void;
+  setListOpen: (isListOpen: boolean) => void;
 }
 
 export const useChatbotStore = create<ChatbotState>()((set) => ({
@@ -19,4 +20,5 @@ export const useChatbotStore = create<ChatbotState>()((set) => ({
   setModelId: (modelId) => set({ modelId }),
   setInput: (input) => set({ input }),
   toggleList: () => set((state) => ({ isListOpen: !state.isListOpen })),
+  setListOpen: (isListOpen) => set({ isListOpen }),
 }));

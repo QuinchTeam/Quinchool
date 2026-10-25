@@ -39,7 +39,7 @@ export function ChatComposer({
   }
 
   return (
-    <footer className="border-t px-6 py-4">
+    <footer className="border-t px-4 py-4 md:px-6">
       <form
         className="w-full"
         onSubmit={handleSubmit}

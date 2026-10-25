@@ -30,12 +30,14 @@ export function ChatEmptyState({
           What would you like to work on?
         </p>
       </div>
-      <div className="flex max-w-2xl flex-wrap justify-center gap-2">
+      <div className="flex w-full max-w-2xl flex-wrap justify-center gap-2">
         {SUGGESTIONS.map((suggestion) => (
           <Button
             key={suggestion}
             type="button"
             variant="outline"
+            // Long prompts wrap onto full-width rows on mobile instead of overflowing.
+            className="max-md:h-auto max-md:min-h-14 max-md:w-full max-md:py-3 max-md:whitespace-normal"
             onClick={() => onSelect(suggestion)}
           >
             {suggestion}

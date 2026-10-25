@@ -23,7 +23,7 @@ export function ChatMessages({
   messages: DisplayMessage[];
 }) {
   return (
-    <div className="grid w-full gap-8 px-6 py-8">
+    <div className="grid w-full gap-8 px-4 py-8 md:px-6">
       {messages.map((message) => (
         <ChatMessage key={message.id} action={action} message={message} />
       ))}
