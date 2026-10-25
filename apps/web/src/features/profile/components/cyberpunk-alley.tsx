@@ -1094,7 +1094,11 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
   }, [loading, paused, resolvedTheme]);
 
   return (
-    <div ref={columnRef} className="relative h-dvh min-w-0 lg:static lg:h-auto">
+    // Below lg, bleed past the page's p-6 padding so the alley spans edge to edge.
+    <div
+      ref={columnRef}
+      className="relative -mx-6 -mb-6 h-dvh min-w-0 lg:static lg:mx-0 lg:mb-0 lg:h-auto"
+    >
       <div
         ref={panelRef}
         className="group/alley absolute inset-0 overflow-hidden lg:left-1/2 lg:rounded-r-lg"

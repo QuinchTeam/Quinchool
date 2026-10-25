@@ -30,7 +30,7 @@ function CheckboxGroupItem({
   value: string;
 }) {
   return (
-    <Label data-slot="checkbox-group-item">
+    <Label data-slot="checkbox-group-item" className="min-w-0 break-words">
       <Checkbox value={value} />
       {children}
     </Label>
@@ -90,7 +90,8 @@ function SortableCheckboxGroupItem({
       {...itemProps}
       data-slot="sortable-checkbox-group-item"
       className={cn(
-        "flex items-center gap-1 rounded-lg p-1",
+        // min-w-0 lets the item shrink inside a grid column so long labels wrap instead of overflowing.
+        "flex min-w-0 items-center gap-1 rounded-lg p-1",
         dragClassName,
         isDragging && "bg-card ring-1 ring-border",
       )}

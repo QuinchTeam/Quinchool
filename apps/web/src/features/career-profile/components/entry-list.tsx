@@ -154,6 +154,7 @@ export function EntryList({
           type="button"
           variant="outline"
           size="sm"
+          className="max-md:w-full"
           onClick={() => append(empty())}
         >
           <AppIcon icon={PlusCircleIcon} />

@@ -58,9 +58,9 @@ export function ResumeContentToolbar({
 
     return (
       <div className="rounded-lg bg-muted/50 p-2">
-        {/* Short skill labels use three columns; bullets stay full width. */}
+        {/* Short skill labels use columns (two on phones, three above); bullets stay full width. */}
         <SortableCheckboxGroup
-          className={cn(columns && "grid-cols-3")}
+          className={cn(columns && "grid-cols-2 sm:grid-cols-3")}
           wrap={columns}
           items={items}
           value={items

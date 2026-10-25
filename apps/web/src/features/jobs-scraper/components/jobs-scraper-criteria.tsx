@@ -4,7 +4,16 @@ import { FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ProhibitIcon } from "@phosphor-icons/react/dist/ssr/Prohibit";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { AppIcon } from "@/components/ui/icon";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/features/jobs-scraper/components/shared/section-card";
 import { useJobsScraper } from "@/features/jobs-scraper/hooks/use-jobs-scraper";
@@ -16,11 +25,38 @@ import type { JobScraperConfig } from "@/features/jobs-scraper/validations/job-s
 
 export function JobsScraperCriteria() {
   const { state } = useJobsScraper();
+  const criteria = state ? (
+    <CriteriaSummary config={state.config} />
+  ) : (
+    <CriteriaLoading />
+  );
 
+  // Mobile shows a button that opens the criteria in a sheet; md and up keep the card.
   return (
-    <SectionCard icon={FunnelIcon} title="Search criteria">
-      {state ? <CriteriaSummary config={state.config} /> : <CriteriaLoading />}
-    </SectionCard>
+    <>
+      <div className="max-md:hidden">
+        <SectionCard icon={FunnelIcon} title="Search criteria">
+          {criteria}
+        </SectionCard>
+      </div>
+      <Sheet>
+        <SheetTrigger
+          render={<Button variant="outline" className="w-full md:hidden" />}
+        >
+          <AppIcon icon={FunnelIcon} />
+          Search criteria
+        </SheetTrigger>
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <AppIcon icon={FunnelIcon} className="text-muted-foreground" />
+              Search criteria
+            </SheetTitle>
+          </SheetHeader>
+          <SheetBody className="grid content-start gap-6">{criteria}</SheetBody>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 

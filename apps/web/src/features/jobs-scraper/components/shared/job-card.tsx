@@ -90,9 +90,10 @@ export function JobCard({
           <h3 className="text-base font-semibold">{job.title}</h3>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
             <span>{job.company}</span>
-            <span className="flex items-center gap-1">
-              <AppIcon icon={MapPinIcon} className="size-4 shrink-0" />
-              {job.location}
+            {/* Pin stays full size and aligned to the first line when the location wraps. */}
+            <span className="flex min-w-0 items-start gap-1">
+              <AppIcon icon={MapPinIcon} className="mt-0.5 size-4 shrink-0" />
+              <span className="min-w-0">{job.location}</span>
             </span>
           </p>
         </div>
@@ -149,10 +150,12 @@ export function JobCard({
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           {footer ?? <span />}
-          <div className="flex flex-wrap gap-2">
+          {/* Mobile stacks the actions full width. */}
+          <div className="flex flex-wrap gap-2 max-md:w-full max-md:flex-col">
             {onGenerateResume ? (
               <Button
                 type="button"
+                className="max-md:w-full"
                 disabled={resumeDisabled}
                 loading={isGeneratingResume}
                 loadingText="Generating..."
@@ -166,7 +169,10 @@ export function JobCard({
               href={job.url}
               target="_blank"
               rel="noreferrer"
-              className={buttonVariants({ variant: "outline" })}
+              className={buttonVariants({
+                variant: "outline",
+                className: "max-md:w-full",
+              })}
             >
               View job
               <AppIcon icon={ArrowSquareOutIcon} />

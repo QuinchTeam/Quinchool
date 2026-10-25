@@ -33,9 +33,10 @@ export function BulletsField({
 
   return (
     <div className="grid gap-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Label>Bullets</Label>
-        <div className="flex flex-wrap gap-2">
+        {/* Mobile: the two actions split a full-width row. */}
+        <div className="flex flex-wrap gap-2 max-md:w-full max-md:*:flex-1">
           <ImportBulletsDialog
             onImport={(bullets) => {
               // Replace the blank new-entry placeholder when pasting bullets.
@@ -107,7 +108,7 @@ function BulletRow({
       <div className="mt-7">
         <DragHandle label={label.toLowerCase()} {...handleProps} />
       </div>
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <CareerProfileField
           aria-label={label}
           label={title}

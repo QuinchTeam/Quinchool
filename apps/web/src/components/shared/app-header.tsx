@@ -28,7 +28,10 @@ export function AppHeader({
         )}
       </div>
       {children && (
-        <div className="flex flex-wrap items-center gap-2">{children}</div>
+        // Mobile: actions share the row and the last (primary) action takes a full-width row.
+        <div className="flex flex-wrap items-center gap-2 max-md:w-full max-md:*:flex-1 max-md:*:last:basis-full">
+          {children}
+        </div>
       )}
     </header>
   );
