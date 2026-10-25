@@ -22,21 +22,22 @@ jobs:
           # slow, so the request timeout matches the API's own client timeout.
           - service: ai
             label: "🤖 AI"
-            serviceFlags: --no-allow-unauthenticated --timeout=300
+            serviceFlags: --no-allow-unauthenticated --timeout=300 --cpu-throttling
             flags: >-
               --memory=2Gi
               --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }},LANGFUSE_HOST=${{ vars.LANGFUSE_HOST }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-ai
               --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
           # Public: the browser calls it directly with the session cookie.
+          # Always-on CPU: scans keep running after the 202 response.
           - service: api
             label: "⚙️ API"
-            serviceFlags: --allow-unauthenticated --timeout=300
+            serviceFlags: --allow-unauthenticated --timeout=300 --no-cpu-throttling
             flags: >-
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }},S3_ENDPOINT=${{ vars.S3_ENDPOINT }},S3_REGION=${{ vars.S3_REGION }},S3_BUCKET=${{ vars.S3_BUCKET }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-api
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest,S3_ACCESS_KEY_ID=s3-access-key-id:latest,S3_SECRET_ACCESS_KEY=s3-secret-access-key:latest
           - service: web
             label: "🌐 Web"
-            serviceFlags: --allow-unauthenticated
+            serviceFlags: --allow-unauthenticated --cpu-throttling
             buildArgs: >-
               --build-arg NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
               --build-arg NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
@@ -86,7 +87,6 @@ jobs:
             --region ${{ vars.GCP_REGION }} --format=json > "$SERVICE_CONFIG"
           APP_CONTAINER="$(jq -er '[.spec.template.spec.containers[] | select((.ports // []) | length > 0)] | if length == 1 then .[0].name else error("Expected exactly one ingress container") end' "$SERVICE_CONFIG")"
           gcloud run deploy quinchool-${{ matrix.service }} \
-            --no-cpu-throttling \
             --region ${{ vars.GCP_REGION }} \
             --service-account ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }} \
             --quiet \
