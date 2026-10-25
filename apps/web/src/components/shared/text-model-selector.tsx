@@ -24,11 +24,13 @@ const models: readonly TextGenerationModelConfig[] = TEXT_GENERATION_MODELS;
 
 export function TextModelSelector({
   label,
+  hideLabel = false,
   inCanvas = false,
   onValueChange,
   value,
 }: {
   label: string;
+  hideLabel?: boolean;
   inCanvas?: boolean;
   onValueChange: (modelId: TextGenerationModelId) => void;
   value: TextGenerationModelId;
@@ -47,8 +49,8 @@ export function TextModelSelector({
   }
 
   return (
-    <div className="grid gap-2">
-      <Label>{label}</Label>
+    <div className="grid min-w-0 grid-cols-1 gap-2">
+      <Label className={hideLabel ? "sr-only" : undefined}>{label}</Label>
       <Combobox
         filter={null}
         items={models}
@@ -64,7 +66,7 @@ export function TextModelSelector({
           <ComboboxTrigger
             render={
               <Button
-                className="h-auto w-full justify-between border-input bg-card py-2 dark:bg-input/30"
+                className="h-auto w-full justify-between border-input bg-card py-2 active:scale-100 dark:bg-input/30"
                 type="button"
                 variant="outline"
               />
@@ -80,7 +82,7 @@ export function TextModelSelector({
             )}
           </ComboboxTrigger>
         </div>
-        <ComboboxContent anchor={anchor} className="min-w-0">
+        <ComboboxContent anchor={anchor} className="w-128">
           <ComboboxEmpty>No model found.</ComboboxEmpty>
           <ComboboxList>
             {(model) => {

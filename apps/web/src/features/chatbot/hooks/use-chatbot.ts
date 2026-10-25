@@ -26,6 +26,7 @@ export function useChatbot(chatId?: string) {
   const setInput = useChatbotStore((state) => state.setInput);
   const [optimistic, setOptimistic] = useState<DisplayMessage[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+  const scrolledChatId = useRef<string | undefined | null>(null);
 
   const chat = useQuery({
     queryKey: ["chat", chatId],
@@ -40,14 +41,20 @@ export function useChatbot(chatId?: string) {
   ];
 
   async function settle(turn: ChatTurn) {
-    setOptimistic([]);
-
     if (!chatId) {
-      // Refresh the list before navigating so the generated title appears in the sidebar.
-      await queryClient.invalidateQueries({ queryKey: CHATS_KEY });
+      // Keep the optimistic bubble and prefetch the new chat, so neither page flashes empty while navigating.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: CHATS_KEY }),
+        queryClient.prefetchQuery({
+          queryKey: ["chat", turn.chatId],
+          queryFn: () => getChat(turn.chatId),
+        }),
+      ]);
       router.push(`/chatbot/${turn.chatId}`);
       return;
     }
+
+    setOptimistic([]);
 
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["chat", turn.chatId] }),
@@ -76,9 +83,17 @@ export function useChatbot(chatId?: string) {
 
   useEffect(() => {
     if (lastMessageId || reply.isPending) {
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
+      // scrollIntoView also scrolls outer containers, shoving the whole layout up; scroll only the list.
+      const list = endRef.current?.closest("main");
+      // Jump instantly on the first scroll for each chat (visiting); animate only new messages.
+      const isFirst = scrolledChatId.current !== chatId;
+      scrolledChatId.current = chatId;
+      list?.scrollTo({
+        top: list.scrollHeight,
+        behavior: isFirst ? "instant" : "smooth",
+      });
     }
-  }, [lastMessageId, reply.isPending]);
+  }, [chatId, lastMessageId, reply.isPending]);
 
   function sendMessage(content: string) {
     const trimmed = content.trim();
@@ -121,6 +136,7 @@ export function useChatbot(chatId?: string) {
     isLoading: chat.isLoading,
     isPending: reply.isPending || action.isPending,
     messages,
+    retry: () => reply.variables && sendMessage(reply.variables.content),
     sendMessage,
     title: chat.data?.title ?? null,
   };

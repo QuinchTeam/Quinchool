@@ -197,6 +197,65 @@
   image-rendering: pixelated;
 }
 
+/* Pixel dither: a 2px checkerboard across the whole element. */
+@utility dither {
+  mask-image: repeating-conic-gradient(#000 0 25%, transparent 0 50%);
+  mask-size: 4px 4px;
+}
+
+/* Flip the dither checkerboard so the pattern shimmers; pair with `dither`. */
+@keyframes dither-shift {
+  to {
+    mask-position: 0 4px;
+  }
+}
+
+@utility animate-dither {
+  animation: dither-shift 0.6s steps(2) infinite;
+}
+
+/* One pixel of the thinking grid; stagger cells with animation-delay. */
+@keyframes dither-cell {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@utility animate-dither-cell {
+  animation: dither-cell 1.2s steps(4) infinite;
+}
+
+/* Primary text with a brighter primary highlight sweeping across. */
+@keyframes text-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@utility text-shimmer {
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-primary) 40%,
+    color-mix(in oklab, var(--color-primary), white 60%) 50%,
+    var(--color-primary) 60%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  animation: text-shimmer 2s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 @utility scrollbar-gutter-stable {
   scrollbar-gutter: stable;
 }
@@ -238,6 +297,71 @@
   box-shadow: inset 0 0 0 100vmax var(--input-fill);
   -webkit-text-fill-color: var(--foreground);
   caret-color: var(--foreground);
+}
+
+.chat-title-viewport {
+  display: block;
+  overflow: hidden;
+  container-type: inline-size;
+  mask-image: linear-gradient(to right, #000 0%, #000 90%, transparent 100%);
+}
+
+.chat-title-text {
+  display: inline-block;
+  min-width: 100%;
+  white-space: nowrap;
+}
+
+/* Animatable so the start fade only appears once the title slides. */
+@property --chat-fade-start {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.group:is(:hover, :focus-within) .chat-title-viewport {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--chat-fade-start),
+    #000 90%,
+    transparent
+  );
+}
+
+@keyframes chat-title-fade {
+  0%,
+  15% {
+    --chat-fade-start: 0%;
+  }
+  85%,
+  100% {
+    --chat-fade-start: 5%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ponytail: short titles that never slide still get the 5% start fade at the end. */
+  .group:is(:hover, :focus-within) .chat-title-viewport {
+    animation: chat-title-fade 3s ease-in-out infinite alternate;
+  }
+
+  .group:is(:hover, :focus-within) .chat-title-text {
+    /* End padding = fade width, so the last word clears the mask. */
+    padding-inline-end: 10cqw;
+    animation: chat-title-slide 3s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes chat-title-slide {
+  0%,
+  15% {
+    transform: translateX(0);
+  }
+  85%,
+  100% {
+    transform: translateX(min(0px, calc(100cqw - 100%)));
+  }
 }
 
 @keyframes shimmer {

@@ -4,6 +4,7 @@ import { PaperPlaneTiltIcon } from "@phosphor-icons/react/dist/ssr/PaperPlaneTil
 import { AppIcon } from "@/components/ui/icon";
 import type { FormEvent, KeyboardEvent } from "react";
 
+import { TextModelSelector } from "@/components/shared/text-model-selector";
 import {
   InputGroup,
   InputGroupAddon,
@@ -21,6 +22,8 @@ export function ChatComposer({
 }) {
   const value = useChatbotStore((state) => state.input);
   const onChange = useChatbotStore((state) => state.setInput);
+  const modelId = useChatbotStore((state) => state.modelId);
+  const setModelId = useChatbotStore((state) => state.setModelId);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,7 +42,7 @@ export function ChatComposer({
   }
 
   return (
-    <footer className="border-t px-4 py-4 md:px-6">
+    <footer className="px-4 py-4 md:px-6">
       <form
         className="w-full"
         onSubmit={handleSubmit}
@@ -53,10 +56,18 @@ export function ChatComposer({
             disabled={isPending}
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Quinch Bot"
+            placeholder="Ask Quinch Bot"
             value={value}
           />
-          <InputGroupAddon align="block-end" className="justify-end">
+          <InputGroupAddon align="block-end" className="justify-end gap-2">
+            <div className="shrink-0">
+              <TextModelSelector
+                label="Model"
+                hideLabel
+                value={modelId}
+                onValueChange={setModelId}
+              />
+            </div>
             <InputGroupButton
               aria-label="Send message"
               disabled={!value.trim()}

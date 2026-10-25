@@ -16,7 +16,14 @@ export function useChats() {
     chats: query.data ?? [],
     isLoading: query.isLoading,
     isError: query.isError,
-    rename: useMutation({ mutationFn: renameChat, onSuccess: invalidate }),
+    rename: useMutation({
+      mutationFn: renameChat,
+      onSuccess: (_chat, { chatId }) =>
+        Promise.all([
+          invalidate(),
+          queryClient.invalidateQueries({ queryKey: ["chat", chatId] }),
+        ]),
+    }),
     remove: useMutation({ mutationFn: deleteChat, onSuccess: invalidate }),
   };
 }

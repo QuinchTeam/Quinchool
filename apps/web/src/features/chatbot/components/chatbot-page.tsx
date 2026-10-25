@@ -13,7 +13,7 @@ export function ChatbotPage({ chatId }: { chatId?: string }) {
   return (
     <div className="flex h-full min-h-0">
       <div className="flex min-w-0 flex-1 flex-col">
-        <ChatHeader title={chat.title} />
+        <ChatHeader key={chatId ?? "new"} chatId={chatId} title={chat.title} />
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           {chat.messages.length === 0 && !chat.isLoading ? (
@@ -25,6 +25,7 @@ export function ChatbotPage({ chatId }: { chatId?: string }) {
               error={chat.error}
               isPending={chat.isPending}
               messages={chat.messages}
+              onRetry={chat.retry}
             />
           )}
         </main>

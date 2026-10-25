@@ -14,6 +14,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { DitherLoader } from "@/components/ui/dither-loader";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -83,10 +84,13 @@ export function FeedbackShowcase() {
       <ShowcaseSection
         id="feedback"
         title="Feedback"
-        description="Spinner, skeleton, and empty states"
+        description="Spinner, dither loader, skeleton, and empty states"
         className="flex-col items-start gap-6"
       >
-        <Spinner className="size-6" />
+        <div className="flex items-center gap-6">
+          <Spinner className="size-6" />
+          <DitherLoader />
+        </div>
 
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-64" />

@@ -1,7 +1,9 @@
 "use client";
 
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { AppIcon } from "@/components/ui/icon";
 import Link from "next/link";
@@ -39,8 +41,9 @@ export function ChatListSidebar({ activeChatId }: { activeChatId?: string }) {
     return (
       <Sheet open={isOpen} onOpenChange={setListOpen}>
         <SheetContent side="right">
-          <SheetHeader>
+          <SheetHeader className="flex-row items-center justify-between">
             <SheetTitle>Chats</SheetTitle>
+            <NewChatButton onNavigate={() => setListOpen(false)} />
           </SheetHeader>
           <SheetBody className="p-2">
             <ChatList
@@ -59,18 +62,40 @@ export function ChatListSidebar({ activeChatId }: { activeChatId?: string }) {
       aria-hidden={!isOpen}
       className={cn(
         "shrink-0 overflow-hidden border-l transition-all duration-200",
-        isOpen ? "w-72" : "w-0",
+        isOpen ? "w-112" : "w-0",
       )}
     >
-      <div className="flex h-full w-72 flex-col">
-        <header className="border-b px-4 py-3">
-          <h2 className="text-sm font-medium">Chats</h2>
-        </header>
+      <div className="flex h-full w-112 flex-col">
+        <div className="px-2 pt-2">
+          <NewChatButton className="w-full" />
+        </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-2">
           <ChatList activeChatId={activeChatId} />
         </div>
       </div>
     </aside>
+  );
+}
+
+function NewChatButton({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className={className}
+      nativeButton={false}
+      render={<Link href="/chatbot" onClick={onNavigate} />}
+    >
+      <PlusIcon weight="regular" />
+      New chat
+    </Button>
   );
 }
 
@@ -95,23 +120,28 @@ function ChatList({
         <p className="p-2 text-sm text-muted-foreground">
           Could not load your chats.
         </p>
-      ) : chats.length === 0 ? (
-        <p className="p-2 text-sm text-muted-foreground">
-          No chats yet. Send a message to start one.
-        </p>
-      ) : (
-        <ul className="grid gap-1">
-          {chats.map((chat) => (
-            <ChatRow
-              key={chat.id}
-              chat={chat}
-              isActive={chat.id === activeChatId}
-              onDelete={() => remove.mutate(chat.id)}
-              onNavigate={onNavigate}
-              onRename={(title) => rename.mutate({ chatId: chat.id, title })}
+      ) : chats.length === 0 ? null : (
+        <details open className="group/recent">
+          <summary className="flex cursor-pointer list-none items-center gap-1 px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+            Recent
+            <CaretDownIcon
+              weight="regular"
+              className="size-3 transition-transform group-not-open/recent:-rotate-90"
             />
-          ))}
-        </ul>
+          </summary>
+          <ul className="grid gap-1">
+            {chats.map((chat) => (
+              <ChatRow
+                key={chat.id}
+                chat={chat}
+                isActive={chat.id === activeChatId}
+                onDelete={() => remove.mutate(chat.id)}
+                onNavigate={onNavigate}
+                onRename={(title) => rename.mutate({ chatId: chat.id, title })}
+              />
+            ))}
+          </ul>
+        </details>
       )}
     </>
   );
@@ -137,7 +167,7 @@ function ChatRow({
     return (
       <li>
         <form
-          className="flex items-center gap-1"
+          className="flex items-center gap-2"
           onSubmit={(event) => {
             event.preventDefault();
             if (draft.trim()) onRename(draft.trim());
@@ -150,17 +180,17 @@ function ChatRow({
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onBlur={() => setDraft(null)}
-            className="h-8"
+            className="h-13 rounded-xl [&_input]:h-full"
           />
           <Button
             aria-label="Save name"
-            size="icon-sm"
+            size="icon"
             type="submit"
-            variant="ghost"
+            className="rounded-full [&_svg]:size-6"
             // Prevent blur from closing the editor before its action receives the click.
             onMouseDown={(event) => event.preventDefault()}
           >
-            <AppIcon icon={CheckIcon} />
+            <CheckIcon size={24} />
           </Button>
         </form>
       </li>
@@ -168,38 +198,40 @@ function ChatRow({
   }
 
   return (
-    <li className="group flex items-center gap-1">
+    <li
+      className={cn(
+        "group relative flex w-full items-center rounded-xl hover:bg-muted focus-within:bg-muted",
+        isActive && "bg-muted font-medium",
+      )}
+    >
       <Link
         href={`/chatbot/${chat.id}`}
         onClick={onNavigate}
         title={`${label} — ${updated.format(new Date(chat.updatedAt))}`}
-        className={cn(
-          "min-w-0 flex-1 truncate rounded px-2 py-1.5 text-sm hover:bg-muted",
-          isActive && "bg-muted font-medium",
-        )}
+        className="min-w-0 flex-1 rounded-xl py-4 px-4 text-sm group-focus-within:pr-22 group-hover:pr-22 max-md:pr-22"
       >
-        {label}
+        <span className="chat-title-viewport">
+          <span className="chat-title-text">{label}</span>
+        </span>
       </Link>
-      <Button
-        aria-label={`Rename ${label}`}
-        size="icon-sm"
-        variant="ghost"
-        // Touch screens have no hover, so the actions stay visible on mobile.
-        className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100"
-        onClick={() => setDraft(chat.title ?? "")}
-      >
-        <AppIcon icon={PencilSimpleIcon} />
-      </Button>
-      <Button
-        aria-label={`Delete ${label}`}
-        size="icon-sm"
-        variant="ghost"
-        // Touch screens have no hover, so the actions stay visible on mobile.
-        className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100"
-        onClick={onDelete}
-      >
-        <AppIcon icon={TrashIcon} />
-      </Button>
+      <div className="absolute right-2 flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100">
+        <Button
+          aria-label={`Rename ${label}`}
+          size="icon-sm"
+          variant="ghost"
+          onClick={() => setDraft(chat.title ?? "")}
+        >
+          <AppIcon icon={PencilSimpleIcon} />
+        </Button>
+        <Button
+          aria-label={`Delete ${label}`}
+          size="icon-sm"
+          variant="ghost"
+          onClick={onDelete}
+        >
+          <AppIcon icon={TrashIcon} />
+        </Button>
+      </div>
     </li>
   );
 }

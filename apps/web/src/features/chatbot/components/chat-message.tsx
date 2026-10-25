@@ -1,6 +1,6 @@
 "use client";
 
-import { RobotIcon } from "@phosphor-icons/react/dist/ssr/Robot";
+import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
 import { AppIcon } from "@/components/ui/icon";
 import Image from "next/image";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -37,7 +37,7 @@ export function ChatMessage({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-2xl rounded bg-muted px-4 py-3 text-sm whitespace-pre-wrap">
+        <p className="max-w-2xl rounded-full bg-primary px-5 py-3 text-sm whitespace-pre-wrap text-primary-foreground">
           {message.content}
         </p>
       </div>
@@ -53,7 +53,7 @@ export function ChatMessage({
       <div className="grid min-w-0 flex-1 gap-2 pt-1">
         {message.toolUsed ? (
           <Badge variant="outline" className="w-fit">
-            <AppIcon icon={RobotIcon} />
+            <AppIcon icon={IdentificationCardIcon} />
             Career profile used
           </Badge>
         ) : null}
@@ -64,7 +64,7 @@ export function ChatMessage({
             </ReactMarkdown>
           </div>
         ) : null}
-        {pending && ToolAction && message.actionOutcome === undefined ? (
+        {pending && ToolAction && !message.actionOutcome ? (
           <ToolAction
             action={pending}
             error={action.error}
