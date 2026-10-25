@@ -23,7 +23,10 @@ export function JobResults({ state }: { state: JobScraperState }) {
   if (savedJobs.length === 0) {
     return (
       <div className="grid gap-4">
-        <SourceIssues issues={state.sourceIssues} />
+        <SourceIssues
+          issues={state.sourceIssues}
+          scannedAt={state.lastScannedAt}
+        />
         <div className="min-h-96">
           <EmptyState
             icon={BriefcaseIcon}
@@ -68,7 +71,10 @@ export function JobResults({ state }: { state: JobScraperState }) {
         </p>
       </div>
 
-      <SourceIssues issues={state.sourceIssues} />
+      <SourceIssues
+        issues={state.sourceIssues}
+        scannedAt={state.lastScannedAt}
+      />
 
       {matches.length > 0 ? (
         <JobSection title="Matches" jobs={matches} />

@@ -2,15 +2,33 @@
 
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { useState } from "react";
-import { AppIcon } from "@/components/ui/icon";
 import type { JobSourceIssue } from "@/features/jobs-scraper/lib/types";
 
-export function SourceIssues({ issues }: { issues: JobSourceIssue[] }) {
-  // ponytail: dismissal lasts until reload; persist per scan if it nags.
-  const [dismissed, setDismissed] = useState(false);
+const DISMISSED_SCAN_KEY = "jobs-scraper:dismissed-source-issues";
 
-  if (issues.length === 0 || dismissed) {
+// Dismissal is remembered per scan, so the next scan's issues show again.
+export function SourceIssues({
+  issues,
+  scannedAt,
+}: {
+  issues: JobSourceIssue[];
+  scannedAt: string | null;
+}) {
+  const [dismissedScan, setDismissedScan] = useState(() =>
+    typeof window === "undefined"
+      ? null
+      : localStorage.getItem(DISMISSED_SCAN_KEY),
+  );
+
+  if (issues.length === 0 || (scannedAt && dismissedScan === scannedAt)) {
     return null;
+  }
+
+  function dismiss() {
+    if (scannedAt) {
+      localStorage.setItem(DISMISSED_SCAN_KEY, scannedAt);
+    }
+    setDismissedScan(scannedAt);
   }
 
   return (
@@ -20,9 +38,9 @@ export function SourceIssues({ issues }: { issues: JobSourceIssue[] }) {
         <button
           type="button"
           className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
-          onClick={() => setDismissed(true)}
+          onClick={dismiss}
         >
-          <AppIcon icon={XIcon} className="size-4" />
+          <XIcon className="size-4" />
           <span className="sr-only">Dismiss</span>
         </button>
       </div>
