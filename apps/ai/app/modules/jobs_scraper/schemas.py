@@ -78,7 +78,7 @@ EXCLUDED_JOB_LEVELS = (
     "CTO",
 )
 
-JOB_SOURCES = ("LinkedIn", "JobStreet", "OnlineJobs.ph")
+JOB_SOURCES = ("LinkedIn", "JobStreet", "OnlineJobs.ph", "Indeed")
 JOB_WORK_MODES = ("Remote", "Hybrid", "Onsite")
 JOB_TIME_RANGES = ("LAST_HOUR", "TODAY", "THIS_WEEK", "CUSTOM")
 
@@ -86,11 +86,12 @@ JOB_URL_PREFIXES = {
     "LinkedIn": "https://www.linkedin.com/jobs/view/",
     "JobStreet": "https://ph.jobstreet.com/job/",
     "OnlineJobs.ph": "https://www.onlinejobs.ph/jobseekers/job/",
+    "Indeed": "https://ph.indeed.com/viewjob?jk=",
 }
 
 JOB_CLASSIFICATIONS = ("MATCH", "POTENTIAL", "REJECTED")
 
-JobSource = Literal["LinkedIn", "JobStreet", "OnlineJobs.ph"]
+JobSource = Literal["LinkedIn", "JobStreet", "OnlineJobs.ph", "Indeed"]
 WorkMode = Literal["Remote", "Hybrid", "Onsite"]
 ReviewedWorkMode = Literal["Remote", "Hybrid", "Onsite", "Unclear"]
 TimeRange = Literal["LAST_HOUR", "TODAY", "THIS_WEEK", "CUSTOM"]

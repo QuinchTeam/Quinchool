@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-export const JOB_SOURCES = ["LinkedIn", "JobStreet", "OnlineJobs.ph"] as const;
+export const JOB_SOURCES = [
+  "LinkedIn",
+  "JobStreet",
+  "OnlineJobs.ph",
+  "Indeed",
+] as const;
 export const JOB_WORK_MODES = ["Remote", "Hybrid", "Onsite"] as const;
 export const JOB_TIME_RANGES = [
   "LAST_HOUR",
@@ -201,12 +206,17 @@ export interface ScanStatus {
   stepCount: number | null;
 }
 
-// Use the source's numeric job ID, falling back to the lowercase URL path.
+// Use the source's job ID, falling back to the lowercase URL path.
 export function getSourceJobId(
   url: string,
   source: (typeof JOB_SOURCES)[number],
 ): string {
-  const pathname = new URL(url).pathname.replace(/\/$/, "");
+  const parsed = new URL(url);
+  if (source === "Indeed") {
+    return parsed.searchParams.get("jk") ?? parsed.pathname.toLowerCase();
+  }
+
+  const pathname = parsed.pathname.replace(/\/$/, "");
   const numericId =
     source === "JobStreet"
       ? pathname.match(/\/job\/(\d+)/)?.[1]

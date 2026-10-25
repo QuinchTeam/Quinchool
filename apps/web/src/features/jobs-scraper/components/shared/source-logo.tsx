@@ -15,6 +15,19 @@ export function SourceLogo({ source }: { source: SavedJob["source"] }) {
             />
           </g>
         </svg>
+      ) : source === "Indeed" ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6">
+          <rect width="24" height="24" rx="5" fill="#fff" />
+          <path
+            d="M5 10c1-5 7-8 13-6"
+            fill="none"
+            stroke="#003a9b"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <circle cx="12" cy="8" r="2" fill="#003a9b" />
+          <rect x="10" y="11" width="4" height="10" rx="2" fill="#003a9b" />
+        </svg>
       ) : (
         <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6">
           {source === "LinkedIn" ? <LinkedInMark /> : <JobStreetMark />}

@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   DEFAULT_JOB_SCRAPER_CONFIG,
+  getSourceJobId,
   getUnsetScanCriteria,
   jobScraperConfigSchema,
   mapScanFailure,
@@ -22,6 +23,18 @@ const validConfig = {
   worldwideWorkModes: ["Remote"],
   philippinesWorkModes: [],
 };
+
+test("Indeed jobs keep distinct query-based IDs", () => {
+  const first = "https://ph.indeed.com/viewjob?jk=c58dcfbe410f0392";
+  const second = "https://ph.indeed.com/viewjob?jk=018aef0e739c7ac9";
+  assert.equal(getSourceJobId(first, "Indeed"), "c58dcfbe410f0392");
+  assert.equal(getSourceJobId(second, "Indeed"), "018aef0e739c7ac9");
+  assert.deepEqual(
+    jobScraperConfigSchema.parse({ ...validConfig, sources: ["Indeed"] })
+      .sources,
+    ["Indeed"],
+  );
+});
 
 test("dedupes criteria case-insensitively and keeps the first spelling", () => {
   const parsed = jobScraperConfigSchema.parse({

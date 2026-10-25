@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections.abc import Sequence
 from datetime import date, datetime, timedelta, timezone
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from app.modules.jobs_scraper.schemas import (
     JOB_URL_PREFIXES,
@@ -193,10 +193,16 @@ def get_job_source_from_url(url: str) -> JobSource | None:
     if hostname in {"onlinejobs.ph", "www.onlinejobs.ph"}:
         return "OnlineJobs.ph"
 
+    if hostname == "ph.indeed.com":
+        return "Indeed"
+
     return None
 
 
 def get_source_job_id(url: str, source: JobSource) -> str:
+    if source == "Indeed":
+        return parse_qs(urlparse(url).query).get("jk", [urlparse(url).path.lower()])[0]
+
     pathname = urlparse(url).path.rstrip("/")
     match = (
         re.search(r"/job/(\d+)", pathname)

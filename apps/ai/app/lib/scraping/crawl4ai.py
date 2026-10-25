@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import re
 import time
 from collections.abc import Sequence
+from datetime import datetime
 from typing import ClassVar
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import parse_qs, quote, urlparse, urlunparse
 
 import google.auth.transport.requests
 import google.oauth2.id_token
@@ -16,8 +18,10 @@ from app.core.exceptions import Crawl4AiUnavailableError
 from app.core.logging import elapsed_ms, log_jobs_scraper
 from app.core.telemetry import domain_operation
 from app.lib.jobs_scraper.rules import (
+    MANILA,
     get_crawl_lookback_seconds,
     get_job_source_from_url,
+    get_source_job_id,
 )
 from app.modules.jobs_scraper.schemas import (
     JOB_SOURCES,
@@ -43,6 +47,7 @@ BLOCKED_PATTERN = re.compile(
 LINKEDIN_PATH = re.compile(r"^/jobs/view/")
 JOBSTREET_PATH = re.compile(r"^/job/\d+")
 ONLINEJOBS_PATH = re.compile(r"^/jobseekers/job/(?:[a-zA-Z0-9-]+-)?\d+/?$")
+INDEED_JOB_CARDS = 'window.mosaic.providerData["mosaic-provider-jobcards"]='
 
 
 class CrawlLink(BaseModel):
@@ -62,6 +67,7 @@ class CrawlResult(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     error_message: str | None = None
+    html: str | None = None
     links: CrawlLinks = Field(default_factory=CrawlLinks)
     markdown: str | dict[str, object] | None = None
     status_code: int | None = None
@@ -94,6 +100,7 @@ async def collect_job_documents(
         },
     )
 
+    indeed_posted = read_indeed_posted_labels(search_results)
     source_issues: list[JobSourceIssue] = []
     detail_urls: dict[JobSource, list[str]] = {}
 
@@ -133,7 +140,13 @@ async def collect_job_documents(
     selected_detail_urls = [url for urls in detail_urls.values() for url in urls]
     await on_step("READING", len(selected_detail_urls))
     details_started_at = time.monotonic()
-    detail_results = await crawl_urls(selected_detail_urls)
+    # Indeed's search side-pane view serves public listings; plain /viewjob redirects to sign-in.
+    detail_results = await crawl_urls(
+        [
+            url.replace("/viewjob?jk=", "/viewjob?viewtype=embedded&jk=")
+            for url in selected_detail_urls
+        ]
+    )
     documents: list[JobDocument] = []
 
     for result in detail_results:
@@ -143,11 +156,20 @@ async def collect_job_documents(
         if not source or not result.success or is_blocked(result) or not content:
             continue
 
+        url = normalize_job_url(result.url, source)
+        if not url or (source == "Indeed" and not is_indeed_listing(content, url)):
+            continue
+
+        if source == "Indeed" and (
+            posted := indeed_posted.get(get_source_job_id(url, source))
+        ):
+            content = f"{posted}\n\n{content}"
+
         documents.append(
             JobDocument(
                 content=content[:MAX_DOCUMENT_LENGTH],
                 source=source,
-                url=normalize_job_url(result.url, source),
+                url=url,
             )
         )
 
@@ -228,6 +250,12 @@ def build_search_urls(config: JobScraperConfig) -> list[str]:
                 "https://www.onlinejobs.ph/jobseekers/jobsearch"
                 f"?jobkeyword={encoded_role}&gig=on&partTime=on&fullTime=on"
                 "&isFromJobsearchForm=1"
+            )
+
+        if "Indeed" in config.sources:
+            urls.append(
+                f"https://ph.indeed.com/jobs?q={encoded_role}&l=Philippines"
+                f"&fromage={jobstreet_days}&sort=date"
             )
 
     return urls
@@ -352,6 +380,17 @@ def normalize_job_url(url: str, source: JobSource) -> str:
         if not parsed.hostname or get_job_source_from_url(url) != source:
             return ""
 
+        if source == "Indeed":
+            job_ids = parse_qs(parsed.query).get("jk", [])
+            if (
+                parsed.path not in {"/viewjob", "/rc/clk", "/pagead/clk"}
+                or len(job_ids) != 1
+                or not re.fullmatch(r"[a-fA-F0-9]{16}", job_ids[0])
+            ):
+                return ""
+
+            return f"{JOB_URL_PREFIXES['Indeed']}{job_ids[0].lower()}"
+
         if source == "LinkedIn":
             if not LINKEDIN_PATH.match(parsed.path):
                 return ""
@@ -386,8 +425,47 @@ def read_markdown(result: CrawlResult) -> str:
 
 def is_blocked(result: CrawlResult) -> bool:
     return bool(
-        BLOCKED_PATTERN.search(f"{result.error_message or ''} {read_markdown(result)}")
+        result.status_code in {401, 403, 429}
+        or BLOCKED_PATTERN.search(
+            f"{result.error_message or ''} {read_markdown(result)}"
+        )
     )
+
+
+def is_indeed_listing(content: str, url: str) -> bool:
+    # Rejects sign-in/verification pages (often 200 or 307) and panes bound to another job.
+    job_ids = set(re.findall(r"fromjk=([a-f0-9]{16})", content))
+    return "Full job description" in content and job_ids <= {
+        get_source_job_id(url, "Indeed")
+    }
+
+
+def read_indeed_posted_labels(results: list[CrawlResult]) -> dict[str, str]:
+    # Indeed dates exist only in search-card JSON; createDate drives its visible "N days ago" label.
+    labels: dict[str, str] = {}
+
+    for result in results:
+        html = result.html or ""
+        start = html.find(INDEED_JOB_CARDS)
+        if start < 0:
+            continue
+
+        try:
+            data, _ = json.JSONDecoder().raw_decode(html, start + len(INDEED_JOB_CARDS))
+            jobs = data["metaData"]["mosaicProviderJobCardsModel"]["results"]
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        for job in jobs:
+            job_id, created_ms = job.get("jobkey"), job.get("createDate")
+            if isinstance(job_id, str) and isinstance(created_ms, int):
+                posted_at = datetime.fromtimestamp(created_ms / 1000, MANILA)
+                labels[job_id] = (
+                    f"Posted on Indeed: {job.get('formattedRelativeTime', '')} "
+                    f"({posted_at.isoformat(timespec='minutes')})"
+                )
+
+    return labels
 
 
 def _summarize_crawl_batch(
