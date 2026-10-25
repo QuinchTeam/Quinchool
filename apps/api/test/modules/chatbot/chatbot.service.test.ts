@@ -27,9 +27,9 @@ class FakeChatbotService extends ChatbotService {
     const next = this.script.shift() ?? { text: "done", toolCall: null };
 
     return Promise.resolve({
-      modelId: "gemini-3.1-flash-lite",
+      modelId: "gemini-3.5-flash-lite",
       providerId: "google-ai-studio",
-      providerModelId: "gemini-3.1-flash-lite",
+      providerModelId: "gemini-3.5-flash-lite",
       text: next.text,
       toolCall: next.toolCall,
     } as never);
@@ -62,7 +62,7 @@ function readTool(name: string, result: unknown, ran: string[]): AnyTool {
 
 const INPUT = {
   messages: [{ content: "hi", role: "user" as const }],
-  modelId: "gemini-3.1-flash-lite" as const,
+  modelId: "gemini-3.5-flash-lite" as const,
   userId: "user-1",
 };
 

@@ -13,7 +13,7 @@ locals {
     # Must be run.app URLs, not custom domains: they are the ID token audience.
     AI_SERVICE_URL = google_cloud_run_v2_service.app["ai"].uri
     CRAWL4AI_URL   = google_cloud_run_v2_service.crawl4ai.uri
-    GEMINI_MODEL   = "gemini-3.1-flash-lite"
+    GEMINI_MODEL   = "gemini-3.5-flash-lite"
     LANGFUSE_HOST  = "https://jp.cloud.langfuse.com"
     S3_ENDPOINT   = "https://2b4ccec120d284d624dec0ebfddc9848.r2.cloudflarestorage.com"
     S3_REGION     = "auto"

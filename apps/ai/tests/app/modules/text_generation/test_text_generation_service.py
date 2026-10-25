@@ -22,14 +22,14 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         model_id: TextGenerationModelId = "gpt-oss-20b"
         self.assertEqual(
             [provider for provider, _ in get_provider_chain(model_id)],
-            ["groq", "openrouter", "cloudflare-workers-ai"],
+            ["groq", "cloudflare-workers-ai"],
         )
 
         with patch.dict(
             "app.modules.text_generation.service.TEXT_GENERATION_PROVIDERS",
             {
                 "groq": AsyncMock(side_effect=ProviderHttpError("groq is down", 503)),
-                "openrouter": AsyncMock(
+                "cloudflare-workers-ai": AsyncMock(
                     return_value=ProviderText(
                         text="answer", usage=TextGenerationUsage(input_tokens=3)
                     )
@@ -38,8 +38,8 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
         ):
             result = await generate_text(model_id, "hello")
 
-        self.assertEqual(result.provider_id, "openrouter")
-        self.assertEqual(result.provider_model_id, "openai/gpt-oss-20b:free")
+        self.assertEqual(result.provider_id, "cloudflare-workers-ai")
+        self.assertEqual(result.provider_model_id, "@cf/openai/gpt-oss-20b")
         self.assertEqual(result.text, "answer")
 
     async def test_reports_the_last_failure_when_every_provider_fails(self) -> None:
@@ -56,7 +56,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
             ),
             self.assertRaises(TextGenerationError) as raised,
         ):
-            _ = await generate_text("gemini-3.5-flash", "hello")
+            _ = await generate_text("gemini-3.6-flash", "hello")
 
         self.assertEqual(raised.exception.status, 429)
         self.assertEqual(raised.exception.code, "rate_limit")
@@ -69,9 +69,9 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
 
     async def test_generate_endpoint_returns_camel_case_json(self) -> None:
         result = GenerateTextResult(
-            model_id="kimi-k2.6",
+            model_id="qwen-3.8-27b",
             provider_id="cloudflare-workers-ai",
-            provider_model_id="@cf/moonshotai/kimi-k2.6",
+            provider_model_id="@cf/qwen/qwen3.8-27b",
             text="answer",
             usage=TextGenerationUsage(input_tokens=1, output_tokens=2),
         )
@@ -85,7 +85,7 @@ class TextGenerationTest(IsolatedAsyncioTestCase):
             ) as client:
                 response = await client.post(
                     "/text-generation",
-                    json={"modelId": "kimi-k2.6", "prompt": "hello"},
+                    json={"modelId": "qwen-3.8-27b", "prompt": "hello"},
                 )
 
         self.assertEqual(response.status_code, 200)

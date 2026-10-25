@@ -8,7 +8,7 @@ import {
 } from "@/lib/ai/text-generation/types";
 
 export const DEFAULT_TEXT_GENERATION_MODEL_ID =
-  TEXT_GENERATION_MODEL_IDS.GEMINI_3_1_FLASH_LITE;
+  TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH_LITE;
 
 export interface TextGenerationModelConfig {
   description: string;
@@ -19,20 +19,20 @@ export interface TextGenerationModelConfig {
 
 export const TEXT_GENERATION_MODELS = [
   {
-    id: TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH,
-    name: "Gemini 3.5 Flash",
+    id: TEXT_GENERATION_MODEL_IDS.GEMINI_3_6_FLASH,
+    name: "Gemini 3.6 Flash",
     description:
-      "Google's most capable Flash model for agentic and coding tasks.",
+      "Google's most capable free Flash model for agentic and coding tasks.",
     providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemini-3.5-flash",
+      [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemini-3.6-flash",
     },
   },
   {
-    id: TEXT_GENERATION_MODEL_IDS.GEMINI_3_1_FLASH_LITE,
-    name: "Gemini 3.1 Flash-Lite",
+    id: TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH_LITE,
+    name: "Gemini 3.5 Flash-Lite",
     description: "Cheapest, fastest current-generation Gemini model.",
     providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemini-3.1-flash-lite",
+      [TEXT_GENERATION_PROVIDER_IDS.GOOGLE_AI_STUDIO]: "gemini-3.5-flash-lite",
     },
   },
   {
@@ -48,21 +48,21 @@ export const TEXT_GENERATION_MODELS = [
     },
   },
   {
-    id: TEXT_GENERATION_MODEL_IDS.KIMI_K2_7_CODE,
-    name: "Kimi K2.7 Code",
-    description: "Open-weight model for agentic coding tasks.",
+    id: TEXT_GENERATION_MODEL_IDS.QWEN_3_8_27B,
+    name: "Qwen 3.8 27B",
+    description: "Open-weight all-rounder from Alibaba for chat and reasoning.",
     providerModels: {
+      [TEXT_GENERATION_PROVIDER_IDS.GROQ]: "qwen/qwen3.8-27b",
       [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
-        "@cf/moonshotai/kimi-k2.7-code",
+        "@cf/qwen/qwen3.8-27b",
     },
   },
   {
-    id: TEXT_GENERATION_MODEL_IDS.KIMI_K2_6,
-    name: "Kimi K2.6",
-    description: "Open-weight model for multimodal agentic work.",
+    id: TEXT_GENERATION_MODEL_IDS.NORTH_MINI_CODE,
+    name: "Cohere North Mini Code",
+    description: "Compact Cohere model tuned for coding tasks.",
     providerModels: {
-      [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
-        "@cf/moonshotai/kimi-k2.6",
+      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: "cohere/north-mini-code:free",
     },
   },
   {
@@ -71,7 +71,6 @@ export const TEXT_GENERATION_MODELS = [
     description: "Fast open-weight reasoning model.",
     providerModels: {
       [TEXT_GENERATION_PROVIDER_IDS.GROQ]: "openai/gpt-oss-20b",
-      [TEXT_GENERATION_PROVIDER_IDS.OPENROUTER]: "openai/gpt-oss-20b:free",
       [TEXT_GENERATION_PROVIDER_IDS.CLOUDFLARE_WORKERS_AI]:
         "@cf/openai/gpt-oss-20b",
     },

@@ -18,11 +18,11 @@ class CamelModel(BaseModel):
 
 
 TextGenerationModelId = Literal[
-    "gemini-3.5-flash",
-    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
     "gemma-4-26b-a4b",
-    "kimi-k2.7-code",
-    "kimi-k2.6",
+    "qwen-3.8-27b",
+    "north-mini-code",
     "gpt-oss-20b",
 ]
 
@@ -35,7 +35,7 @@ TextGenerationProviderId = Literal[
 
 TextGenerationErrorCode = Literal["rate_limit"]
 
-DEFAULT_TEXT_GENERATION_MODEL_ID: TextGenerationModelId = "gemini-3.1-flash-lite"
+DEFAULT_TEXT_GENERATION_MODEL_ID: TextGenerationModelId = "gemini-3.5-flash-lite"
 
 Prompt = Annotated[str, StringConstraints(min_length=1)]
 

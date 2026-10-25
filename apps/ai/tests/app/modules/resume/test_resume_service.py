@@ -150,7 +150,7 @@ class ResumeTest(TestCase):
 class ResumeTailoringTest(IsolatedAsyncioTestCase):
     async def test_repairs_short_and_missing_bullets_with_ai(self) -> None:
         request = TailorResumeRequest(
-            model_id="gemini-3.1-flash-lite",
+            model_id="gemini-3.5-flash-lite",
             job_requirement="Build reliable APIs",
             experiences=[
                 TailorResumeExperience(
@@ -240,7 +240,7 @@ class ResumeTailoringTest(IsolatedAsyncioTestCase):
 
     async def test_fails_closed_when_ai_cannot_repair_bullets(self) -> None:
         request = TailorResumeRequest(
-            model_id="gemini-3.1-flash-lite",
+            model_id="gemini-3.5-flash-lite",
             job_requirement="Build reliable APIs",
             experiences=[
                 TailorResumeExperience(
@@ -278,8 +278,8 @@ class ResumeTailoringTest(IsolatedAsyncioTestCase):
     @staticmethod
     def generation(payload: object) -> GenerateTextResult:
         return GenerateTextResult(
-            model_id="gemini-3.1-flash-lite",
+            model_id="gemini-3.5-flash-lite",
             provider_id="google-ai-studio",
-            provider_model_id="gemini-3.1-flash-lite",
+            provider_model_id="gemini-3.5-flash-lite",
             text=json.dumps(payload),
         )

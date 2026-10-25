@@ -22,12 +22,16 @@ already talks to.
 
 Providers are listed in fallback order.
 
-1. Gemini 3.5 Flash : Google AI Studio
-2. Gemini 3.1 Flash-Lite : Google AI Studio
-3. Kimi K2.7 Code : Cloudflare Workers AI
-4. Kimi K2.6 : Cloudflare Workers AI
-5. Gemma 4 26B (A4B) : Google AI Studio → OpenRouter → Cloudflare Workers AI
-6. GPT-OSS 20B : Groq → OpenRouter → Cloudflare Workers AI
+Every model below runs on a free tier. Before adding one, confirm a real request
+succeeds on the free plan: some providers list models they only serve on paid
+plans (Cloudflare's Kimi and GLM models, for example).
+
+1. Gemini 3.6 Flash : Google AI Studio
+2. Gemini 3.5 Flash-Lite (default) : Google AI Studio
+3. Gemma 4 26B (A4B) : Google AI Studio → OpenRouter → Cloudflare Workers AI
+4. Qwen 3.8 27B : Groq → Cloudflare Workers AI
+5. Cohere North Mini Code : OpenRouter
+6. GPT-OSS 20B : Groq → Cloudflare Workers AI
 
 ## Architecture
 
@@ -111,6 +115,7 @@ Example: Anthropic.
 2. Add one `TEXT_GENERATION_MODELS` entry mapping each provider to its real
    provider model ID, first provider first.
 3. Add the same ID to the web app's model registry so the picker can show it.
+4. Map the ID to its brand logo in `apps/web/src/components/shared/model-icon.tsx`.
 
 Nest deliberately does not keep a model or provider registry. FastAPI validates
 the requested model; Nest only checks that the transport field is non-empty.

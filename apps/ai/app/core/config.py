@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     otel_exporter_otlp_endpoint: str = ""
 
     # Job extraction uses Gemini directly because its prompt and JSON schema are model-specific.
-    gemini_model: str = "gemini-3.1-flash-lite"
+    gemini_model: str = "gemini-3.5-flash-lite"
 
     @property
     def crawl4ai_base_url(self) -> str:

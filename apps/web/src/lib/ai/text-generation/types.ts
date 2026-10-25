@@ -1,9 +1,9 @@
 export const TEXT_GENERATION_MODEL_IDS = {
-  GEMINI_3_5_FLASH: "gemini-3.5-flash",
-  GEMINI_3_1_FLASH_LITE: "gemini-3.1-flash-lite",
+  GEMINI_3_6_FLASH: "gemini-3.6-flash",
+  GEMINI_3_5_FLASH_LITE: "gemini-3.5-flash-lite",
   GEMMA_4_26B_A4B: "gemma-4-26b-a4b",
-  KIMI_K2_7_CODE: "kimi-k2.7-code",
-  KIMI_K2_6: "kimi-k2.6",
+  QWEN_3_8_27B: "qwen-3.8-27b",
+  NORTH_MINI_CODE: "north-mini-code",
   GPT_OSS_20B: "gpt-oss-20b",
 } as const;
 

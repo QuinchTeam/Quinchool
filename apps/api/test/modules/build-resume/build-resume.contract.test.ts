@@ -7,14 +7,14 @@ test("accepts either pasted requirements or an owned saved-job id", () => {
   assert.equal(
     buildResumeSchema.safeParse({
       jobRequirement: "Build TypeScript APIs",
-      modelId: "gemini-3.1-flash-lite",
+      modelId: "gemini-3.5-flash-lite",
     }).success,
     true,
   );
   assert.equal(
     buildResumeSchema.safeParse({
       jobId: "job-1",
-      modelId: "gemini-3.1-flash-lite",
+      modelId: "gemini-3.5-flash-lite",
     }).success,
     true,
   );
@@ -22,7 +22,7 @@ test("accepts either pasted requirements or an owned saved-job id", () => {
     buildResumeSchema.safeParse({
       jobId: "job-1",
       jobRequirement: "conflicting source",
-      modelId: "gemini-3.1-flash-lite",
+      modelId: "gemini-3.5-flash-lite",
     }).success,
     false,
   );

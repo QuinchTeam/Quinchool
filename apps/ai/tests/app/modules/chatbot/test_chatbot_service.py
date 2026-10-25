@@ -55,9 +55,9 @@ class RespondTest(IsolatedAsyncioTestCase):
     @staticmethod
     def _generation(text: str) -> GenerateTextResult:
         return GenerateTextResult(
-            model_id="gemini-3.1-flash-lite",
+            model_id="gemini-3.5-flash-lite",
             provider_id="google-ai-studio",
-            provider_model_id="gemini-3.1-flash-lite",
+            provider_model_id="gemini-3.5-flash-lite",
             text=text,
         )
 
@@ -68,7 +68,7 @@ class RespondTest(IsolatedAsyncioTestCase):
         ):
             return await respond(
                 [ChatMessage(role="user", content="Tailor this to my background")],
-                "gemini-3.1-flash-lite",
+                "gemini-3.5-flash-lite",
             )
 
     async def test_surfaces_the_tool_the_model_picked(self) -> None:

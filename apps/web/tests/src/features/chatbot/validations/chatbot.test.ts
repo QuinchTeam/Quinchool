@@ -9,7 +9,7 @@ import {
 test("a first message needs no chat id, and a follow-up carries one", () => {
   const request = {
     content: "Help me plan my week.",
-    modelId: "gemini-3.1-flash-lite",
+    modelId: "gemini-3.5-flash-lite",
   };
 
   assert.equal(chatbotRequestSchema.safeParse(request).success, true);

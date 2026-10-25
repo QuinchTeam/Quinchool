@@ -1,14 +1,11 @@
-import { BrainIcon } from "@phosphor-icons/react/dist/ssr/Brain";
-import { DiamondIcon } from "@phosphor-icons/react/dist/ssr/Diamond";
-import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
-import { SparkleIcon } from "@phosphor-icons/react/dist/ssr/Sparkle";
-import { AppIcon } from "@/components/ui/icon";
+import type { SVGProps } from "react";
 import {
   TEXT_GENERATION_MODEL_IDS,
   type TextGenerationModelId,
 } from "@/lib/ai/text-generation/types";
 import { cn } from "@/lib/utils";
 
+// Brand logos from LobeHub's static icon set (@lobehub/icons-static-svg 1.100.0).
 export function ModelIcon({
   className,
   modelId,
@@ -16,38 +13,150 @@ export function ModelIcon({
   className?: string;
   modelId: TextGenerationModelId;
 }) {
-  const iconClassName = cn("size-8 text-foreground", className);
+  const iconClassName = cn("size-8 shrink-0 text-foreground", className);
 
   switch (modelId) {
-    case TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH:
-    case TEXT_GENERATION_MODEL_IDS.GEMINI_3_1_FLASH_LITE:
-      return (
-        <AppIcon
-          icon={SparkleIcon}
-          aria-hidden="true"
-          className={iconClassName}
-        />
-      );
+    case TEXT_GENERATION_MODEL_IDS.GEMINI_3_6_FLASH:
+    case TEXT_GENERATION_MODEL_IDS.GEMINI_3_5_FLASH_LITE:
+      return <GeminiLogo className={iconClassName} />;
     case TEXT_GENERATION_MODEL_IDS.GEMMA_4_26B_A4B:
-      return (
-        <AppIcon
-          icon={DiamondIcon}
-          aria-hidden="true"
-          className={iconClassName}
-        />
-      );
-    case TEXT_GENERATION_MODEL_IDS.KIMI_K2_7_CODE:
-    case TEXT_GENERATION_MODEL_IDS.KIMI_K2_6:
-      return (
-        <AppIcon icon={MoonIcon} aria-hidden="true" className={iconClassName} />
-      );
+      return <GemmaLogo className={iconClassName} />;
+    case TEXT_GENERATION_MODEL_IDS.QWEN_3_8_27B:
+      return <QwenLogo className={iconClassName} />;
+    case TEXT_GENERATION_MODEL_IDS.NORTH_MINI_CODE:
+      return <CohereLogo className={iconClassName} />;
     case TEXT_GENERATION_MODEL_IDS.GPT_OSS_20B:
-      return (
-        <AppIcon
-          icon={BrainIcon}
-          aria-hidden="true"
-          className={iconClassName}
-        />
-      );
+      return <OpenAILogo className={iconClassName} />;
   }
+}
+
+function GeminiLogo(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"
+        fill="#3186FF"
+      />
+      <path
+        d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"
+        fill="url(#lobe-icons-gemini-0-_R_0_)"
+      />
+      <path
+        d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"
+        fill="url(#lobe-icons-gemini-1-_R_0_)"
+      />
+      <path
+        d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"
+        fill="url(#lobe-icons-gemini-2-_R_0_)"
+      />
+      <defs>
+        <linearGradient
+          gradientUnits="userSpaceOnUse"
+          id="lobe-icons-gemini-0-_R_0_"
+          x1="7"
+          x2="11"
+          y1="15.5"
+          y2="12"
+        >
+          <stop stopColor="#08B962" />
+          <stop offset="1" stopColor="#08B962" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient
+          gradientUnits="userSpaceOnUse"
+          id="lobe-icons-gemini-1-_R_0_"
+          x1="8"
+          x2="11.5"
+          y1="5.5"
+          y2="11"
+        >
+          <stop stopColor="#F94543" />
+          <stop offset="1" stopColor="#F94543" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient
+          gradientUnits="userSpaceOnUse"
+          id="lobe-icons-gemini-2-_R_0_"
+          x1="3.5"
+          x2="17.5"
+          y1="13.5"
+          y2="12"
+        >
+          <stop stopColor="#FABC12" />
+          <stop offset=".46" stopColor="#FABC12" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function GemmaLogo(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <defs>
+        <linearGradient
+          id="lobe-icons-gemma-_R_0_"
+          x1="24.419%"
+          x2="75.194%"
+          y1="75.581%"
+          y2="25.194%"
+        >
+          <stop offset="0%" stopColor="#446EFF" />
+          <stop offset="36.661%" stopColor="#2E96FF" />
+          <stop offset="83.221%" stopColor="#B1C5FF" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M12.34 5.953a8.233 8.233 0 01-.247-1.125V3.72a8.25 8.25 0 015.562 2.232H12.34zm-.69 0c.113-.373.199-.755.257-1.145V3.72a8.25 8.25 0 00-5.562 2.232h5.304zm-5.433.187h5.373a7.98 7.98 0 01-.267.696 8.41 8.41 0 01-1.76 2.65L6.216 6.14zm-.264-.187H2.977v.187h2.915a8.436 8.436 0 00-2.357 5.767H0v.186h3.535a8.436 8.436 0 002.357 5.767H2.977v.186h2.976v2.977h.187v-2.915a8.436 8.436 0 005.767 2.357V24h.186v-3.535a8.436 8.436 0 005.767-2.357v2.915h.186v-2.977h2.977v-.186h-2.915a8.436 8.436 0 002.357-5.767H24v-.186h-3.535a8.436 8.436 0 00-2.357-5.767h2.915v-.187h-2.977V2.977h-.186v2.915a8.436 8.436 0 00-5.767-2.357V0h-.186v3.535A8.436 8.436 0 006.14 5.892V2.977h-.187v2.976zm6.14 14.326a8.25 8.25 0 005.562-2.233H12.34c-.108.367-.19.743-.247 1.126v1.107zm-.186-1.087a8.015 8.015 0 00-.258-1.146H6.345a8.25 8.25 0 005.562 2.233v-1.087zm-8.186-7.285h1.107a8.23 8.23 0 001.125-.247V6.345a8.25 8.25 0 00-2.232 5.562zm1.087.186H3.72a8.25 8.25 0 002.232 5.562v-5.304a8.012 8.012 0 00-1.145-.258zm15.47-.186a8.25 8.25 0 00-2.232-5.562v5.315c.367.108.743.19 1.126.247h1.107zm-1.086.186c-.39.058-.772.144-1.146.258v5.304a8.25 8.25 0 002.233-5.562h-1.087zm-1.332 5.69V12.41a7.97 7.97 0 00-.696.267 8.409 8.409 0 00-2.65 1.76l3.346 3.346zm0-6.18v-5.45l-.012-.013h-5.451c.076.235.162.468.26.696a8.698 8.698 0 001.819 2.688 8.698 8.698 0 002.688 1.82c.228.097.46.183.696.259zM6.14 17.848V12.41c.235.078.468.167.696.267a8.403 8.403 0 012.688 1.799 8.404 8.404 0 011.799 2.688c.1.228.19.46.267.696H6.152l-.012-.012zm0-6.245V6.326l3.29 3.29a8.716 8.716 0 01-2.594 1.728 8.14 8.14 0 01-.696.259zm6.257 6.257h5.277l-3.29-3.29a8.716 8.716 0 00-1.728 2.594 8.135 8.135 0 00-.259.696zm-2.347-7.81a9.435 9.435 0 01-2.88 1.96 9.14 9.14 0 012.88 1.94 9.14 9.14 0 011.94 2.88 9.435 9.435 0 011.96-2.88 9.14 9.14 0 012.88-1.94 9.435 9.435 0 01-2.88-1.96 9.434 9.434 0 01-1.96-2.88 9.14 9.14 0 01-1.94 2.88z"
+        fill="url(#lobe-icons-gemma-_R_0_)"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function QwenLogo(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M19.713 2.825h-5.907c0-.251-.066-.503-.196-.728L12.819.728A1.46 1.46 0 0 0 11.559 0h-1.58c-.52 0-1 .275-1.26.728l-2.42 4.19a1.45 1.45 0 0 0 0 1.453l.791 1.37c.26.448.74.727 1.26.727h11.36c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451l-.79-1.37a1.46 1.46 0 0 0-1.26-.728zM.195 9.905l2.951 5.115a1.46 1.46 0 0 0-.531.531l-.791 1.37a1.45 1.45 0 0 0 0 1.452l.79 1.37c.26.448.74.727 1.26.727h4.84c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451L5.086 7.083a1.46 1.46 0 0 0-1.26-.728h-1.58c-.52 0-1 .276-1.26.728l-.79 1.37a1.45 1.45 0 0 0 0 1.452m15.888 13.367 2.951-5.115c.217.125.469.196.728.196h1.582c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451l-2.42-4.191a1.46 1.46 0 0 0-1.259-.728h-1.582c-.52 0-1 .276-1.259.728l-5.678 9.838a1.45 1.45 0 0 0 0 1.452l.79 1.37c.26.448.74.727 1.26.727h1.582c.52 0 1-.275 1.26-.728z"
+        fill="#082dff"
+      />
+    </svg>
+  );
+}
+
+function CohereLogo(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        clipRule="evenodd"
+        d="M8.128 14.099c.592 0 1.77-.033 3.398-.703 1.897-.781 5.672-2.2 8.395-3.656 1.905-1.018 2.74-2.366 2.74-4.18A4.56 4.56 0 0018.1 1H7.549A6.55 6.55 0 001 7.55c0 3.617 2.745 6.549 7.128 6.549z"
+        fill="#39594D"
+        fillRule="evenodd"
+      />
+      <path
+        clipRule="evenodd"
+        d="M9.912 18.61a4.387 4.387 0 012.705-4.052l3.323-1.38c3.361-1.394 7.06 1.076 7.06 4.715a5.104 5.104 0 01-5.105 5.104l-3.597-.001a4.386 4.386 0 01-4.386-4.387z"
+        fill="#D18EE2"
+        fillRule="evenodd"
+      />
+      <path
+        d="M4.776 14.962A3.775 3.775 0 001 18.738v.489a3.776 3.776 0 007.551 0v-.49a3.775 3.775 0 00-3.775-3.775z"
+        fill="#FF7759"
+      />
+    </svg>
+  );
+}
+
+function OpenAILogo(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      fillRule="evenodd"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z" />
+    </svg>
+  );
 }
