@@ -1,6 +1,7 @@
 "use client";
 
 import { BriefcaseIcon } from "@phosphor-icons/react/dist/ssr/Briefcase";
+import { CaretUpDownIcon } from "@phosphor-icons/react/dist/ssr/CaretUpDown";
 import { NotepadIcon } from "@phosphor-icons/react/dist/ssr/Notepad";
 import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
 import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
@@ -282,6 +283,7 @@ export function AppSidebar() {
                     {user?.email}
                   </span>
                 </div>
+                <CaretUpDownIcon className="ml-auto size-4 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-56">
                 <DropdownMenuItem

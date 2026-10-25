@@ -159,7 +159,7 @@ function ComboboxItem({
           <span className="pointer-events-none absolute right-3 flex size-5 items-center justify-center" />
         }
       >
-        <AppIcon icon={CheckIcon} className="pointer-events-none" />
+        <CheckIcon className="pointer-events-none" />
       </ComboboxPrimitive.ItemIndicator>
     </ComboboxPrimitive.Item>
   );
