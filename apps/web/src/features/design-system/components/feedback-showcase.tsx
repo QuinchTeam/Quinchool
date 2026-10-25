@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { AuthDither } from "@/features/auth/components/auth-form-parts";
+import { AUTH_SCENES, type AuthScene } from "@/features/auth/lib/auth-scenes";
 import { ScanProgressShowcase } from "@/features/design-system/components/scan-progress-showcase";
 import { ShowcaseSection } from "@/features/design-system/components/showcase-section";
 
@@ -53,6 +55,23 @@ export function FeedbackShowcase() {
             </div>
           ),
         )}
+      </ShowcaseSection>
+
+      <Separator />
+
+      <ShowcaseSection
+        id="auth-dither"
+        title="Auth Dither"
+        description="Auth card header icon, one per auth page"
+      >
+        {(Object.keys(AUTH_SCENES) as AuthScene[]).map((scene) => (
+          <div key={scene} className="grid justify-items-center gap-2">
+            <AuthDither scene={scene} />
+            <span className="text-xs text-muted-foreground capitalize">
+              {scene}
+            </span>
+          </div>
+        ))}
       </ShowcaseSection>
 
       <Separator />

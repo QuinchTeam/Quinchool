@@ -144,7 +144,7 @@ const SCENES: Record<DayPeriod, DitherSceneFn> = {
 
 export function DitherScene({ period }: { period: DayPeriod }) {
   return (
-    <div className="size-20 shrink-0 rounded-xl border-2 p-1">
+    <div className="size-20 shrink-0 rounded-xl border-2 border-primary/25 p-1">
       <div className="size-full overflow-hidden rounded-lg bg-muted text-primary">
         <DitherCanvas scene={SCENES[period]} className="size-full" />
       </div>
