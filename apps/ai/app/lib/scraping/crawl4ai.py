@@ -42,6 +42,7 @@ BLOCKED_PATTERN = re.compile(
 )
 LINKEDIN_PATH = re.compile(r"^/jobs/view/")
 JOBSTREET_PATH = re.compile(r"^/job/\d+")
+ONLINEJOBS_PATH = re.compile(r"^/jobseekers/job/(?:[a-zA-Z0-9-]+-)?\d+/?$")
 
 
 class CrawlLink(BaseModel):
@@ -222,6 +223,13 @@ def build_search_urls(config: JobScraperConfig) -> list[str]:
                 f"https://ph.jobstreet.com/{slug}-jobs?daterange={jobstreet_days}"
             )
 
+        if "OnlineJobs.ph" in config.sources:
+            urls.append(
+                "https://www.onlinejobs.ph/jobseekers/jobsearch"
+                f"?jobkeyword={encoded_role}&gig=on&partTime=on&fullTime=on"
+                "&isFromJobsearchForm=1"
+            )
+
     return urls
 
 
@@ -246,6 +254,13 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
     if not urls:
         return []
 
+    onlinejobs_urls = [
+        url for url in urls if get_job_source_from_url(url) == "OnlineJobs.ph"
+    ]
+    if onlinejobs_urls and len(onlinejobs_urls) != len(urls):
+        other_urls = [url for url in urls if url not in onlinejobs_urls]
+        return await crawl_urls(other_urls) + await crawl_urls(onlinejobs_urls)
+
     settings = get_settings()
     payload = {
         "urls": urls,
@@ -265,7 +280,13 @@ async def crawl_urls(urls: list[str]) -> list[CrawlResult]:
             "type": "CrawlerRunConfig",
             "params": {
                 "cache_mode": "bypass",
-                "magic": True,
+                # Magic mode can strip OnlineJobs.ph's public job description.
+                "magic": not onlinejobs_urls,
+                **(
+                    {"wait_until": "networkidle", "delay_before_return_html": 2}
+                    if onlinejobs_urls
+                    else {}
+                ),
                 "page_timeout": 60_000,
                 "stream": False,
                 # Pin browser locale and timezone so client-rendered labels match Manila date filters.
@@ -336,11 +357,16 @@ def normalize_job_url(url: str, source: JobSource) -> str:
                 return ""
 
             hostname = urlparse(JOB_URL_PREFIXES["LinkedIn"]).hostname
-        else:
+        elif source == "JobStreet":
             if not JOBSTREET_PATH.match(parsed.path):
                 return ""
 
             hostname = urlparse(JOB_URL_PREFIXES["JobStreet"]).hostname
+        else:
+            if not ONLINEJOBS_PATH.fullmatch(parsed.path):
+                return ""
+
+            hostname = urlparse(JOB_URL_PREFIXES["OnlineJobs.ph"]).hostname
 
         return urlunparse(("https", hostname or "", parsed.path, "", "", ""))
     except ValueError:

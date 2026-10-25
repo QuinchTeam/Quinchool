@@ -190,6 +190,9 @@ def get_job_source_from_url(url: str) -> JobSource | None:
     if hostname == "jobstreet.com" or hostname.endswith(".jobstreet.com"):
         return "JobStreet"
 
+    if hostname in {"onlinejobs.ph", "www.onlinejobs.ph"}:
+        return "OnlineJobs.ph"
+
     return None
 
 

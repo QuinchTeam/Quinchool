@@ -78,7 +78,7 @@ Rules:
 - A title must match one configured role. The level must match an included level and must not match an excluded level.
 - Worldwide modes apply to every country. Philippines modes apply only when the job country is the Philippines.
 - A listing that mentions a configured excluded technology does not qualify. JavaScript is not Java.
-- Use the document's SOURCE and exact URL. LinkedIn URLs must start with https://www.linkedin.com/jobs/view/ and JobStreet URLs must start with https://ph.jobstreet.com/job/.
+- Use the document's SOURCE and exact URL. LinkedIn URLs must start with https://www.linkedin.com/jobs/view/, JobStreet URLs must start with https://ph.jobstreet.com/job/, and OnlineJobs.ph URLs must start with https://www.onlinejobs.ph/jobseekers/job/.
 - Write every field in English. If the document is in another language, translate it, including the country name and the posting label.
 - Set postedDate to the Philippine calendar date. Preserve the site's visible posting label in postedText. Set postedAt only when an exact timestamp or an explicit relative posting time can support it.
 - Return exactly one entry per document, in exactly one of the three lists, and never repeat a URL. Every document must be accounted for. The summary must state the relevant stack and work arrangement.

@@ -1,4 +1,4 @@
-export const JOB_SOURCES = ["LinkedIn", "JobStreet"] as const;
+export const JOB_SOURCES = ["LinkedIn", "JobStreet", "OnlineJobs.ph"] as const;
 export const JOB_WORK_MODES = ["Remote", "Hybrid", "Onsite"] as const;
 export const JOB_TIME_RANGES = [
   "LAST_HOUR",
