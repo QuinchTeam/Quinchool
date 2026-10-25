@@ -76,7 +76,43 @@ resource "google_artifact_registry_repository" "quinchool" {
   location      = local.region
   repository_id = "quinchool"
   format        = "DOCKER"
+
+  # Storage past 0.5 GB is billed; keep only recent images per service.
+  cleanup_policy_dry_run = false
+
+  cleanup_policies {
+    id     = "keep-recent"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = 3
+    }
+  }
+
+  cleanup_policies {
+    id     = "delete-rest"
+    action = "DELETE"
+
+    condition {
+      tag_state = "ANY"
+    }
+  }
 }
+
+# Docker Hub pull-through cache for upstream images such as crawl4ai.
+resource "google_artifact_registry_repository" "dockerhub" {
+  location      = local.region
+  repository_id = "dockerhub"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    docker_repository {
+      public_repository = "DOCKER_HUB"
+    }
+  }
+}
+
 
 resource "google_secret_manager_secret" "secrets" {
   for_each  = local.secrets
@@ -188,7 +224,8 @@ resource "google_cloud_run_v2_service" "crawl4ai" {
     timeout         = "300s"
 
     containers {
-      image = "unclecode/crawl4ai:0.8.0"
+      # Pulled through the Docker Hub proxy; mirror.gcr.io does not carry this tag.
+      image = "${local.region}-docker.pkg.dev/${local.project_id}/${google_artifact_registry_repository.dockerhub.repository_id}/unclecode/crawl4ai:0.8.0"
 
       ports {
         container_port = 11235
@@ -196,10 +233,10 @@ resource "google_cloud_run_v2_service" "crawl4ai" {
 
       resources {
         cpu_idle          = true
-        startup_cpu_boost = true
+        startup_cpu_boost = false
         limits = {
-          cpu    = "2"
-          memory = "4Gi"
+          cpu    = "1"
+          memory = "2Gi"
         }
       }
     }

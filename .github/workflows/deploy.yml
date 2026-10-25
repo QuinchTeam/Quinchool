@@ -24,14 +24,16 @@ jobs:
             label: "🤖 AI"
             serviceFlags: --no-allow-unauthenticated --timeout=300 --cpu-throttling
             flags: >-
-              --memory=2Gi
+              --memory=1Gi
               --set-env-vars=CRAWL4AI_URL=${{ vars.CRAWL4AI_URL }},GEMINI_MODEL=${{ vars.GEMINI_MODEL }},LANGFUSE_HOST=${{ vars.LANGFUSE_HOST }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-ai
               --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,CLOUDFLARE_ACCOUNT_ID=cloudflare-account-id:latest,CLOUDFLARE_API_TOKEN=cloudflare-api-token:latest,OPENROUTER_API_KEY=openrouter-api-key:latest,GROQ_API_KEY=groq-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest
           # Public: the browser calls it directly with the session cookie.
-          # Always-on CPU: scans keep running after the 202 response.
+          # Request-based CPU to stay in the free tier. Scans still finish after the 202
+          # because the client polls every 3s, and each poll lends the instance CPU.
+          # ponytail: one instance so polls hit the scanning one; move scans to Cloud Tasks if this ceiling bites.
           - service: api
             label: "⚙️ API"
-            serviceFlags: --allow-unauthenticated --timeout=300 --no-cpu-throttling
+            serviceFlags: --allow-unauthenticated --timeout=300 --cpu-throttling --max-instances=1
             flags: >-
               --set-env-vars=AI_SERVICE_URL=${{ vars.AI_SERVICE_URL }},BETTER_AUTH_URL=${{ vars.API_URL }},WEB_ORIGIN=${{ vars.WEB_URL }},COOKIE_DOMAIN=${{ vars.COOKIE_DOMAIN }},S3_ENDPOINT=${{ vars.S3_ENDPOINT }},S3_REGION=${{ vars.S3_REGION }},S3_BUCKET=${{ vars.S3_BUCKET }},OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318,GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }},OTEL_SERVICE_NAME=quinchool-api
               --set-secrets=DATABASE_URL=database-url:latest,BETTER_AUTH_SECRET=better-auth-secret:latest,S3_ACCESS_KEY_ID=s3-access-key-id:latest,S3_SECRET_ACCESS_KEY=s3-secret-access-key:latest
@@ -99,7 +101,7 @@ jobs:
             --container otel-collector \
             --image "$COLLECTOR_IMAGE" \
             --memory 128Mi \
-            --cpu 1 \
+            --cpu 0.25 \
             --set-env-vars GOOGLE_CLOUD_PROJECT=${{ vars.GCP_PROJECT_ID }} \
             --startup-probe httpGet.path=/,httpGet.port=13133,timeoutSeconds=5,periodSeconds=5,failureThreshold=12 \
             --liveness-probe httpGet.path=/,httpGet.port=13133,timeoutSeconds=5,periodSeconds=30,failureThreshold=3
