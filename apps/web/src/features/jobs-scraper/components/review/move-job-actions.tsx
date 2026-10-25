@@ -23,6 +23,11 @@ export function MoveJobActions({ job }: { job: SavedJob }) {
             size="sm"
             variant="outline"
             disabled={updateClassification.isPending}
+            loading={
+              updateClassification.isPending &&
+              updateClassification.variables?.classification === option
+            }
+            loadingText="Moving..."
             onClick={() =>
               updateClassification.mutate({
                 classification: option,

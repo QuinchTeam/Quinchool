@@ -183,8 +183,8 @@ export function WalletForm({
           {save.error.message}
         </p>
       )}
-      <Button type="submit" disabled={save.isPending}>
-        {save.isPending ? "Saving..." : "Save wallet"}
+      <Button type="submit" loading={save.isPending} loadingText="Saving...">
+        Save wallet
       </Button>
     </form>
   );

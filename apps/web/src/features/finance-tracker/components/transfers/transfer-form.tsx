@@ -178,8 +178,12 @@ export function TransferForm({
             {transfer.error.message}
           </p>
         )}
-        <Button type="submit" disabled={transfer.isPending}>
-          {transfer.isPending ? "Transferring..." : "Transfer money"}
+        <Button
+          type="submit"
+          loading={transfer.isPending}
+          loadingText="Transferring..."
+        >
+          Transfer money
         </Button>
       </form>
     </Form>

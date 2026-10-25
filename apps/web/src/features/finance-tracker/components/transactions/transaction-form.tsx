@@ -143,8 +143,13 @@ export function TransactionForm({
             {save.error.message}
           </p>
         )}
-        <Button type="submit" disabled={save.isPending || !wallets.length}>
-          {save.isPending ? "Saving..." : "Save transaction"}
+        <Button
+          type="submit"
+          disabled={!wallets.length}
+          loading={save.isPending}
+          loadingText="Saving..."
+        >
+          Save transaction
         </Button>
       </form>
     </Form>

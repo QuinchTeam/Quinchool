@@ -74,11 +74,13 @@ export function EnhancerNode({ id, data }: NodeProps<EnhancerFlowNode>) {
         />
         <Button
           className="nodrag"
-          disabled={!data.prompt.trim() || enhancePrompt.isPending}
+          disabled={!data.prompt.trim()}
+          loading={enhancePrompt.isPending}
+          loadingText="Enhancing..."
           onClick={runEnhancer}
           type="button"
         >
-          {enhancePrompt.isPending ? "Enhancing..." : "Run"}
+          Run
         </Button>
         {data.executionError || enhancePrompt.isError ? (
           <p className="text-xs text-destructive" role="alert">

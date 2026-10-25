@@ -153,11 +153,13 @@ export function JobCard({
             {onGenerateResume ? (
               <Button
                 type="button"
-                disabled={resumeDisabled || isGeneratingResume}
+                disabled={resumeDisabled}
+                loading={isGeneratingResume}
+                loadingText="Generating..."
                 onClick={onGenerateResume}
               >
                 <AppIcon icon={SparkleIcon} />
-                {isGeneratingResume ? "Generating..." : "Generate Resume"}
+                Generate Resume
               </Button>
             ) : null}
             <a

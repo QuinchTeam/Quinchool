@@ -59,7 +59,8 @@ export function ChatComposer({
           <InputGroupAddon align="block-end" className="justify-end">
             <InputGroupButton
               aria-label="Send message"
-              disabled={!value.trim() || isPending}
+              disabled={!value.trim()}
+              loading={isPending}
               size="icon-sm"
               type="submit"
               variant="default"

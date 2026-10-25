@@ -86,7 +86,11 @@ export function TextGenerationPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={generateText.isPending}>
+          <Button
+            type="submit"
+            loading={generateText.isPending}
+            loadingText="Generating..."
+          >
             Submit
           </Button>
         </form>

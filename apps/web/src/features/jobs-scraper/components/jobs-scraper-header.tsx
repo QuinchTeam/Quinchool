@@ -10,7 +10,6 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shared/app-header";
 import { Button } from "@/components/ui/button";
 import { AppIcon } from "@/components/ui/icon";
-import { Spinner } from "@/components/ui/spinner";
 import {
   useJobsScraper,
   useScanStatus,
@@ -47,22 +46,14 @@ export function JobsScraperHeader() {
       </Button>
       <Button
         onClick={() => scan.mutate()}
-        disabled={isScanning || !state || unsetCriteria.length > 0}
+        disabled={!state || unsetCriteria.length > 0}
+        loading={isScanning}
+        loadingText="Scanning job boards..."
       >
-        {isScanning ? (
-          <Spinner />
-        ) : (
-          <AppIcon
-            icon={
-              state?.lastScannedAt ? ArrowClockwiseIcon : MagnifyingGlassIcon
-            }
-          />
-        )}
-        {isScanning
-          ? "Scanning job boards"
-          : state?.lastScannedAt
-            ? "Scan again"
-            : "Scan jobs"}
+        <AppIcon
+          icon={state?.lastScannedAt ? ArrowClockwiseIcon : MagnifyingGlassIcon}
+        />
+        {state?.lastScannedAt ? "Scan again" : "Scan jobs"}
       </Button>
     </AppHeader>
   );

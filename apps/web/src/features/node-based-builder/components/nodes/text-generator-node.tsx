@@ -79,11 +79,13 @@ export function TextGeneratorNode({
         />
         <Button
           className="nodrag"
-          disabled={!data.prompt.trim() || generateText.isPending}
+          disabled={!data.prompt.trim()}
+          loading={generateText.isPending}
+          loadingText="Generating..."
           onClick={runGeneration}
           type="button"
         >
-          {generateText.isPending ? "Generating..." : "Generate"}
+          Generate
         </Button>
         {data.executionError || generateText.isError ? (
           <p className="text-xs text-destructive" role="alert">

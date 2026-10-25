@@ -11,7 +11,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
 
 export function ToolActionForm({
   action,
@@ -60,9 +59,9 @@ export function ToolActionForm({
           <Button
             type="submit"
             variant={action.destructive ? "destructive" : "default"}
-            disabled={isPending}
+            loading={isPending}
+            loadingText={action.destructive ? "Deleting..." : "Saving..."}
           >
-            {isPending ? <Spinner /> : null}
             {action.submitLabel}
           </Button>
           <Button

@@ -13,9 +13,15 @@ export function CanvasMainToolbar() {
 
   return (
     <div className="flex items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
-      <Button disabled={isRunning} onClick={onRun} size="sm" type="button">
+      <Button
+        loading={isRunning}
+        loadingText="Running..."
+        onClick={onRun}
+        size="sm"
+        type="button"
+      >
         <AppIcon icon={PlayIcon} />
-        {isRunning ? "Running..." : "Run Flow"}
+        Run Flow
       </Button>
       <Button
         disabled={isRunning}

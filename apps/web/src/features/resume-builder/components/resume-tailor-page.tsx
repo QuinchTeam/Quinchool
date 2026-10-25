@@ -58,7 +58,9 @@ export function ResumeTailorPage() {
         </div>
         <Button
           type="button"
-          disabled={!jobRequirement.trim() || buildResume.isPending}
+          disabled={!jobRequirement.trim()}
+          loading={buildResume.isPending}
+          loadingText="Tailoring..."
           onClick={() =>
             buildResume.mutate({
               jobRequirement: jobRequirement.trim(),
@@ -67,7 +69,7 @@ export function ResumeTailorPage() {
           }
         >
           <AppIcon icon={MagicWandIcon} />
-          {buildResume.isPending ? "Tailoring..." : "Tailor Resume"}
+          Tailor Resume
         </Button>
         {buildResume.isError && (
           <p className="text-sm text-destructive">

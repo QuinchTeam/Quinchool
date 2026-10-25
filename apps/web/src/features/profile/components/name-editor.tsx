@@ -85,9 +85,10 @@ export function NameEditor({
           <Button
             type="submit"
             size="sm"
-            disabled={form.formState.isSubmitting}
+            loading={form.formState.isSubmitting}
+            loadingText="Saving..."
           >
-            {form.formState.isSubmitting ? "Saving..." : "Save"}
+            Save
           </Button>
           <Button
             type="button"

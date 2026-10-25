@@ -88,7 +88,8 @@ export function ErrorState({
         <Button
           variant="outline"
           size="sm"
-          disabled={pending}
+          loading={pending}
+          loadingText="Signing out..."
           onClick={expired ? loginAgain : retry}
         >
           <AppIcon icon={expired ? SignInIcon : ArrowClockwiseIcon} />

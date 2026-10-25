@@ -74,10 +74,12 @@ export function JobsScraperSettingsPage() {
           <Button
             type="submit"
             form={FORM_ID}
-            disabled={!state || !form.formState.isDirty || saveConfig.isPending}
+            disabled={!state || !form.formState.isDirty}
+            loading={saveConfig.isPending}
+            loadingText="Saving..."
           >
             <AppIcon icon={FloppyDiskIcon} />
-            {saveConfig.isPending ? "Saving" : "Save settings"}
+            Save settings
           </Button>
         </AppHeader>
       </div>

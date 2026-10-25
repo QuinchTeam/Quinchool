@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { UserCircleIcon } from "@phosphor-icons/react/dist/ssr/UserCircle";
 import { PaletteIcon } from "@phosphor-icons/react/dist/ssr/Palette";
 import { ChatCircleTextIcon } from "@phosphor-icons/react/dist/ssr/ChatCircleText";
@@ -34,10 +35,16 @@ export function ProfilePage() {
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
   const user = session?.user;
+  const [signingOut, setSigningOut] = useState(false);
 
   async function handleSignOut() {
-    await signOut();
-    router.push("/auth/login");
+    setSigningOut(true);
+    try {
+      await signOut();
+      router.push("/auth/login");
+    } catch {
+      setSigningOut(false);
+    }
   }
 
   return (
@@ -145,7 +152,12 @@ export function ProfilePage() {
                 <p className="text-xs text-muted-foreground">
                   All done for now? Your workspace will be here.
                 </p>
-                <Button variant="outline" onClick={handleSignOut}>
+                <Button
+                  variant="outline"
+                  loading={signingOut}
+                  loadingText="Signing out..."
+                  onClick={handleSignOut}
+                >
                   <AppIcon icon={SignOutIcon} />
                   Sign out
                 </Button>

@@ -84,9 +84,14 @@ export function FinanceDeleteDialog({
           >
             Cancel
           </Button>
-          <Button variant="destructive" disabled={pending} onClick={remove}>
+          <Button
+            variant="destructive"
+            loading={pending}
+            loadingText="Deleting..."
+            onClick={remove}
+          >
             <AppIcon icon={TrashIcon} />
-            {pending ? "Deleting..." : "Delete"}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

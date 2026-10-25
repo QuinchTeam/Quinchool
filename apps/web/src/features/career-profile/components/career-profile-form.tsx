@@ -157,9 +157,9 @@ export function CareerProfileForm() {
         />
 
         <div className="sticky bottom-0 -mx-6 -mb-6 flex justify-end border-t bg-card/95 px-6 py-4 supports-[backdrop-filter]:backdrop-blur">
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" loading={isSaving} loadingText="Saving...">
             <AppIcon icon={FloppyDiskIcon} />
-            {isSaving ? "Saving..." : "Save career profile"}
+            Save career profile
           </Button>
         </div>
       </form>
