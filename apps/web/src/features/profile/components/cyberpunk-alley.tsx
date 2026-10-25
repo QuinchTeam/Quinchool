@@ -11,6 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const WIDTH = 480;
 const HEIGHT = 720;
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+type Spot = { x: number; y: number };
+type Pane = Spot & { mullion: boolean; transomY: number };
+type Scene = { smokers: Spot[]; windows: Pane[] };
+
 // Fixed seed keeps facade wear and lit windows stable between frames.
 function randomSource() {
   let seed = 1807;
@@ -22,10 +27,14 @@ function randomSource() {
 
 function paintCity(
   ctx: CanvasRenderingContext2D,
-  palette: string[],
+  skyPalette: string[],
+  cityPalette: string[],
   sky: CanvasRenderingContext2D,
   skyline: CanvasRenderingContext2D,
-) {
+  morning: boolean,
+): Scene {
+  // Sky pixels use skyPalette; switched to cityPalette once the sky is stamped.
+  let palette = skyPalette;
   const random = randomSource();
   const rect = (x: number, y: number, w: number, h: number, shade: number) => {
     ctx.fillStyle = palette[shade];
@@ -60,7 +69,6 @@ function paintCity(
     }
   };
 
-  const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
   const noiseGrid = Array.from({ length: 4096 }, () => random());
   const noise = (x: number, y: number) => {
     const ix = Math.floor(x);
@@ -90,22 +98,39 @@ function paintCity(
         9 * Math.exp(-(((x - 175) / 65) ** 2 + ((y - 310) / 95) ** 2)) +
         11 * Math.exp(-(((x - 318) / 55) ** 2 + ((y - 270) / 78) ** 2)) +
         6 * Math.exp(-(((x - 250) / 115) ** 2 + ((y - 440) / 140) ** 2));
-      const value =
-        0.8 +
-        (y / HEIGHT) * 3.8 +
-        haze * 1.7 +
-        cloud +
-        neon * (0.8 + cloudNoise * 0.4);
+      // Morning spans the whole pale ramp: soft tint up top, near white at the horizon.
+      const sunGlow =
+        10 * Math.exp(-(((x - 303) / 70) ** 2 + ((y - 95) / 70) ** 2));
+      const value = morning
+        ? Math.min(
+            30.9,
+            3 + (y / HEIGHT) * 22 + haze * 2 + cloud * 1.1 + sunGlow,
+          )
+        : 0.8 +
+          (y / HEIGHT) * 3.8 +
+          haze * 1.7 +
+          cloud +
+          neon * (0.8 + cloudNoise * 0.4);
       const base = Math.floor(value);
-      const threshold = (bayer[(y % 4) * 4 + (x % 4)] + 0.5) / 16;
+      const threshold = (BAYER[(y % 4) * 4 + (x % 4)] + 0.5) / 16;
       rect(x, y, 1, 1, base + (value - base > threshold ? 1 : 0));
     }
   }
+  // Always draw the specks' random numbers so the buildings below keep the same seed.
   for (let i = 0; i < 150; i++) {
-    rect(random() * WIDTH, random() * 300, 1, 1, 9 + Math.floor(random() * 10));
+    const [x, y, shade] = [random() * WIDTH, random() * 300, random()];
+    if (!morning) rect(x, y, 1, 1, 9 + Math.floor(shade * 10));
+  }
+  if (morning) {
+    for (let y = -21; y <= 21; y++) {
+      for (let x = -21; x <= 21; x++) {
+        const distance = Math.sqrt(x * x + y * y);
+        if (distance <= 18) rect(303 + x, 95 + y, 1, 1, 31);
+      }
+    }
   }
   const starRandom = randomSource();
-  for (let i = 0; i < 1100; i++) {
+  for (let i = 0; i < (morning ? 0 : 1100); i++) {
     const x = Math.floor(starRandom() * WIDTH);
     const y = Math.floor(starRandom() * HEIGHT);
     const brightness = starRandom();
@@ -116,7 +141,7 @@ function paintCity(
       rect(x, y, 1, 1, 30);
     }
   }
-  for (let y = -25; y <= 25; y++) {
+  for (let y = -25; y <= 25 && !morning; y++) {
     const radius = Math.floor(Math.sqrt(625 - y * y));
     const innerEdge = Math.floor(radius * 0.43);
     for (let x = innerEdge; x < radius; x++) {
@@ -127,6 +152,7 @@ function paintCity(
 
   sky.drawImage(ctx.canvas, 0, 0);
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  palette = cityPalette;
 
   // Rasterize system Japanese glyphs into hard pixels to match the canvas art.
   const lettering = document.createElement("canvas");
@@ -178,7 +204,9 @@ function paintCity(
     while (x < WIDTH) {
       const w = 17 + Math.floor(random() * (40 + layer * 17));
       const top = 170 + layer * 112 + Math.floor(random() * 195);
-      const shade = 2 + layer * 2 + Math.floor(random() * 2);
+      // Daylight haze lightens distant layers; at night the far layers sink darker.
+      const shade =
+        (morning ? 6 - layer * 2 : 2 + layer * 2) + Math.floor(random() * 2);
       const style = Math.floor(random() * 4);
       const spacing = 6 + Math.floor(random() * 6);
       const floorHeight = 8 + Math.floor(random() * 7);
@@ -362,11 +390,14 @@ function paintCity(
   ctx.globalAlpha = 0.65;
   ctx.translate(0, HEIGHT);
   ctx.scale(1, 0.55);
-  for (const [x, radius, shade] of [
-    [160, 95, 24],
-    [265, 125, 20],
-    [342, 75, 27],
-  ]) {
+  // Street neon glow from below; daylight has none.
+  for (const [x, radius, shade] of morning
+    ? []
+    : [
+        [160, 95, 24],
+        [265, 125, 20],
+        [342, 75, 27],
+      ]) {
     const glow = ctx.createRadialGradient(x, 24, 0, x, 24, radius);
     glow.addColorStop(0, palette[shade]);
     glow.addColorStop(0.25, palette[18]);
@@ -380,6 +411,7 @@ function paintCity(
   skyline.drawImage(ctx.canvas, 0, 0);
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
+  const litWindows: Pane[] = [];
   // Nearby upper floors frame the distant city as front-facing facades.
   for (const [left, width] of [
     [0, 104],
@@ -415,6 +447,14 @@ function paintCity(
         rect(x + 2, y + 2, 24, 38, lit ? 19 + Math.floor(random() * 6) : 5);
         texture(x + 2, y + 2, 24, 38, lit ? 16 : 7);
         const pattern = Math.floor(random() * 4);
+        if (lit && floor > 0 && floor < 7) {
+          litWindows.push({
+            x,
+            y,
+            mullion: pattern !== 2,
+            transomY: y + (pattern === 3 ? 12 : 22),
+          });
+        }
         if (lit) {
           if (pattern === 0) {
             const blinds = 2 + Math.floor(random() * 8);
@@ -539,24 +579,42 @@ function paintCity(
   rect(213, 359, 13, 4, 23);
   rect(219, 345, 1, 14, 26);
 
+  const smokers: Spot[] = [];
+  const doors: number[] = [];
+  const smokerFloors: number[] = [];
   const balconyRandom = randomSource();
   for (let floor = 1; floor < 8; floor++) {
     if (floor === 5 || balconyRandom() < 0.28) continue;
     const x = 394 + Math.floor(balconyRandom() * 12);
     const y = floor * 85 + 48;
     const width = 43 + Math.floor(balconyRandom() * 19);
+    // The window above becomes a tall glass door that opens onto the balcony.
+    const doorX = 388;
+    const doorTop = y - 64;
+    doors.push(doorTop);
+    rect(doorX - 3, doorTop - 3, 34, 62, 13);
+    rect(doorX - 1, doorTop - 1, 30, 58, 2);
+    rect(doorX + 2, doorTop + 2, 24, 53, 20);
+    texture(doorX + 2, doorTop + 2, 24, 53, 16);
+    rect(doorX + 2, doorTop + 2, 24, 3, 12);
+    rect(doorX + 13, doorTop, 2, 57, 4);
+    rect(doorX + 2, doorTop + 38, 24, 2, 4);
+    rect(doorX + 10, doorTop + 28, 2, 5, 24);
+    // Keep the conduit that runs down the facade in front of the door frame.
+    rect(387, doorTop - 3, 4, 62, 3);
+    rect(388, doorTop - 3, 1, 62, 16);
     rect(x, y - 5, width, 5, 5);
     rect(x - 2, y, width + 4, 3, 17);
     rect(x, y + 3, width, 4, 3);
     rect(x + 4, y + 7, 3, 7, 11);
     rect(x + width - 7, y + 7, 3, 7, 11);
 
-    const people = 1 + Math.floor(balconyRandom() * 3);
-    for (let person = 0; person < people; person++) {
-      const px = x + 9 + person * 13;
-      const leaning = balconyRandom() > 0.5;
-      const headY = y - (leaning ? 25 : 30);
-      const coat = 10 + Math.floor(balconyRandom() * 12);
+    // At most two balconies hold one smoker each; the cigarette smoke animates in paintMotion.
+    const occupied = balconyRandom() > 0.3 && smokers.length < 2;
+    const coat = 10 + Math.floor(balconyRandom() * 12);
+    if (occupied) {
+      const px = x + 9 + Math.floor(balconyRandom() * (width - 26));
+      const headY = y - 30;
       rect(px, headY, 5, 6, 23);
       rect(px - 1, headY - 1, 6, 2, 3);
       rect(px + 4, headY + 2, 2, 2, 23);
@@ -564,9 +622,13 @@ function paintCity(
       rect(px, headY + 18, 2, y - headY - 18, 3);
       rect(px + 5, headY + 18, 2, y - headY - 18, 3);
       rect(px - 3, headY + 8, 2, 9, coat);
-      rect(px + 7, headY + 8, 2, leaning ? 5 : 7, coat);
-      rect(px + 7, headY + (leaning ? 12 : 14), 5, 2, 23);
-      if (!leaning) rect(px + 10, headY + 10, 3, 4, 27);
+      // Smoking arm: elbow out, forearm raised, hand at the mouth.
+      rect(px + 7, headY + 7, 2, 5, coat);
+      rect(px + 6, headY + 4, 2, 4, coat);
+      rect(px + 6, headY + 3, 2, 2, 23);
+      rect(px + 8, headY + 3, 3, 1, 28);
+      smokers.push({ x: px + 11, y: headY + 3 });
+      smokerFloors.push(doorTop);
     }
 
     // Railings sit in front of the residents, with hands resting on the top bar.
@@ -578,6 +640,15 @@ function paintCity(
     rect(x + width - 11, y - 15, 5, 2, 16);
     rect(x + width - 5, y - 19, 4, 3, 20);
   }
+
+  // Three spread-out lit windows get an animated resident.
+  const windows = litWindows
+    .filter((pane) => !(pane.x === 388 && doors.includes(pane.y)))
+    // Keep residents off any floor that already has a smoker, so no floor shows two people.
+    .filter((pane) => !smokerFloors.includes(pane.y))
+    .filter((_, i) => i % 4 === 1)
+    .slice(0, 3);
+  return { smokers, windows };
 }
 
 function paintRooftops(ctx: CanvasRenderingContext2D, palette: string[]) {
@@ -634,10 +705,83 @@ function paintSkyMotion(
   ctx.restore();
 }
 
+const hash = (n: number) => {
+  const s = Math.sin(n * 127.1) * 43758.5453;
+  return s - Math.floor(s);
+};
+// Bird pixel offsets from its body: wings up, then wings down.
+const BIRD_UP: [number, number][] = [
+  [0, 0],
+  [-1, -1],
+  [-2, -2],
+  [1, -1],
+  [2, -2],
+];
+const BIRD_DOWN: [number, number][] = [
+  [0, 0],
+  [-1, 0],
+  [-2, 1],
+  [1, 0],
+  [2, 1],
+];
+
+function paintMorningMotion(
+  ctx: CanvasRenderingContext2D,
+  time: number,
+  sun: string,
+  bird: string,
+  birds: boolean,
+) {
+  // Dithered rays: slow rotating spokes that fade with distance from the sun, ordered by Bayer.
+  ctx.fillStyle = sun;
+  const pulse = 0.85 + 0.15 * Math.sin(time * 1.5);
+  for (let dy = -72; dy <= 72; dy++) {
+    for (let dx = -72; dx <= 72; dx++) {
+      const r = Math.sqrt(dx * dx + dy * dy);
+      if (r < 18 || r > 72) continue;
+      const spokes =
+        0.5 + 0.5 * Math.cos(10 * Math.atan2(dy, dx) + time * 0.15);
+      const falloff = (1 - (r - 18) / 54) ** 2;
+      const x = 303 + dx;
+      const y = 95 + dy;
+      const threshold = (BAYER[(y % 4) * 4 + (x % 4)] + 0.5) / 16;
+      if (falloff * (0.3 + 0.7 * spokes) * pulse > threshold)
+        ctx.fillRect(x, y, 1, 1);
+    }
+  }
+  if (!birds) return;
+  // Each bird flies a short random arc, then rests off-screen before its next pass.
+  ctx.save();
+  ctx.fillStyle = bird;
+  for (let i = 0; i < 5; i++) {
+    const period = 13 + i * 3;
+    const flight = 9;
+    const clock = time + i * 5.3;
+    const local = clock % period;
+    if (local > flight) continue;
+    const seed = i * 31 + Math.floor(clock / period);
+    const p = local / flight;
+    const direction = hash(seed + 1) > 0.5 ? 1 : -1;
+    const startX =
+      direction > 0
+        ? hash(seed + 2) * WIDTH * 0.5
+        : WIDTH * (0.5 + hash(seed + 2) * 0.5);
+    const x = Math.round(startX + direction * p * 220);
+    const y = Math.round(
+      40 + hash(seed + 3) * 220 - p * 30 + Math.sin(p * 6 + seed) * 4,
+    );
+    ctx.globalAlpha = Math.sin(Math.PI * p);
+    const frame = Math.floor(time * 6 + i) % 2 ? BIRD_UP : BIRD_DOWN;
+    for (const [px, py] of frame) ctx.fillRect(x + px, y + py, 1, 1);
+  }
+  ctx.restore();
+}
+
 function paintMotion(
   ctx: CanvasRenderingContext2D,
   time: number,
   palette: string[],
+  { smokers, windows }: Scene,
 ) {
   for (let i = 0; i < 3; i++) {
     const x = Math.floor(140 + ((time * (5 + i * 2) + i * 73) % 190));
@@ -660,7 +804,62 @@ function paintMotion(
     const x = Math.floor((i * 71 + y * 0.08) % WIDTH);
     ctx.fillRect(x, y, 1, 3);
   }
+
+  // Cigarette smoke: puffs rise, drift, widen and fade; the ember flickers.
+  smokers.forEach((smoker, i) => {
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(time * 5 + i * 2);
+    ctx.fillStyle = palette[31];
+    ctx.fillRect(smoker.x, smoker.y, 1, 1);
+    ctx.fillStyle = palette[24];
+    for (let puff = 0; puff < 6; puff++) {
+      const age = (time * 0.5 + puff / 6 + i * 0.37) % 1;
+      const x =
+        smoker.x +
+        age * 5 +
+        Math.sin(age * 5 + puff * 1.3 + time * 0.8) * 2 * age;
+      const size = age > 0.5 ? 2 : 1;
+      ctx.globalAlpha = (1 - age) * 0.55;
+      ctx.fillRect(
+        Math.round(x),
+        Math.round(smoker.y - 1 - age * 24),
+        size,
+        size,
+      );
+    }
+  });
   ctx.globalAlpha = 1;
+
+  // Window residents: two pace across the room, one waves; frames are redrawn on top.
+  ctx.fillStyle = palette[5];
+  windows.forEach((pane, i) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(pane.x + 2, pane.y + 2, 24, 38);
+    ctx.clip();
+    const waving = i === 1;
+    const step = waving ? 0 : Math.floor(time * 4 + i) % 2;
+    const pace = Math.sin(time * (0.5 + i * 0.15) + i * 2) * 0.5 + 0.5;
+    const px = Math.round(pane.x + (waving ? 10 : 4 + pace * 14));
+    const top = pane.y + 17;
+    ctx.fillRect(px + 1, top, 4, 4);
+    ctx.fillRect(px, top + 5, 6, 10);
+    ctx.fillRect(px + (step ? 0 : 1), top + 15, 2, 8);
+    ctx.fillRect(px + (step ? 4 : 3), top + 15, 2, 8);
+    if (waving) {
+      const up = Math.floor(time * 3) % 2;
+      ctx.fillRect(px - 1, top + 6, 1, 7);
+      ctx.fillRect(px + 6, top + (up ? -1 : 1), 1, 6);
+      ctx.fillRect(px + 6 + up, top + (up ? -2 : 0), 2, 2);
+    } else {
+      ctx.fillRect(px - 1, top + 6 + step, 1, 6);
+      ctx.fillRect(px + 6, top + 7 - step, 1, 6);
+    }
+    ctx.restore();
+    ctx.fillStyle = palette[4];
+    if (pane.mullion) ctx.fillRect(pane.x + 13, pane.y, 2, 43);
+    ctx.fillRect(pane.x, pane.transomY, 28, 2);
+    ctx.fillStyle = palette[5];
+  });
 }
 
 export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
@@ -724,6 +923,7 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
     background.fillStyle = getComputedStyle(canvas).color;
     background.fillRect(0, 0, 1, 1);
     const [red, green, blue] = background.getImageData(0, 0, 1, 1).data;
+    const morning = resolvedTheme === "light";
     const palette = Array.from({ length: 32 }, (_, level) => {
       const shade = level / 31;
       const channels = [red, green, blue].map((channel) =>
@@ -735,12 +935,41 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
       );
       return `rgb(${channels.join(",")})`;
     });
-    paintCity(background, palette, sky, skyline);
+    // Daylit city: the same dark-to-white ramp, but a square-root curve lifts the low shades
+    // the facades use, so walls land near full primary instead of near black.
+    const dayPalette = Array.from({ length: 32 }, (_, level) => {
+      const light = Math.sqrt(level / 31);
+      const channels = [red, green, blue].map((channel) =>
+        Math.round(
+          light < 0.5
+            ? channel * (0.3 + (light / 0.5) * 0.7)
+            : channel + (255 - channel) * ((light - 0.5) / 0.5) * 0.88,
+        ),
+      );
+      return `rgb(${channels.join(",")})`;
+    });
+    // Morning sky lives entirely in pale tints: light primary at level 0, almost white at 31.
+    const morningSkyPalette = Array.from({ length: 32 }, (_, level) => {
+      const mix = 0.4 + (level / 31) * 0.57;
+      const channels = [red, green, blue].map((channel) =>
+        Math.round(channel + (255 - channel) * mix),
+      );
+      return `rgb(${channels.join(",")})`;
+    });
+    const cityPalette = morning ? dayPalette : palette;
+    const scene = paintCity(
+      background,
+      morning ? morningSkyPalette : palette,
+      cityPalette,
+      sky,
+      skyline,
+      morning,
+    );
     const roofCanvas = document.createElement("canvas");
     roofCanvas.width = WIDTH;
     roofCanvas.height = 64;
     const roof = roofCanvas.getContext("2d");
-    if (roof) paintRooftops(roof, palette);
+    if (roof) paintRooftops(roof, cityPalette);
     const starRandom = randomSource();
     const sparklingStars: { x: number; y: number; phase: number }[] = [];
     for (let i = 0; i < 1100; i++) {
@@ -760,7 +989,16 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
     const draw = (time: number) => {
       const height = Math.round(ascent.current);
       ctx.drawImage(skyCanvas, 0, 0);
-      if (height === 500 && !motion.matches) {
+      if (morning) {
+        paintMorningMotion(
+          ctx,
+          time,
+          morningSkyPalette[31],
+          dayPalette[6],
+          !motion.matches,
+        );
+      }
+      if (height === 500 && !motion.matches && !morning) {
         topStarted ??= time;
         paintSkyMotion(
           ctx,
@@ -776,7 +1014,7 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
       ctx.save();
       ctx.translate(0, height);
       ctx.drawImage(backdrop, 0, 0);
-      paintMotion(ctx, time, palette);
+      paintMotion(ctx, time, cityPalette, scene);
       ctx.restore();
     };
     const tick = (now: number) => {
@@ -869,7 +1107,7 @@ export function CyberpunkAlley({ loading = false }: { loading?: boolean }) {
               ref={canvasRef}
               role="img"
               tabIndex={0}
-              aria-label="Interactive pixel city beneath a fixed half moon. Scroll up or press Arrow Up to rise to the rooftops; scroll down or press Arrow Down to descend."
+              aria-label={`Interactive pixel city beneath a ${resolvedTheme === "light" ? "morning sun" : "fixed half moon"}. Scroll up or press Arrow Up to rise to the rooftops; scroll down or press Arrow Down to descend.`}
               className="pixelated absolute inset-0 size-full text-primary outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring"
             />
             <Button
