@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetClose,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -96,6 +97,11 @@ export function OverlaysShowcase() {
                 done.
               </SheetDescription>
             </SheetHeader>
+            <SheetBody>
+              <p className="text-muted-foreground">
+                Main content sits on the inner panel.
+              </p>
+            </SheetBody>
             <SheetFooter>
               <SheetClose render={<Button />}>Close</SheetClose>
             </SheetFooter>

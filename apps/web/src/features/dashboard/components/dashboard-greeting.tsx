@@ -61,13 +61,14 @@ export function DashboardGreeting() {
 
   return (
     <header className="flex items-center justify-between gap-4">
-      <div className="flex min-w-0 items-center gap-4">
+      {/* Mobile stacks the icon above full-width, wrapping text; desktop keeps one row. */}
+      <div className="flex min-w-0 flex-col items-start gap-4 md:flex-row md:items-center">
         <DitherScene period={period} />
         <div className="grid min-w-0 gap-1">
           {isPending ? (
-            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-8 w-64 max-w-full" />
           ) : (
-            <h1 className="truncate text-2xl font-semibold">
+            <h1 className="text-2xl font-semibold md:truncate">
               {GREETINGS[period]}
               {user?.name ? `, ${user.name}` : ""}
             </h1>
@@ -78,17 +79,21 @@ export function DashboardGreeting() {
               {today.format(now)}
             </span>
             <MiniClock />
-            <span className="flex items-center gap-1.5 font-light italic">
-              <AppIcon icon={MegaphoneIcon} className="size-4" />
+            <span className="flex items-start gap-1.5 font-light italic">
+              <AppIcon
+                icon={MegaphoneIcon}
+                className="mt-0.5 size-4 shrink-0"
+              />
               {greetingMessage(weekday, period)}
             </span>
           </div>
         </div>
       </div>
+      {/* The mobile top bar already has a Profile button. */}
       <Button
         variant="outline"
         size="sm"
-        className="shrink-0 pl-2"
+        className="shrink-0 pl-2 max-md:hidden"
         nativeButton={false}
         render={<Link href="/profile" />}
       >

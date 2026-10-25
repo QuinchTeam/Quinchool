@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/shared/app-sidebar";
+import { AppSidebar, AppSidebarMobile } from "@/components/shared/app-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
@@ -11,7 +11,8 @@ export default function DashboardLayout({
     <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
       {/* Keep the A4 preview inside the page instead of stretching the dashboard. */}
-      <SidebarInset className="min-h-0 min-w-0 p-8 md:pl-0">
+      <SidebarInset className="min-h-0 min-w-0 gap-4 p-8 md:pl-0">
+        <AppSidebarMobile />
         <Card className="min-h-0 min-w-0 flex-1">
           <CardContent className="relative min-h-0 overflow-y-auto p-0 has-data-dragging:overflow-x-hidden has-[[data-dragging=lock]]:overflow-hidden has-data-scroll-gutter:scrollbar-gutter-stable">
             {children}
