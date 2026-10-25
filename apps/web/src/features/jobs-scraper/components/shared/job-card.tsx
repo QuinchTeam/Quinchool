@@ -92,7 +92,7 @@ export function JobCard({
             <span>{job.company}</span>
             {/* Pin stays full size and aligned to the first line when the location wraps. */}
             <span className="flex min-w-0 items-start gap-1">
-              <AppIcon icon={MapPinIcon} className="mt-0.5 size-4 shrink-0" />
+              <AppIcon icon={MapPinIcon} className="h-lh w-4 shrink-0" />
               <span className="min-w-0">{job.location}</span>
             </span>
           </p>
