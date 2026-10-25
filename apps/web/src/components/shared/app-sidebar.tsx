@@ -5,6 +5,8 @@ import { NotepadIcon } from "@phosphor-icons/react/dist/ssr/Notepad";
 import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
 import { IdentificationCardIcon } from "@phosphor-icons/react/dist/ssr/IdentificationCard";
 import { RobotIcon } from "@phosphor-icons/react/dist/ssr/Robot";
+import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
+import { UserCircleIcon } from "@phosphor-icons/react/dist/ssr/UserCircle";
 import { WalletIcon } from "@phosphor-icons/react/dist/ssr/Wallet";
 import { WrenchIcon } from "@phosphor-icons/react/dist/ssr/Wrench";
 import { AppIcon, type AppIconProps } from "@/components/ui/icon";
@@ -180,7 +182,8 @@ export function AppSidebar() {
               render={
                 <SidebarMenuButton
                   size="lg"
-                  className="gap-3 group-data-[collapsible=icon]:justify-center"
+                  // Base UI marks the trigger with data-popup-open; match the active nav link.
+                  className="gap-3 group-data-[collapsible=icon]:justify-center data-popup-open:bg-secondary data-popup-open:text-secondary-foreground data-popup-open:hover:bg-secondary/80"
                 />
               }
             >
@@ -210,10 +213,18 @@ export function AppSidebar() {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" className="w-56">
-              <DropdownMenuItem render={<Link href="/profile" />}>
+              <DropdownMenuItem
+                className="h-12 text-muted-foreground"
+                render={<Link href="/profile" />}
+              >
+                <AppIcon icon={UserCircleIcon} className="size-6" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem
+                className="h-12 text-muted-foreground"
+                onClick={handleSignOut}
+              >
+                <AppIcon icon={SignOutIcon} className="size-6" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
