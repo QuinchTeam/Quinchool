@@ -79,11 +79,8 @@ export function DashboardGreeting() {
               {today.format(now)}
             </span>
             <MiniClock />
-            <span className="flex items-start gap-1.5 font-light italic">
-              <AppIcon
-                icon={MegaphoneIcon}
-                className="mt-0.5 size-4 shrink-0"
-              />
+            <span className="flex items-center gap-1.5 font-light italic">
+              <AppIcon icon={MegaphoneIcon} className="size-4 shrink-0" />
               {greetingMessage(weekday, period)}
             </span>
           </div>
