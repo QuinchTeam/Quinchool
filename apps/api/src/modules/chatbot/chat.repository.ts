@@ -10,7 +10,7 @@ export interface StoredMessage {
   position: number;
   toolUsed: boolean;
   pendingAction: unknown;
-  actionOutcome: string | null;
+  actionOutcome?: string;
 }
 
 const messageFields = {
@@ -36,6 +36,7 @@ function toStored(row: {
     ...row,
     role: row.role === "USER" ? "user" : "assistant",
     pendingAction: row.pendingAction ?? undefined,
+    actionOutcome: row.actionOutcome ?? undefined,
   };
 }
 

@@ -16,7 +16,7 @@ function message(
     position,
     toolUsed: false,
     pendingAction: undefined,
-    actionOutcome: null,
+    actionOutcome: undefined,
   };
 }
 

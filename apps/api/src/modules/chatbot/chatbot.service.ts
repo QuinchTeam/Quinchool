@@ -83,7 +83,12 @@ export class ChatbotService {
       tool.run(userId, args.data, values.data),
     );
 
-    return this.runChain({ ...context, userId }, [{ name: tool.name, result }]);
+    // The last user message still asks for this write, so block a second form for it.
+    return this.runChain(
+      { ...context, userId },
+      [{ name: tool.name, result }],
+      false,
+    );
   }
 
   /* FastAPI selects tools; Nest validates and executes them.
@@ -92,6 +97,7 @@ export class ChatbotService {
   private async runChain(
     { messages, modelId, summary, userId }: ChainInput,
     seed: ToolResult[],
+    allowWrites = true,
   ): Promise<ChatbotResult> {
     const toolResults = [...seed];
 
@@ -125,6 +131,14 @@ export class ChatbotService {
           ...stripToolCall(answer),
           text: "I could not work out the details for that. Could you rephrase it?",
           toolUsed: toolResults.length > 0,
+        };
+      }
+
+      if (tool.kind === "write" && !allowWrites) {
+        return {
+          ...stripToolCall(answer),
+          text: answer.text || "Saved to your career profile.",
+          toolUsed: true,
         };
       }
 
